@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>On Inspire</title>
+  <meta name="description" content="On Inspire — ideas, tools, and interactive learning.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b12;
+      --fg: #f1efe9;
+      --muted: #a6a3b5;
+      --accent: #ffb86b;
+      --accent-2: #8b7bff;
+      --line: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    h1, h2 { font-family: Fraunces, Georgia, serif; font-weight: 300; line-height: 1.05; }
+    a { color: var(--accent); }
+
+    /* Animated field behind the hero */
+    #field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+
+    /* Hero */
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      place-content: center;
+      text-align: center;
+      padding: 0 16px;
+      position: relative;
+    }
+    /* Drop an exported Higgsfield/Runway/Veo clip at docs/media/hero.mp4 and it plays behind the title */
+    .hero video {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: -1; opacity: 0.45;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 12vw, 9rem);
+      background: linear-gradient(100deg, var(--fg) 20%, var(--accent) 50%, var(--accent-2) 80%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 8s ease-in-out infinite alternate;
+    }
+    .hero p { color: var(--muted); font-size: clamp(1rem, 2.5vw, 1.3rem); margin-top: 1rem; }
+    .scroll-cue {
+      position: absolute; bottom: 2rem; left: 50%; translate: -50% 0;
+      color: var(--muted); font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
+      animation: bob 2.4s ease-in-out infinite;
+    }
+    @keyframes shimmer { to { background-position: 100% 0; } }
+    @keyframes bob { 50% { transform: translateY(6px); } }
+
+    /* Progress bar tied to scroll */
+    .progress {
+      position: fixed; top: 0; left: 0; height: 3px; width: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transform-origin: 0 50%; transform: scaleX(0); z-index: 10;
+    }
+
+    /* Story chapters */
+    .chapter {
+      min-height: 90svh;
+      display: grid;
+      align-content: center;
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 6rem 16px;
+      border-top: 1px solid var(--line);
+    }
+    .chapter .num { color: var(--accent); font-size: 0.85rem; letter-spacing: 0.2em; }
+    .chapter h2 { font-size: clamp(2rem, 6vw, 4rem); margin: 0.5rem 0 1.25rem; }
+    .chapter p { color: var(--muted); max-width: 38rem; }
+
+    .reveal { opacity: 0; transform: translateY(40px); filter: blur(6px);
+      transition: opacity 0.9s ease, transform 0.9s ease, filter 0.9s ease; }
+    .reveal.in { opacity: 1; transform: none; filter: none; }
+    .reveal:nth-child(2) { transition-delay: 0.1s; }
+    .reveal:nth-child(3) { transition-delay: 0.2s; }
+
+    footer { text-align: center; color: var(--muted); padding: 4rem 16px; font-size: 0.85rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; filter: none; }
+      .hero video { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="progress" aria-hidden="true"></div>
+
+  <header class="hero">
+    <video autoplay muted loop playsinline preload="none" aria-hidden="true">
+      <source src="media/hero.mp4" type="video/mp4">
+    </video>
+    <h1>On Inspire</h1>
+    <p>Ideas worth exploring, one step at a time.</p>
+    <span class="scroll-cue">Scroll</span>
+  </header>
+
+  <main>
+    <section class="chapter">
+      <span class="num reveal">01</span>
+      <h2 class="reveal">Start with curiosity</h2>
+      <p class="reveal">Placeholder text. Every great idea starts as a question. This is where the story begins.</p>
+    </section>
+    <section class="chapter">
+      <span class="num reveal">02</span>
+      <h2 class="reveal">Build it piece by piece</h2>
+      <p class="reveal">Placeholder text. Break big ideas into small, approachable steps you can reason through.</p>
+    </section>
+    <section class="chapter">
+      <span class="num reveal">03</span>
+      <h2 class="reveal">Make it come alive</h2>
+      <p class="reveal">Placeholder text. Interaction and motion turn understanding into something you can feel.</p>
+    </section>
+  </main>
+
+  <footer>© 2026 On Inspire</footer>
+
+  <script>
+    // Scroll progress bar
+    const bar = document.querySelector('.progress');
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Reveal chapters as they enter the viewport
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }, { threshold: 0.2 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Hide the video element if no clip has been added yet
+    const video = document.querySelector('.hero video');
+    video.querySelector('source').addEventListener('error', () => video.remove());
+
+    // Drifting constellation background that reacts to scroll
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canvas = document.getElementById('field');
+    const ctx = canvas.getContext('2d');
+    let w, h, dots;
+    const resize = () => {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      w = canvas.width = innerWidth * dpr;
+      h = canvas.height = innerHeight * dpr;
+      const count = Math.round((innerWidth * innerHeight) / 14000);
+      dots = Array.from({ length: count }, () => ({
+        x: Math.random() * w, y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3 * dpr, vy: (Math.random() - 0.5) * 0.3 * dpr,
+        r: (Math.random() * 1.4 + 0.4) * dpr,
+      }));
+    };
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      const shift = scrollY * 0.15;
+      const link = 120 * (devicePixelRatio || 1);
+      for (const d of dots) {
+        d.x = (d.x + d.vx + w) % w;
+        d.y = (d.y + d.vy + h) % h;
+      }
+      for (let i = 0; i < dots.length; i++) {
+        const a = dots[i], ay = (a.y - shift + h * 10) % h;
+        for (let j = i + 1; j < dots.length; j++) {
+          const b = dots[j], by = (b.y - shift + h * 10) % h;
+          const dist = Math.hypot(a.x - b.x, ay - by);
+          if (dist < link) {
+            ctx.strokeStyle = `rgba(139,123,255,${0.18 * (1 - dist / link)})`;
+            ctx.beginPath(); ctx.moveTo(a.x, ay); ctx.lineTo(b.x, by); ctx.stroke();
+          }
+        }
+        ctx.fillStyle = 'rgba(255,184,107,0.8)';
+        ctx.beginPath(); ctx.arc(a.x, ay, a.r, 0, Math.PI * 2); ctx.fill();
+      }
+      if (!reduce) requestAnimationFrame(draw);
+    };
+    addEventListener('resize', resize);
+    resize();
+    draw();
+  </script>
+</body>
+</html>
