@@ -38,6 +38,14 @@
       return [{ marks: from.marks - marks, conc: from.conc - moved }, { marks: to.marks + marks, conc: to.conc + moved }];
     },
     combine: (cups) => cups.reduce((s, c) => s + c.conc, 0) / cups.reduce((s, c) => s + c.marks, 0),
+    dilute: (cup, water) => ({ marks: cup.marks + water, conc: cup.conc }),
+    fractionOf: (a, b) => a * b,
+    serial(start, rounds) {
+      const out = [];
+      let s = start;
+      for (let i = 0; i < rounds; i++) { s /= 2; out.push(s); }
+      return out;
+    },
     toFraction(x, maxDen = 64) {
       for (let d = 1; d <= maxDen; d++) {
         const n = Math.round(x * d);
@@ -319,6 +327,116 @@
       const t = el("text", { x: x0, y: y - 8, class: "w-label" }, ui.svg);
       t.textContent = label;
     };
+    const tea = cfg.color || "#b06222";
+    if (cfg.mode === "ratio") {
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const { a, b } = state;
+        const x0 = 30, w = 420 / (a + b);
+        for (let i = 0; i < a + b; i++) el("rect", { x: x0 + i * w, y: 100, width: w, height: 40, class: "w-part on", fill: i < a ? tea : "#a8d0d6" }, ui.svg);
+        const t = el("text", { x: x0, y: 88, class: "w-label" }, ui.svg);
+        t.textContent = `${a} part${a > 1 ? "s" : ""} concentrate : ${b} part${b > 1 ? "s" : ""} water`;
+        ui.readout.textContent = `Ratio ${a}:${b} → ${a + b} parts in all → concentrate is ${a}/${a + b} of the drink (not ${a}/${b}).`;
+      };
+      const init = () => { state = { a: cfg.a ?? 1, b: cfg.b ?? 3 }; ai.value = state.a; bi.value = state.b; draw(); };
+      const ai = slider(ui.controls, "Concentrate parts", 1, 5, 1, cfg.a ?? 1, (v) => { state.a = v; draw(); });
+      const bi = slider(ui.controls, "Water parts", 1, 7, 1, cfg.b ?? 3, (v) => { state.b = v; draw(); });
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
+    if (cfg.mode === "cup" || cfg.mode === "dilute") {
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const { marks, conc } = state;
+        const cap = cfg.mode === "dilute" ? 16 : 8, x0 = 30, w = 420 / cap;
+        for (let i = 0; i < cap; i++) el("rect", { x: x0 + i * w, y: 100, width: w, height: 40, class: `w-part${i < marks ? " on" : ""}`, fill: i < conc ? tea : "#a8d0d6" }, ui.svg);
+        const t = el("text", { x: x0, y: 88, class: "w-label" }, ui.svg);
+        t.textContent = `${conc} mark${conc === 1 ? "" : "s"} of concentrate in ${marks} mark${marks === 1 ? "" : "s"} of drink`;
+        const simple = WidgetMath.toFraction(WidgetMath.strength({ marks, conc }));
+        ui.readout.textContent = `strength = concentrate ÷ total = ${conc}/${marks}${simple !== `${conc}/${marks}` ? ` = ${simple}` : ""}`;
+        if (water) water.disabled = marks * 2 > cap;
+      };
+      let water = null;
+      const init = () => { state = { marks: cfg.marks ?? 4, conc: cfg.conc ?? 1 }; if (mi) { mi.value = state.marks; ci.value = state.conc; } draw(); };
+      let mi = null, ci = null;
+      if (cfg.mode === "cup") {
+        mi = slider(ui.controls, "Total marks", 1, 8, 1, cfg.marks ?? 4, (v) => { state.marks = v; if (state.conc > v) { state.conc = v; ci.value = v; } draw(); });
+        ci = slider(ui.controls, "Concentrate marks", 0, 8, 1, cfg.conc ?? 1, (v) => { state.conc = Math.min(v, state.marks); draw(); });
+      } else {
+        water = button(ui.controls, "Add an equal amount of water", () => { state = WidgetMath.dilute(state, state.marks); draw(); });
+      }
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
+    if (cfg.mode === "grid") {
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const { p, q, k } = state;
+        const x0 = 140, y0 = 30, S = 200;
+        const cols = cfg.kind === "equivalent" ? q * k : q, rows = cfg.kind === "equivalent" ? 1 : p;
+        const shadeCols = cfg.kind === "equivalent" ? (cfg.num ?? 1) * k : 1;
+        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+          const on = cfg.kind === "equivalent" ? i < shadeCols : i < 1 && j < 1;
+          const half = cfg.kind !== "equivalent" && i < 1;
+          el("rect", { x: x0 + (i * S) / cols, y: y0 + (j * S) / rows, width: S / cols, height: S / rows, class: `w-part${on ? " on" : half ? " half" : ""}`, fill: tea }, ui.svg);
+        }
+        if (cfg.kind === "equivalent") {
+          const n = cfg.num ?? 1;
+          ui.readout.textContent = `${n}/${q} = ${n * k}/${q * k}: cutting every part into ${k} keeps the same shaded amount.`;
+        } else {
+          ui.readout.textContent = `1/${p} of 1/${q}: one row of the first column = 1 of ${p * q} small parts = 1/${p * q}`;
+        }
+      };
+      let kIn, pIn, qIn;
+      if (cfg.kind === "equivalent") {
+        kIn = slider(ui.controls, "Cut each part into", 1, 6, 1, 2, (v) => { state.k = v; draw(); });
+      } else {
+        pIn = slider(ui.controls, "Take 1 of how many rows", 1, 6, 1, cfg.p ?? 2, (v) => { state.p = v; draw(); });
+        qIn = slider(ui.controls, "Columns (the first fraction)", 1, 8, 1, cfg.q ?? 4, (v) => { state.q = v; draw(); });
+      }
+      const init = () => {
+        state = { p: cfg.p ?? 2, q: cfg.q ?? 4, k: cfg.kind === "equivalent" ? 2 : 1 };
+        if (kIn) kIn.value = state.k; else { pIn.value = state.p; qIn.value = state.q; }
+        draw();
+      };
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
+    if (cfg.mode === "serial") {
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const chain = [1, ...WidgetMath.serial(1, state.rounds)];
+        chain.forEach((s, i) => {
+          const x = 20 + i * 92;
+          el("rect", { x, y: 90, width: 70, height: 90, class: "w-part on", fill: tea, style: `fill-opacity:${0.12 + 0.88 * s}` }, ui.svg);
+          const t = el("text", { x: x + 35, y: 205, class: "w-label", "text-anchor": "middle" }, ui.svg);
+          t.textContent = WidgetMath.toFraction(s);
+          if (i) { const a = el("text", { x: x - 12, y: 140, class: "w-label", "text-anchor": "middle" }, ui.svg); a.textContent = "→"; }
+        });
+        ui.readout.textContent = `${state.rounds} round${state.rounds === 1 ? "" : "s"} of "take 1 mark, add 1 mark of water": strength = (1/2)^${state.rounds} = ${WidgetMath.toFraction(chain[chain.length - 1])}`;
+      };
+      const init = () => { state = { rounds: cfg.rounds ?? 3 }; ri.value = state.rounds; draw(); };
+      const ri = slider(ui.controls, "Rounds", 1, 4, 1, cfg.rounds ?? 3, (v) => { state.rounds = v; draw(); });
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
+    if (cfg.mode === "combine") {
+      const s1 = cfg.s1 ?? 0.5, s2 = cfg.s2 ?? 0.25;
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const { m1, m2 } = state;
+        const mix = WidgetMath.combine([{ marks: m1, conc: m1 * s1 }, { marks: m2, conc: m2 * s2 }]);
+        barRow(50, 6, m1, `${m1} mark${m1 === 1 ? "" : "s"} at ${WidgetMath.toFraction(s1)}`, tea, s1);
+        barRow(120, 6, m2, `${m2} mark${m2 === 1 ? "" : "s"} at ${WidgetMath.toFraction(s2)}`, tea, s2);
+        barRow(200, 12, m1 + m2, `mixed: ${m1 + m2} marks at ${WidgetMath.toFraction(mix)}`, tea, mix);
+        ui.readout.textContent = `(${m1}·${WidgetMath.toFraction(s1)} + ${m2}·${WidgetMath.toFraction(s2)}) ÷ ${m1 + m2} = ${WidgetMath.toFraction(mix)}  (plain average would be ${WidgetMath.toFraction((s1 + s2) / 2)})`;
+      };
+      const init = () => { state = { m1: cfg.m1 ?? 1, m2: cfg.m2 ?? 1 }; a1.value = state.m1; a2.value = state.m2; draw(); };
+      const a1 = slider(ui.controls, `Marks at ${WidgetMath.toFraction(s1)}`, 1, 6, 1, cfg.m1 ?? 1, (v) => { state.m1 = v; draw(); });
+      const a2 = slider(ui.controls, `Marks at ${WidgetMath.toFraction(s2)}`, 1, 6, 1, cfg.m2 ?? 1, (v) => { state.m2 = v; draw(); });
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
     if (cfg.mode === "pour") {
       const draw = () => {
         ui.svg.innerHTML = "";

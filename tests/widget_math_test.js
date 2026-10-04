@@ -26,6 +26,10 @@ const [a, b] = M.pour({ marks: 2, conc: 1 }, { marks: 0, conc: 0 }, 1);
 check("pouring a mark keeps strength", near(M.strength(a), 0.5, 1e-12) && near(M.strength(b), 0.5, 1e-12));
 check("pouring conserves concentrate", near(a.conc + b.conc, 1, 1e-12));
 check("1 mark at 1/2 + 1 mark at 1/4 = 3/8", near(M.combine([{ marks: 1, conc: 0.5 }, { marks: 1, conc: 0.25 }]), 0.375, 1e-12));
+// Two cups modes
+check("diluting with equal water halves strength", near(M.strength(M.dilute({ marks: 2, conc: 1 }, 2)), 0.25, 1e-12));
+check("a fraction of a fraction multiplies", near(M.fractionOf(1 / 2, 1 / 4), 1 / 8, 1e-12));
+check("serial dilution halves each round", M.serial(1, 3).map((x) => M.toFraction(x)).join() === "1/2,1/4,1/8");
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");

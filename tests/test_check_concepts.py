@@ -82,6 +82,9 @@ class CheckConceptsTest(unittest.TestCase):
     def test_attach_to_unknown_entry(self):
         self.assertReports(self.broken(lambda c: None, attach={"start": {"A1"}, "nope": set()}), "page attaches unknown entry 'nope'")
 
+    def test_unattached_entry(self):
+        self.assertReports(self.broken(lambda c: c.append(node("loose", deeper=["base"], entry=True))), "entry 'loose' isn't attached to any page")
+
     def test_false_claim(self):
         concepts = copy.deepcopy(VALID)
         concepts[3]["claims"] = [{"sympy": "integrate(sin(x), (x, 0, pi))", "equals": "3"}]
@@ -98,6 +101,13 @@ class CheckConceptsTest(unittest.TestCase):
         page = Path(tempfile.mkdtemp()) / "p.html"
         page.write_text('Why.attach(fb, "sw-best-height", { A1: fmt(A1), A3 : 2 });\nWhy.attach(box, "tc-half");')
         self.assertEqual(cc.attach_calls([page]), {"sw-best-height": {"A1", "A3"}, "tc-half": set()})
+
+    def test_attach_ids_from_step_data(self):
+        import tempfile
+        from pathlib import Path
+        page = Path(tempfile.mkdtemp()) / "p.html"
+        page.write_text('{ title: "One to three", why: "tc-one-to-three", target: 1 / 4 }\nWhy.attach(live, level.why);')
+        self.assertEqual(cc.attach_calls([page]), {"tc-one-to-three": set()})
 
 
 if __name__ == "__main__":

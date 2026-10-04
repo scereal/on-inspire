@@ -112,6 +112,38 @@ def panel_tests(page, base, c, label):
     c.ok(width <= page.viewport_size["width"], f"{label}: no sideways scroll ({width}px)")
 
 
+TWO_CUPS = [  # (answer to the opening question, moves as (button text, cup index))
+    (None, [("Add tea", 0), ("Add water", 0)]),
+    ("1/4", [("Add tea", 0), ("Add water", 0), ("Add water", 0), ("Add water", 0)]),
+    ("Yes, somehow", [("Add tea", 0), ("Add water", 0), ("Add water", 0), ("Add water", 0), ("Pour into B", 0), ("Add water", 1)]),
+    ("3/8", [("Add tea", 0), ("Add water", 0), ("Pour into B", 0), ("Add water", 1), ("Pour into A", 1)]),
+]
+TWO_CUPS_ENTRIES = ["tc-half", "tc-one-to-three", "tc-one-eighth", "tc-three-eighths"]
+
+
+def two_cups(page, base, c, label):
+    page.goto(f"{base}/math/two-cups/")
+    page.wait_for_selector(".cup")
+    for level, (answer, moves) in enumerate(TWO_CUPS):
+        if answer:
+            page.click(f".task .choices button:text-is('{answer}')")
+        for text, cup in moves:
+            page.locator(".cup").nth(cup).get_by_role("button", name=text).click()
+        c.ok("Done in" in page.inner_text(".task"), f"{label}: two cups level {level + 1} solved")
+        why = page.locator(".task .why-open")
+        c.ok(why.count() == 1, f"{label}: two cups level {level + 1} offers Why?")
+        if why.count():
+            why.click()
+            c.ok(page.is_visible(".why-panel"), f"{label}: two cups level {level + 1} opens the panel")
+            entry = page.evaluate("() => (window.CONCEPTS || []).find(x => x.id === %r)?.title" % TWO_CUPS_ENTRIES[level])
+            c.ok(entry and page.inner_text(".why-title") == entry, f"{label}: level {level + 1} shows entry {TWO_CUPS_ENTRIES[level]}")
+            page.click(".why-body .why-term >> nth=0")
+            c.ok(page.is_enabled(".why-back"), f"{label}: level {level + 1} entry links deeper")
+            page.click(".why-close")
+        if level < 3:
+            page.click(".task .row button:text-is('Next step')")
+
+
 def main():
     base = serve()
     c, errors = Checker(), []
@@ -121,6 +153,8 @@ def main():
             page = browser.new_page(viewport=vp)
             page.on("pageerror", lambda e: errors.append(str(e)))
             panel_tests(page, base, c, name)
+            page.unroute("**/why/concepts.js")
+            two_cups(page, base, c, name)
             page.close()
 
         # Hostile environments: no localStorage, no KaTeX

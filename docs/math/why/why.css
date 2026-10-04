@@ -107,3 +107,4 @@
 .w-part { fill-opacity: 0.08; stroke: rgba(243, 234, 214, 0.6); stroke-width: 1.2; }
 .w-part.on { fill-opacity: 0.85; }
 .w-delta { stroke: var(--paper); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.7; }
+.w-part.half { fill-opacity: 0.3; }

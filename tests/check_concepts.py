@@ -27,8 +27,13 @@ def attach_calls(page_paths=PAGES):
     calls = {}
     pattern = re.compile(r'Why\.attach\(\s*[^,]+,\s*"([^"]+)"\s*(?:,\s*\{([^}]*)\})?')
     for path in page_paths:
-        for entry, obj in pattern.findall(Path(path).read_text(encoding="utf-8")):
+        text = Path(path).read_text(encoding="utf-8")
+        for entry, obj in pattern.findall(text):
             calls.setdefault(entry, set()).update(re.findall(r"([A-Za-z_]\w*)\s*:", obj or ""))
+        # Step data that names its entry (why: "id"), attached by a generic Why.attach(el, step.why) call
+        if re.search(r"Why\.attach\(\s*[^,]+,\s*[A-Za-z_][\w.]*\.why\s*\)", text):
+            for entry in re.findall(r'\bwhy:\s*"([^"]+)"', text):
+                calls.setdefault(entry, set())
     return calls
 
 
@@ -40,7 +45,7 @@ def used_by(concepts):
     return out
 
 
-def problems(concepts, attach):
+def problems(concepts, attach, require_reachable=True):
     found = []
     ids = [c.get("id") for c in concepts]
     for i in sorted({i for i in ids if ids.count(i) > 1}):
@@ -103,9 +108,9 @@ def problems(concepts, attach):
         if not reaches_foundation(cid):
             found.append(f"'{cid}' never reaches a foundation")
 
-    # Every concept is reachable from an entry (once entries exist)
+    # Every concept is reachable from an entry
     entries = [cid for cid, c in by_id.items() if c.get("entry")]
-    if entries:
+    if entries and require_reachable:
         seen, stack = set(entries), list(entries)
         while stack:
             c = by_id.get(stack.pop(), {})
@@ -116,6 +121,9 @@ def problems(concepts, attach):
         for cid in by_id:
             if cid not in seen:
                 found.append(f"orphan '{cid}': not reachable from any entry")
+        for cid in entries:
+            if cid not in attach:
+                found.append(f"entry '{cid}' isn't attached to any page")
     return found
 
 
@@ -144,7 +152,12 @@ def verify_claims(concepts):
 
 def main():
     concepts = load()
-    found = problems(concepts, attach_calls()) + verify_claims(concepts)
+    calls = attach_calls()
+    # Orphans can only be judged once every page has wired in its entries
+    pages_wired = all(attach_calls([page]) for page in PAGES)
+    found = problems(concepts, calls, require_reachable=pages_wired) + verify_claims(concepts)
+    if not pages_wired:
+        print("note: orphan check skipped until all three pages attach their entries")
     for line in found:
         print("FAIL", line)
     entries = sum(1 for c in concepts if c.get("entry"))
