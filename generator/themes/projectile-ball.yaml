@@ -8,4 +8,4 @@ stories:
   1: ["You roll a ball off a {h} m high ledge. It needs to land {d} m out, on the target."]
   2: ["You throw a ball upward at {vy} m/s. It has to come down on a target {d} m away."]
   3: ["You can throw a ball at {v} m/s. A target sits {d} m away on flat ground."]
-  4: ["You throw a ball at {vx} m/s horizontally. It must just clear the top of a {H} m wall that's {w} m away."]
+  4: ["You throw a ball with a horizontal speed of {vx} m/s. It must just clear the top of a {H} m wall that's {w} m away."]

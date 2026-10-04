@@ -43,5 +43,56 @@
   },
   "seed": 1,
   "tried": 767
+ },
+ "projectile": {
+  "acceptance_rate": 0.3596,
+  "accepted": 320,
+  "framework": "projectile",
+  "levels": {
+   "1": {
+    "accepted": 90,
+    "rejected": {
+     "distinct": 101,
+     "duplicate": 11,
+     "plausible": 206
+    },
+    "target": 90,
+    "tried": 408
+   },
+   "2": {
+    "accepted": 80,
+    "rejected": {
+     "distinct": 15,
+     "duplicate": 2,
+     "exists": 7,
+     "plausible": 23
+    },
+    "target": 80,
+    "tried": 127
+   },
+   "3": {
+    "accepted": 70,
+    "rejected": {
+     "clean": 15,
+     "distinct": 141,
+     "duplicate": 11,
+     "plausible": 15
+    },
+    "target": 70,
+    "tried": 252
+   },
+   "4": {
+    "accepted": 80,
+    "rejected": {
+     "distinct": 4,
+     "exists": 4,
+     "plausible": 15
+    },
+    "target": 80,
+    "tried": 103
+   }
+  },
+  "seed": 1,
+  "tried": 890
  }
 }

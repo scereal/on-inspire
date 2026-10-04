@@ -6,4 +6,4 @@ physics: {speed: [3, 15], height: [1, 4], distance: [1, 20], g: [9.8, 9.8]}
 levels: [3, 4]
 stories:
   3: ["You shoot a basketball at {v} m/s toward a spot {d} m away on the court floor."]
-  4: ["You pass a basketball at {vx} m/s horizontally over a defender whose hands reach {H} m, {w} m away."]
+  4: ["You pass a basketball with a horizontal speed of {vx} m/s over a defender whose hands reach {H} m, {w} m away."]
