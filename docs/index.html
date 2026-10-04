@@ -4,196 +4,357 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>On Inspire</title>
-  <meta name="description" content="On Inspire — ideas, tools, and interactive learning.">
+  <meta name="description" content="Travel the On Inspire network — math, cooking, writing, and a thesis in progress.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0b12;
-      --fg: #f1efe9;
-      --muted: #a6a3b5;
-      --accent: #ffb86b;
-      --accent-2: #8b7bff;
-      --line: rgba(255, 255, 255, 0.08);
+      --void: #061018;
+      --paper: #f3ead6;
+      --muted: #9aa7a3;
+      --gold: #d4b06a;
+      --aurora: #4ea8a0;
+      --ember: #c45c4a;
     }
     * { box-sizing: border-box; margin: 0; }
-    html { scroll-behavior: smooth; }
+    html, body { height: 100%; }
     body {
-      background: var(--bg);
-      color: var(--fg);
-      font: 400 1.0625rem/1.65 Inter, system-ui, sans-serif;
-      overflow-x: hidden;
+      background: var(--void);
+      color: var(--paper);
+      font: 400 1rem/1.45 Figtree, system-ui, sans-serif;
+      overflow: hidden;
     }
-    h1, h2 { font-family: Fraunces, Georgia, serif; font-weight: 300; line-height: 1.05; }
-    a { color: var(--accent); }
-
-    /* Animated field behind the hero */
-    #field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
-
-    /* Hero */
-    .hero {
-      min-height: 100svh;
-      display: grid;
-      place-content: center;
-      text-align: center;
-      padding: 0 16px;
-      position: relative;
+    #field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    .grain {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.09;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     }
-    /* Drop an exported Higgsfield/Runway/Veo clip at docs/media/hero.mp4 and it plays behind the title */
-    .hero video {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: cover; z-index: -1; opacity: 0.45;
+    .chrome {
+      position: fixed; z-index: 3; left: 1.25rem; top: 1.1rem;
+      display: grid; gap: 0.2rem; max-width: 16rem; pointer-events: none;
     }
-    .hero h1 {
-      font-size: clamp(3rem, 12vw, 9rem);
-      background: linear-gradient(100deg, var(--fg) 20%, var(--accent) 50%, var(--accent-2) 80%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: shimmer 8s ease-in-out infinite alternate;
+    .chrome h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      font-weight: 500;
+      letter-spacing: 0.01em;
     }
-    .hero p { color: var(--muted); font-size: clamp(1rem, 2.5vw, 1.3rem); margin-top: 1rem; }
-    .scroll-cue {
-      position: absolute; bottom: 2rem; left: 50%; translate: -50% 0;
-      color: var(--muted); font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
-      animation: bob 2.4s ease-in-out infinite;
+    .chrome p { color: var(--muted); font-size: 0.92rem; }
+    #graph {
+      position: fixed; inset: 0; z-index: 2; width: 100%; height: 100%;
+      touch-action: manipulation;
     }
-    @keyframes shimmer { to { background-position: 100% 0; } }
-    @keyframes bob { 50% { transform: translateY(6px); } }
-
-    /* Progress bar tied to scroll */
-    .progress {
-      position: fixed; top: 0; left: 0; height: 3px; width: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      transform-origin: 0 50%; transform: scaleX(0); z-index: 10;
+    .edge { fill: none; stroke: var(--aurora); stroke-width: 1.15; opacity: 0.35; }
+    .edge.is-dim { opacity: 0.08; }
+    .edge.is-live { opacity: 0.7; stroke-width: 1.6; }
+    .node { cursor: pointer; }
+    .node:focus-visible { outline: none; }
+    .node:focus-visible .halo { opacity: 1; }
+    .halo {
+      fill: none; stroke: var(--gold); stroke-width: 1.2; opacity: 0;
+      transition: opacity 0.2s ease;
     }
-
-    /* Story chapters */
-    .chapter {
-      min-height: 90svh;
-      display: grid;
-      align-content: center;
-      max-width: 52rem;
-      margin: 0 auto;
-      padding: 6rem 16px;
-      border-top: 1px solid var(--line);
+    .node:hover .halo { opacity: 0.85; }
+    .core { fill: var(--gold); }
+    .core.inspire { fill: var(--paper); }
+    .core.leaf { fill: var(--aurora); }
+    .ring { fill: none; stroke: var(--paper); stroke-width: 1; opacity: 0.28; }
+    .label {
+      fill: var(--paper);
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 18px;
+      font-weight: 500;
+      text-anchor: middle;
+      pointer-events: none;
     }
-    .chapter .num { color: var(--accent); font-size: 0.85rem; letter-spacing: 0.2em; }
-    .chapter h2 { font-size: clamp(2rem, 6vw, 4rem); margin: 0.5rem 0 1.25rem; }
-    .chapter p { color: var(--muted); max-width: 38rem; }
-
-    .reveal { opacity: 0; transform: translateY(40px); filter: blur(6px);
-      transition: opacity 0.9s ease, transform 0.9s ease, filter 0.9s ease; }
-    .reveal.in { opacity: 1; transform: none; filter: none; }
-    .reveal:nth-child(2) { transition-delay: 0.1s; }
-    .reveal:nth-child(3) { transition-delay: 0.2s; }
-
-    footer { text-align: center; color: var(--muted); padding: 4rem 16px; font-size: 0.85rem; }
-
+    .label.inspire { font-size: 28px; font-style: italic; }
+    .label.leaf { font-size: 14px; fill: var(--muted); font-family: Figtree, system-ui, sans-serif; }
+    .node.is-dim { opacity: 0.16; }
+    .node.is-dim { pointer-events: none; }
+    .orbit { fill: none; stroke: rgba(243, 234, 214, 0.08); stroke-width: 1; }
+    .dock {
+      position: fixed; z-index: 3; left: 50%; bottom: 1.4rem;
+      translate: -50% 0;
+      display: flex; gap: 0.6rem; align-items: center;
+    }
+    button {
+      appearance: none; border: 1px solid rgba(243, 234, 214, 0.22);
+      background: rgba(6, 16, 24, 0.72);
+      color: var(--paper);
+      font: 500 0.9rem/1 Figtree, system-ui, sans-serif;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    button:hover, button:focus-visible {
+      border-color: var(--gold);
+      outline: none;
+    }
+    button[hidden] { display: none; }
+    #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .hint { color: var(--muted); font-size: 0.8rem; }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-      .reveal { opacity: 1; transform: none; filter: none; }
-      .hero video { display: none; }
+      .halo { transition: none; }
     }
   </style>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
-  <div class="progress" aria-hidden="true"></div>
-
-  <header class="hero">
-    <video autoplay muted loop playsinline preload="none" aria-hidden="true">
-      <source src="media/hero.mp4" type="video/mp4">
-    </video>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="chrome">
     <h1>On Inspire</h1>
-    <p>Ideas worth exploring, one step at a time.</p>
-    <span class="scroll-cue">Scroll</span>
+    <p>Pick a star. The map will fold toward it.</p>
   </header>
-
-  <main>
-    <section class="chapter">
-      <span class="num reveal">01</span>
-      <h2 class="reveal">Start with curiosity</h2>
-      <p class="reveal">Placeholder text. Every great idea starts as a question. This is where the story begins.</p>
-    </section>
-    <section class="chapter">
-      <span class="num reveal">02</span>
-      <h2 class="reveal">Build it piece by piece</h2>
-      <p class="reveal">Placeholder text. Break big ideas into small, approachable steps you can reason through.</p>
-    </section>
-    <section class="chapter">
-      <span class="num reveal">03</span>
-      <h2 class="reveal">Make it come alive</h2>
-      <p class="reveal">Placeholder text. Interaction and motion turn understanding into something you can feel.</p>
-    </section>
-  </main>
-
-  <footer>© 2026 On Inspire</footer>
+  <div id="status" role="status" aria-live="polite"></div>
+  <svg id="graph" role="img" aria-label="On Inspire network">
+    <circle class="orbit" cx="0" cy="0" r="220" />
+    <g id="world"></g>
+  </svg>
+  <div class="dock">
+    <button id="back" type="button" hidden>Back to Inspire</button>
+    <span class="hint" id="hint">Click a node, or use the keyboard</span>
+  </div>
 
   <script>
-    // Scroll progress bar
-    const bar = document.querySelector('.progress');
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - innerHeight;
-      bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const graph = document.getElementById("graph");
+    const world = document.getElementById("world");
+    const back = document.getElementById("back");
+    const hint = document.getElementById("hint");
+    const status = document.getElementById("status");
+
+    const HUBS = [
+      {
+        id: "math",
+        label: "Cool Math Problems",
+        angle: -0.95,
+        children: ["The infinite hotel", "A folding square", "Lights out", "Prime spirals", "Hidden symmetries"],
+      },
+      {
+        id: "cooking",
+        label: "Cooking Videos",
+        angle: 0.35,
+        children: ["Knife and flame", "A week of soups", "Pantry geometry", "Night baking", "One pot, two moods"],
+      },
+      {
+        id: "blog",
+        label: "Blog",
+        angle: 2.15,
+        children: ["Field notes", "Tools I keep", "What I unlearned", "Slow builds", "Letters to later"],
+      },
+      {
+        id: "thesis",
+        label: "Honors Thesis",
+        angle: 3.45,
+        children: ["Abstract", "Chapter one", "Methods", "Figures", "Defense notes"],
+      },
+    ];
+
+    const ROOT = 220;
+    const LEAF = 132;
+    const inspire = { id: "inspire", label: "Inspire", x: 0, y: 0, kind: "inspire" };
+    const hubs = HUBS.map((h) => ({
+      ...h,
+      x: Math.cos(h.angle) * ROOT,
+      y: Math.sin(h.angle) * ROOT,
+      kind: "hub",
+    }));
+
+    const leavesOf = (hub) =>
+      hub.children.map((label, i) => {
+        const a = hub.angle + Math.PI + ((i - (hub.children.length - 1) / 2) * 0.52);
+        return {
+          id: `${hub.id}-${i}`,
+          label,
+          parent: hub.id,
+          x: hub.x + Math.cos(a) * LEAF,
+          y: hub.y + Math.sin(a) * LEAF,
+          kind: "leaf",
+        };
+      });
+
+    let focus = "inspire";
+    let cam = { x: 0, y: 0, k: 1 };
+    let target = { x: 0, y: 0, k: 1 };
+    let w = innerWidth;
+    let h = innerHeight;
+
+    const ns = "http://www.w3.org/2000/svg";
+    const el = (name, attrs = {}) => {
+      const node = document.createElementNS(ns, name);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      return node;
     };
-    addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
 
-    // Reveal chapters as they enter the viewport
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-    }, { threshold: 0.2 });
-    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    const setCam = (next, instant) => {
+      target = next;
+      if (instant || reduce) cam = { ...next };
+    };
 
-    // Hide the video element if no clip has been added yet
-    const video = document.querySelector('.hero video');
-    video.querySelector('source').addEventListener('error', () => video.remove());
+    const fitRoot = () => {
+      const pad = 90;
+      const k = Math.min((w - pad) / 560, (h - pad) / 560, 1.15);
+      setCam({ x: 0, y: 0, k: Math.max(k, 0.55) }, cam.k === 1 && cam.x === 0);
+    };
 
-    // Drifting constellation background that reacts to scroll
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const canvas = document.getElementById('field');
-    const ctx = canvas.getContext('2d');
-    let w, h, dots;
-    const resize = () => {
+    const zoomTo = (node) => setCam({ x: node.x, y: node.y, k: Math.min(1.85, Math.max(1.15, 420 / Math.min(w, h) * 2.2)) });
+
+    const applyView = () => {
+      const tx = w / 2 - cam.x * cam.k;
+      const ty = h / 2 - cam.y * cam.k;
+      world.setAttribute("transform", `translate(${tx} ${ty}) scale(${cam.k})`);
+      graph.querySelector(".orbit").setAttribute("transform", `translate(${tx} ${ty}) scale(${cam.k})`);
+    };
+
+    const announce = (msg) => { status.textContent = msg; };
+
+    const draw = () => {
+      world.replaceChildren();
+      const edges = el("g");
+      const nodes = el("g");
+      const active = hubs.find((h) => h.id === focus);
+      const shownLeaves = active ? leavesOf(active) : [];
+
+      for (const hub of hubs) {
+        const line = el("line", {
+          class: `edge${focus === "inspire" ? "" : hub.id === focus ? " is-live" : " is-dim"}`,
+          x1: 0, y1: 0, x2: hub.x, y2: hub.y,
+        });
+        edges.append(line);
+      }
+      for (const leaf of shownLeaves) {
+        const parent = hubs.find((h) => h.id === leaf.parent);
+        edges.append(el("line", {
+          class: "edge is-live",
+          x1: parent.x, y1: parent.y, x2: leaf.x, y2: leaf.y,
+        }));
+      }
+      world.append(edges);
+
+      const all = [inspire, ...hubs, ...shownLeaves];
+      for (const n of all) {
+        const g = el("g", {
+          class: `node${focus !== "inspire" && n.kind === "hub" && n.id !== focus ? " is-dim" : ""}`,
+          tabindex: n.kind === "hub" && focus !== "inspire" && n.id !== focus ? "-1" : "0",
+          role: "button",
+          "data-id": n.id,
+          "data-kind": n.kind,
+        });
+        g.setAttribute("aria-label", n.kind === "leaf" ? `${n.label}, coming soon` : n.label);
+        const r = n.kind === "inspire" ? 16 : n.kind === "hub" ? 9 : 5.5;
+        g.append(el("circle", { class: "halo", r: r + 10, cx: n.x, cy: n.y }));
+        if (n.kind === "inspire") g.append(el("circle", { class: "ring", r: 26, cx: n.x, cy: n.y }));
+        g.append(el("circle", { class: `core ${n.kind}`, r, cx: n.x, cy: n.y }));
+        const label = el("text", {
+          class: `label ${n.kind}`,
+          x: n.x,
+          y: n.y + (n.kind === "inspire" ? -36 : n.kind === "hub" ? -18 : 22),
+        });
+        label.textContent = n.label;
+        g.append(label);
+        g.addEventListener("click", () => select(n));
+        g.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n); }
+        });
+        nodes.append(g);
+      }
+      world.append(nodes);
+    };
+
+    const select = (n) => {
+      if (n.kind === "leaf") {
+        announce(`${n.label} is a placeholder for later.`);
+        hint.textContent = "This branch is a placeholder";
+        return;
+      }
+      if (n.id === "inspire" || (n.id === focus && n.kind === "hub")) {
+        focus = "inspire";
+        history.replaceState(null, "", location.pathname + location.search);
+        fitRoot();
+        back.hidden = true;
+        hint.textContent = "Click a node, or use the keyboard";
+        announce("Returned to Inspire");
+      } else {
+        focus = n.id;
+        history.replaceState(null, "", `#${n.id}`);
+        zoomTo(n);
+        back.hidden = false;
+        hint.textContent = n.label;
+        announce(`Opened ${n.label}`);
+      }
+      draw();
+    };
+
+    back.addEventListener("click", () => select(inspire));
+    addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && focus !== "inspire") select(inspire);
+    });
+
+    const fromHash = () => {
+      const id = location.hash.replace("#", "");
+      const hub = hubs.find((h) => h.id === id);
+      if (hub) select(hub);
+      else {
+        focus = "inspire";
+        back.hidden = true;
+        fitRoot();
+        draw();
+      }
+    };
+
+    addEventListener("resize", () => {
+      w = innerWidth; h = innerHeight;
+      graph.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      if (focus === "inspire") fitRoot();
+      else zoomTo(hubs.find((h) => h.id === focus));
+    });
+
+    const tick = () => {
+      const ease = reduce ? 1 : 0.12;
+      cam.x += (target.x - cam.x) * ease;
+      cam.y += (target.y - cam.y) * ease;
+      cam.k += (target.k - cam.k) * ease;
+      applyView();
+      requestAnimationFrame(tick);
+    };
+
+    graph.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    fromHash();
+    applyView();
+    tick();
+
+    const canvas = document.getElementById("field");
+    const ctx = canvas.getContext("2d");
+    let dots, cw, ch;
+    const resizeField = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = canvas.width = innerWidth * dpr;
-      h = canvas.height = innerHeight * dpr;
-      const count = Math.round((innerWidth * innerHeight) / 14000);
+      cw = canvas.width = innerWidth * dpr;
+      ch = canvas.height = innerHeight * dpr;
+      const count = Math.round((innerWidth * innerHeight) / 16000);
       dots = Array.from({ length: count }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.3 * dpr, vy: (Math.random() - 0.5) * 0.3 * dpr,
-        r: (Math.random() * 1.4 + 0.4) * dpr,
+        x: Math.random() * cw,
+        y: Math.random() * ch,
+        vx: (Math.random() - 0.5) * 0.18 * dpr,
+        vy: (Math.random() - 0.5) * 0.18 * dpr,
+        r: (Math.random() * 1.2 + 0.3) * dpr,
       }));
     };
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      const shift = scrollY * 0.15;
-      const link = 120 * (devicePixelRatio || 1);
+    const paint = () => {
+      ctx.clearRect(0, 0, cw, ch);
       for (const d of dots) {
-        d.x = (d.x + d.vx + w) % w;
-        d.y = (d.y + d.vy + h) % h;
+        d.x = (d.x + d.vx + cw) % cw;
+        d.y = (d.y + d.vy + ch) % ch;
+        ctx.fillStyle = "rgba(212,176,106,0.55)";
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fill();
       }
-      for (let i = 0; i < dots.length; i++) {
-        const a = dots[i], ay = (a.y - shift + h * 10) % h;
-        for (let j = i + 1; j < dots.length; j++) {
-          const b = dots[j], by = (b.y - shift + h * 10) % h;
-          const dist = Math.hypot(a.x - b.x, ay - by);
-          if (dist < link) {
-            ctx.strokeStyle = `rgba(139,123,255,${0.18 * (1 - dist / link)})`;
-            ctx.beginPath(); ctx.moveTo(a.x, ay); ctx.lineTo(b.x, by); ctx.stroke();
-          }
-        }
-        ctx.fillStyle = 'rgba(255,184,107,0.8)';
-        ctx.beginPath(); ctx.arc(a.x, ay, a.r, 0, Math.PI * 2); ctx.fill();
-      }
-      if (!reduce) requestAnimationFrame(draw);
+      if (!reduce) requestAnimationFrame(paint);
     };
-    addEventListener('resize', resize);
-    resize();
-    draw();
+    addEventListener("resize", resizeField);
+    resizeField();
+    paint();
   </script>
 </body>
 </html>
