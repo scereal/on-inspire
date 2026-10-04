@@ -71,6 +71,19 @@ print(result.stdout.rstrip())
 if result.returncode:
     print(result.stderr.rstrip())
 check("JavaScript logic tests", result.returncode == 0)
+result = subprocess.run([JSC, "tests/widget_math_test.js"], cwd=ROOT, capture_output=True, text=True)
+print((result.stdout.strip().splitlines() or [""])[-1])
+check("widget math tests", result.returncode == 0)
+
+# "Why?" concept network ----------------------------------------------------------
+print("Concept network")
+result = subprocess.run([sys.executable, "tests/check_concepts.py"], cwd=ROOT, capture_output=True, text=True)
+print("  " + (result.stdout.strip().splitlines() or [""])[-1])
+if result.returncode:
+    print(result.stdout + result.stderr)
+check("concept network and claims", result.returncode == 0)
+result = subprocess.run([sys.executable, "-m", "unittest", "tests.test_check_concepts", "tests.test_concept_content"], cwd=ROOT, capture_output=True, text=True)
+check("concept checker tests", result.returncode == 0)
 
 # Problem generator --------------------------------------------------------------
 print("Problem generator")

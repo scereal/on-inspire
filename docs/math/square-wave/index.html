@@ -9,6 +9,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../math.css">
+  <link rel="stylesheet" href="../why/why.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
   <style>
     .legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); padding: 0.3rem 0.5rem 0.2rem; }
     .legend span::before { content: ""; display: inline-block; width: 1.2rem; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 0.45rem; background: currentColor; }
@@ -62,6 +66,9 @@
     </section>
   </main>
 
+  <script src="../why/concepts.js"></script>
+  <script src="../why/widgets.js"></script>
+  <script src="../why/why.js"></script>
   <script src="logic.js"></script>
   <script>
     const { TAU, square, sum, gap, bestAmp, recipe, peak } = SquareWave;
@@ -254,7 +261,19 @@
       },
     ];
 
+    // "Why is this the case?" on each step, filled with this page's numbers
+    const attachWhy = (box) => {
+      if (!box) return;
+      if (current === 0) Why.attach(box, "sw-best-height", { A1: fmt(A1) });
+      else if (current === 1) Why.attach(box, "sw-why-sin3t", { A3: fmt(A3) });
+      else if (current === 2) Why.attach(box, "sw-pattern");
+      else Why.attach(box, "sw-gibbs", { peak: fmt(peak(recipe(400))) });
+    };
+
     const finish = () => {
+      // Lock this step's controls: re-checking would rewrite the feedback and duplicate buttons
+      task.querySelectorAll("input, .freqs button, .row button.primary").forEach((x) => (x.disabled = true));
+      attachWhy(task.querySelector(".feedback.good"));
       done.add(current);
       renderRail();
       if (current < STEPS.length - 1) {

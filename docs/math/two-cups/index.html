@@ -9,6 +9,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../math.css">
+  <link rel="stylesheet" href="../why/why.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
   <style>
     .bench { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
     .cup { display: grid; justify-items: center; gap: 0.5rem; padding: 0.4rem 0.2rem 0.8rem; }
@@ -60,6 +64,9 @@
     </section>
   </main>
 
+  <script src="../why/concepts.js"></script>
+  <script src="../why/widgets.js"></script>
+  <script src="../why/why.js"></script>
   <script src="logic.js"></script>
   <script>
     const { CAP, STEP, start, strength, move, hits, fraction } = TwoCups;
@@ -198,12 +205,14 @@
     const LEVELS = [
       {
         title: "Half and half",
+        why: "tc-half",
         target: 1 / 2,
         prompt: "Make a drink that is exactly half tea and half water, in either cup.",
         win: "Equal parts tea and water. Any amount works: 1 mark of each, or 2 of each.",
       },
       {
         title: "One to three",
+        why: "tc-one-to-three",
         target: 1 / 4,
         question: {
           text: "A recipe says 1 part tea to 3 parts water. What fraction of the drink is tea?",
@@ -219,6 +228,7 @@
       },
       {
         title: "Smaller than a mark",
+        why: "tc-one-eighth",
         target: 1 / 8,
         question: {
           text: "Each cup holds only 4 marks. Can you make a drink that is 1/8 tea?",
@@ -234,6 +244,7 @@
       },
       {
         title: "Mix two mixes",
+        why: "tc-three-eighths",
         target: 3 / 8,
         question: {
           text: "You pour equal amounts of a 1/2 drink and a 1/4 drink together. How strong is the result?",
@@ -277,6 +288,7 @@
         if (hits(cups, level.target)) {
           solved = true;
           say(live, "good", `<strong>Done in ${moves} moves.</strong> ${level.win}`);
+          Why.attach(live, level.why);
           finish();
         } else if (level.misstep && !warned && hits(cups, level.misstep.at)) {
           warned = true;

@@ -2,6 +2,7 @@
 // "verify" holds SymPy expressions: the integrand, the correct antiderivative, and any wrong answers shown.
 window.IBP_ITEMS = [
   {
+    "why": "ibp-pick-u",
     "type": "choose",
     "title": "Pick u",
     "integral": "∫ x e<sup>2x</sup> dx",
@@ -14,6 +15,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "x*exp(2*x)", "answer": "x*exp(2*x)/2 - exp(2*x)/4" }
   },
   {
+    "why": "ibp-sign",
     "type": "error",
     "title": "Find the error",
     "integral": "∫ x cos x dx",
@@ -28,6 +30,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "x*cos(x)", "answer": "x*sin(x) + cos(x)", "shown": "x*sin(x) - cos(x)" }
   },
   {
+    "why": "ibp-v",
     "type": "error",
     "title": "Find the error",
     "integral": "∫ x e<sup>3x</sup> dx",
@@ -42,6 +45,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "x*exp(3*x)", "answer": "x*exp(3*x)/3 - exp(3*x)/9", "shown": "3*x*exp(3*x) - exp(3*x)" }
   },
   {
+    "why": "ibp-blank",
     "type": "choose",
     "title": "Fill the blank",
     "integral": "∫ x² e<sup>x</sup> dx = x² e<sup>x</sup> − ∫ ▢ dx",
@@ -55,6 +59,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "x**2*exp(x)", "answer": "x**2*exp(x) - 2*x*exp(x) + 2*exp(x)", "blank": "2*x*exp(x)", "uv": "x**2*exp(x)" }
   },
   {
+    "why": "ibp-chain",
     "type": "error",
     "title": "Find the error",
     "integral": "∫ x sin 2x dx",
@@ -69,6 +74,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "x*sin(2*x)", "answer": "-x*cos(2*x)/2 + sin(2*x)/4", "shown": "-x*cos(2*x)/2 + sin(2*x)/2" }
   },
   {
+    "why": "ibp-minus",
     "type": "error",
     "title": "Find the error",
     "integral": "∫ ln x dx",
@@ -83,6 +89,7 @@ window.IBP_ITEMS = [
     "verify": { "integrand": "log(x)", "answer": "x*log(x) - x", "shown": "x*log(x) + x" }
   },
   {
+    "why": "ibp-check",
     "type": "choose",
     "title": "Check by differentiating",
     "integral": "∫ x ln x dx",
