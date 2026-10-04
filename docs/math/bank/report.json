@@ -1,0 +1,47 @@
+{
+ "ibp": {
+  "acceptance_rate": 0.4042,
+  "accepted": 310,
+  "framework": "ibp",
+  "levels": {
+   "1": {
+    "accepted": 70,
+    "rejected": {
+     "distinct": 22,
+     "duplicate": 65
+    },
+    "target": 70,
+    "tried": 157
+   },
+   "2": {
+    "accepted": 100,
+    "rejected": {
+     "clean": 82,
+     "distinct": 59,
+     "duplicate": 118
+    },
+    "target": 100,
+    "tried": 359
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "distinct": 31,
+     "duplicate": 47
+    },
+    "target": 100,
+    "tried": 178
+   },
+   "4": {
+    "accepted": 40,
+    "rejected": {
+     "duplicate": 33
+    },
+    "target": 40,
+    "tried": 73
+   }
+  },
+  "seed": 1,
+  "tried": 767
+ }
+}

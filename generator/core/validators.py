@@ -67,15 +67,15 @@ def distinct_problem(steps):
         correct = [o for o in step.options if o.correct]
         if len(correct) != 1:
             return f"step {i} has {len(correct)} correct options"
-        labels = [o.label.strip().lower() for o in step.options]
-        if len(set(labels)) != len(labels):
-            return f"step {i} repeats an option label"
         right = correct[0].value
         for o in step.options:
             if o.correct or o.value is None or right is None:
                 continue
             if same_value(o.value, right):
                 return f"step {i}: '{o.misconception}' gives the right answer"
+        labels = [o.label.strip().lower() for o in step.options]
+        if len(set(labels)) != len(labels):
+            return f"step {i} repeats an option label"
         numbers = [o.value for o in step.options if isinstance(o.value, (int, float))]
         for a_i, a in enumerate(numbers):
             for b in numbers[a_i + 1:]:
