@@ -69,3 +69,41 @@
   .why-map-row.mid .side { width: 100%; }
   .why-group-label { min-width: 0; width: 100%; }
 }
+
+/* Widgets */
+.w-prompt { color: var(--paper); font-size: 0.9rem; margin: 0.2rem 0.3rem 0.4rem; }
+.w-svg { display: block; width: 100%; height: auto; touch-action: none; }
+.w-controls { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin: 0.4rem 0.3rem; }
+.w-controls button { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+.w-slider { display: flex; align-items: center; gap: 0.6rem; flex: 1 1 14rem; }
+.w-slider label { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+.w-slider input { flex: 1; accent-color: var(--gold); }
+.w-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin: 0.3rem; }
+.w-readout { font-size: 0.86rem; color: var(--paper); font-variant-numeric: tabular-nums; margin: 0; }
+.w-reset { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+.w-axes line, .w-axis { stroke: rgba(243, 234, 214, 0.25); stroke-width: 1; }
+.w-curve { fill: none; stroke: var(--aurora); stroke-width: 2.4; }
+.w-curve.alt { stroke: var(--gold); }
+.w-secant { stroke: var(--gold); stroke-width: 1.8; }
+.w-point { fill: var(--gold); }
+.w-point.alt { fill: var(--paper); }
+.w-point.handle { cursor: grab; stroke: var(--void); stroke-width: 2; }
+.w-hole { fill: var(--void); stroke: var(--gold); stroke-width: 2; }
+.w-band { fill: rgba(212, 176, 106, 0.15); }
+.w-circle { fill: none; stroke: rgba(243, 234, 214, 0.5); stroke-width: 1.5; }
+.w-radius { stroke: var(--paper); stroke-width: 1.5; }
+.w-cos { stroke: var(--aurora); stroke-width: 3; }
+.w-sin { stroke: var(--gold); stroke-width: 3; }
+.w-angle { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.w-label { fill: var(--paper); font: 14px Figtree, system-ui, sans-serif; }
+.w-label.cos { fill: var(--aurora); }
+.w-label.sin { fill: var(--gold); }
+.w-grid { stroke: rgba(243, 234, 214, 0.12); }
+.w-rect { fill: none; stroke: var(--paper); stroke-width: 1.5; }
+.w-tri { fill: rgba(212, 176, 106, 0.35); stroke: var(--gold); stroke-width: 1.5; }
+.w-bar { fill: rgba(78, 168, 160, 0.3); stroke: rgba(78, 168, 160, 0.8); stroke-width: 0.8; }
+.w-bar.neg { fill: rgba(196, 92, 74, 0.3); stroke: rgba(196, 92, 74, 0.8); }
+.w-average { stroke: var(--gold); stroke-width: 2; stroke-dasharray: 6 4; }
+.w-part { fill-opacity: 0.08; stroke: rgba(243, 234, 214, 0.6); stroke-width: 1.2; }
+.w-part.on { fill-opacity: 0.85; }
+.w-delta { stroke: var(--paper); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.7; }
