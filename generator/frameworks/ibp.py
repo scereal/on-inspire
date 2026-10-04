@@ -280,7 +280,8 @@ def _solve(level, items):
         swap = c * e * numer.subs({S: C, C: S}, simultaneous=True) / (a**2 + b**2)
         steps = [
             _choice(
-                f"Take $u = {sp.latex(T(b * x))}$ and $dv = {sp.latex(e)}\\,dx$, then do parts twice. What's left over?",
+                (f"Pull the {p['c']} out front. " if p["c"] != 1 else "")
+                + f"Take $u = {sp.latex(T(b * x))}$ and $dv = {sp.latex(e)}\\,dx$, then do parts twice. What's left over?",
                 [Option(f"${sp.latex(k)}$ times the original integral", correct=True, value=float(k)),
                  Option("Nothing: the integral disappears", misconception="loop-vanishes",
                         feedback="Differentiating sin or cos never reaches zero; it cycles back.", value="vanishes"),

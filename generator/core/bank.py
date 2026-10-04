@@ -106,6 +106,20 @@ def write(fw, problems, report, bank_dir=BANK_DIR):
     combined = json.loads(report_path.read_text()) if report_path.exists() else {}
     combined[fw.id] = report
     report_path.write_text(json.dumps(combined, sort_keys=True, indent=1) + "\n", encoding="utf-8")
+    write_index(bank_dir)
+
+
+def write_index(bank_dir=BANK_DIR):
+    """index.json: which frameworks and levels exist, for the practice page's picker."""
+    index = {}
+    for path in sorted(bank_dir.glob("*-*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "problems" not in data:
+            continue
+        entry = index.setdefault(data["framework"], {"title": data["title"], "outcome": data["outcome"], "levels": {}})
+        entry["levels"][str(data["level"])] = {"name": data["level_name"], "count": len(data["problems"])}
+    (bank_dir / "index.json").write_text(json.dumps(index, sort_keys=True, indent=1) + "\n", encoding="utf-8")
+    return index
 
 
 def rejected_ids(bank_dir=BANK_DIR):

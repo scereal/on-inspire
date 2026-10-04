@@ -1,0 +1,86 @@
+{
+ "bounce": {
+  "levels": {
+   "1": {
+    "count": 80,
+    "name": "Shrinking bounces"
+   },
+   "2": {
+    "count": 80,
+    "name": "Total distance"
+   },
+   "3": {
+    "count": 70,
+    "name": "Coefficient of restitution"
+   },
+   "4": {
+    "count": 80,
+    "name": "When does it drop below?"
+   }
+  },
+  "outcome": "Each bounce keeps the same fraction of the height, a geometric sequence, and infinitely many bounces cover a finite distance.",
+  "title": "Bouncing ball"
+ },
+ "ibp": {
+  "levels": {
+   "1": {
+    "count": 70,
+    "name": "One round"
+   },
+   "2": {
+    "count": 100,
+    "name": "Repeated parts"
+   },
+   "3": {
+    "count": 100,
+    "name": "The loop"
+   },
+   "4": {
+    "count": 40,
+    "name": "Logarithms"
+   }
+  },
+  "outcome": "Choose u so the integral gets simpler, know when repeated parts ends, and handle the loop.",
+  "title": "Integration by parts"
+ },
+ "mixing": {
+  "levels": {
+   "1": {
+    "count": 50,
+    "name": "Ratios and parts"
+   },
+   "2": {
+    "count": 140,
+    "name": "Diluting a dilution"
+   },
+   "3": {
+    "count": 120,
+    "name": "Mixing two drinks"
+   }
+  },
+  "outcome": "Strength is a fraction of the whole: a ratio isn't a fraction, diluting multiplies strength, and mixing averages it.",
+  "title": "Mixing drinks"
+ },
+ "projectile": {
+  "levels": {
+   "1": {
+    "count": 90,
+    "name": "Off a ledge"
+   },
+   "2": {
+    "count": 80,
+    "name": "Up and over"
+   },
+   "3": {
+    "count": 70,
+    "name": "Two angles"
+   },
+   "4": {
+    "count": 80,
+    "name": "Clear the wall"
+   }
+  },
+  "outcome": "Horizontal and vertical motion are independent: the vertical motion sets the flight time, and distance = v\u2093 \u00d7 time.",
+  "title": "Projectile aim"
+ }
+}

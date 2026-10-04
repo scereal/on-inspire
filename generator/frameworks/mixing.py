@@ -25,6 +25,11 @@ def show(f):
     return "1 (pure)" if f == 1 else str(f)
 
 
+def strength_of(f, conc):
+    """'pure strong tea' or '1/3 strong tea', for sentences."""
+    return f"pure {conc}" if Fraction(f) == 1 else f"{Fraction(f)} {conc}"
+
+
 def move(state, action, i, caps):
     (va, ca), (vb, cb) = state
     cups = [[va, ca], [vb, cb]]
@@ -187,8 +192,8 @@ class Mixing(Framework):
             tools = ["build", "dilute"]
         else:
             m1, m2, s1, s2 = p["m1"], p["m2"], frac(p["s1"]), frac(p["s2"])
-            story = (f"{intro} You pour {m1} mark{'s' if m1 > 1 else ''} of a drink that's {show(s1)} {conc} "
-                     f"together with {m2} mark{'s' if m2 > 1 else ''} of one that's {show(s2)} {conc}.")
+            story = (f"{intro} You pour {m1} mark{'s' if m1 > 1 else ''} of a drink that's {strength_of(s1, conc)} "
+                     f"together with {m2} mark{'s' if m2 > 1 else ''} of one that's {strength_of(s2, conc)}.")
             build, moves, path = self._build_step(target, ma, mb, conc)
             avg, add, mul = (s1 + s2) / 2, s1 + s2, s1 * s2
             steps = [Step(f"How strong is the mixture?", "choice", show(target), options=[
