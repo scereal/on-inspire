@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Integration by Parts</title>
+  <meta name="description" content="Integration by parts, one step at a time: pick u, find the error, fill the blank, and check by differentiating.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../math.css">
+  <style>
+    .integral {
+      font: italic 500 clamp(1.8rem, 6vw, 2.6rem)/1.2 var(--serif);
+      text-align: center; padding: 1.6rem 0.6rem;
+    }
+    .formula { text-align: center; color: var(--muted); font-size: 0.95rem; padding-bottom: 0.9rem; }
+    .formula .math { color: var(--paper); }
+    .work { display: grid; gap: 0.45rem; margin-top: 1rem; counter-reset: line; }
+    .work button {
+      display: grid; grid-template-columns: 2rem 1fr; align-items: baseline; text-align: left;
+      border-radius: 10px; padding: 0.75rem 1rem;
+      font: italic 500 1.3rem/1.35 var(--serif);
+    }
+    .work button::before { counter-increment: line; content: counter(line); font: 400 0.85rem/1 var(--sans); color: var(--muted); font-style: normal; }
+    .work button.right { border-color: var(--aurora); background: rgba(78, 168, 160, 0.16); }
+    .work button.fine { border-color: rgba(243, 234, 214, 0.4); }
+    .choices button { font: italic 500 1.25rem/1.35 var(--serif); }
+    sup { font-size: 0.68em; line-height: 0; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="crumbs"><a href="../../">on inspire</a> / <a href="../">Cool math problems</a></nav>
+    <h1>Integration by parts, one step at a time</h1>
+    <p class="lede">Seven short problems. Each one tests a single step, so you're practicing the idea rather than grinding through algebra.</p>
+
+    <div class="stage">
+      <div class="integral" id="integral" aria-live="polite"></div>
+      <p class="formula">The rule: <span class="math">∫ u dv = uv − ∫ v du</span></p>
+    </div>
+
+    <div class="steps" id="steps" role="list" aria-label="Problems"></div>
+    <section class="task" id="task" aria-live="polite"></section>
+
+    <section class="notes">
+      <h2>Design notes</h2>
+      <p><strong>Learning goal:</strong> use integration by parts reliably by practicing each step on its own: choosing u, finding v, assembling uv − ∫ v du, and checking by differentiating.</p>
+      <ul>
+        <li>Each item isolates one step, so a mistake points to exactly one gap.</li>
+        <li>The planted errors are the common ones: the sign of ∫ sin x, differentiating instead of integrating for v, dropping the chain-rule factor, and flipping the minus in the rule.</li>
+        <li>The last item teaches the habit that catches all of them: differentiate your answer.</li>
+      </ul>
+      <p>Built with Claude Code. Every correct answer, planted error and blank is checked symbolically with SymPy in automated tests.</p>
+    </section>
+  </main>
+
+  <script src="items.js"></script>
+  <script>
+    const ITEMS = window.IBP_ITEMS;
+    const task = document.getElementById("task");
+    const stepsNav = document.getElementById("steps");
+    const integral = document.getElementById("integral");
+    const done = new Set();
+    let current = 0;
+
+    const h = (tag, props = {}, ...kids) => {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...kids);
+      return node;
+    };
+    const say = (box, kind, html) => { box.className = `feedback ${kind}`; box.innerHTML = html; };
+
+    const build = (item) => {
+      const fb = h("div", { className: "feedback" });
+      if (item.type === "error") {
+        const work = h("div", { className: "work" });
+        item.lines.forEach((line, i) => {
+          const b = h("button", { type: "button", innerHTML: line });
+          b.setAttribute("aria-label", `Line ${i + 1}: ${b.textContent}`);
+          b.addEventListener("click", () => {
+            if (i === item.wrong) {
+              b.classList.add("right");
+              say(fb, "good", item.feedback);
+              work.querySelectorAll("button").forEach((x) => (x.disabled = x !== b));
+              finish();
+            } else {
+              b.classList.add("fine");
+              say(fb, "bad", i > item.wrong
+                ? `Line ${i + 1} follows correctly from the line before it. The mistake is earlier.`
+                : `Line ${i + 1} is correct. Keep checking.`);
+            }
+          });
+          work.append(b);
+        });
+        return [h("p", { className: "prompt", textContent: "One line of this working is wrong. Click it." }), work, fb];
+      }
+      const wrap = h("div", { className: "choices" });
+      for (const opt of item.options) {
+        const b = h("button", { type: "button", innerHTML: opt.label });
+        b.addEventListener("click", () => {
+          b.classList.add(opt.right ? "right" : "wrong");
+          say(fb, opt.right ? "good" : "bad", opt.feedback);
+          if (opt.right) { wrap.querySelectorAll("button").forEach((x) => (x.disabled = x !== b)); finish(); }
+        });
+        wrap.append(b);
+      }
+      return [h("p", { className: "prompt", innerHTML: item.prompt }), wrap, fb];
+    };
+
+    const finish = () => {
+      done.add(current);
+      renderRail();
+      if (current < ITEMS.length - 1) {
+        const next = h("button", { type: "button", textContent: "Next problem" });
+        next.addEventListener("click", () => go(current + 1));
+        task.append(h("div", { className: "row" }, next));
+      } else {
+        task.append(h("p", { className: "feedback good", innerHTML: "<strong>All seven done.</strong> Choose u so it gets simpler, integrate carefully for v, keep the minus sign, and differentiate to check." }));
+      }
+    };
+
+    const renderRail = () => {
+      stepsNav.replaceChildren(...ITEMS.map((it, i) => {
+        const b = h("button", { type: "button", textContent: i + 1, title: it.title });
+        b.setAttribute("role", "listitem");
+        b.setAttribute("aria-label", `Problem ${i + 1}: ${it.title}${done.has(i) ? " (done)" : ""}`);
+        if (i === current) b.setAttribute("aria-current", "step");
+        if (done.has(i)) b.classList.add("done");
+        b.addEventListener("click", () => go(i));
+        return b;
+      }));
+    };
+
+    const go = (i) => {
+      current = i;
+      renderRail();
+      integral.innerHTML = ITEMS[i].integral;
+      task.replaceChildren(h("h2", { textContent: `${i + 1}. ${ITEMS[i].title}` }), ...build(ITEMS[i]));
+    };
+
+    go(0);
+  </script>
+</body>
+</html>

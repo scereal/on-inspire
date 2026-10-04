@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two Cups of Tea</title>
+  <meta name="description" content="Mix tea and water with two marked cups to hit exact strengths, and discover ratios, parts and serial dilution.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../math.css">
+  <style>
+    .bench { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .cup { display: grid; justify-items: center; gap: 0.5rem; padding: 0.4rem 0.2rem 0.8rem; }
+    .cup svg { max-width: 11rem; }
+    .cup .name { font: 500 1.35rem/1 var(--serif); }
+    .cup .reading { color: var(--muted); font-size: 0.92rem; font-variant-numeric: tabular-nums; text-align: center; min-height: 2.9em; }
+    .cup .reading b { color: var(--paper); font-weight: 500; }
+    .cup .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%; max-width: 15rem; }
+    .cup .acts button { padding: 0.6rem 0.5rem; font-size: 0.86rem; }
+    .glass { fill: rgba(243, 234, 214, 0.04); stroke: rgba(243, 234, 214, 0.55); stroke-width: 1.5; }
+    .mark { stroke: rgba(243, 234, 214, 0.35); stroke-width: 1; }
+    .mark-label { fill: var(--muted); font: 11px Figtree, system-ui, sans-serif; }
+    .goal { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+    .goal .target { font: 500 1.5rem/1 var(--serif); color: var(--gold); }
+    .moves { color: var(--muted); font-size: 0.9rem; }
+    @media (max-width: 420px) {
+      .cup .acts { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="crumbs"><a href="../../">on inspire</a> / <a href="../">Cool math problems</a></nav>
+    <h1>Two cups of tea</h1>
+    <p class="lede">You have strong tea, water, and two cups that only have four marks. How exact can you get?</p>
+
+    <div class="stage">
+      <div class="bench" id="bench"></div>
+      <div class="row" style="justify-content:center; margin: 0.2rem 0 0.4rem;">
+        <button type="button" id="undo">Undo</button>
+        <button type="button" id="reset">Start over</button>
+      </div>
+    </div>
+
+    <div class="steps" id="steps" role="list" aria-label="Steps"></div>
+    <section class="task" id="task" aria-live="polite"></section>
+
+    <section class="notes">
+      <h2>Design notes</h2>
+      <p><strong>Learning goal:</strong> reason about strength as a fraction of the whole: parts versus ratios, mixing a mix (serial dilution), and averaging two strengths.</p>
+      <ul>
+        <li>The cups hold only 4 marks, so 1/8 looks impossible. That constraint is the puzzle: the only way past it is to dilute something that's already diluted.</li>
+        <li>Misconceptions targeted: reading "1 to 3" as 1/3, believing a cup's size limits its precision, and adding or multiplying strengths instead of averaging them.</li>
+        <li>Every move is one mark, so the learner works with whole parts and never has to measure.</li>
+      </ul>
+      <p>Built with Claude Code. Every target is checked by an automated solver to make sure it can be reached.</p>
+    </section>
+  </main>
+
+  <script src="logic.js"></script>
+  <script>
+    const { CAP, STEP, start, strength, move, hits, fraction } = TwoCups;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const bench = document.getElementById("bench");
+    const task = document.getElementById("task");
+    const stepsNav = document.getElementById("steps");
+    const ns = "http://www.w3.org/2000/svg";
+    const NAMES = ["A", "B"];
+
+    const h = (tag, props = {}, ...kids) => {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...kids);
+      return node;
+    };
+    const s = (name, attrs) => {
+      const node = document.createElementNS(ns, name);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      return node;
+    };
+    const say = (box, kind, html) => { box.className = `feedback ${kind}`; box.innerHTML = html; };
+
+    // Water is pale blue-green, full-strength tea is deep amber.
+    const mix = (k) => {
+      const a = [168, 208, 214], b = [176, 98, 34];
+      return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(",")})`;
+    };
+
+    // Glass geometry (slightly tapered), in a 120 x 170 viewBox
+    const TOP = 14, BOT = 158, LT = 16, RT = 104, LB = 26, RB = 94;
+    const levelY = (vol) => BOT - (vol / CAP) * (BOT - TOP);
+    const xAt = (y, left) => {
+      const f = (BOT - y) / (BOT - TOP);
+      return left ? LB + (LT - LB) * f : RB + (RT - RB) * f;
+    };
+
+    let cups = start();
+    let history = [];
+    let shown = cups.map((c) => c.vol);
+    const views = [];
+
+    const buildCup = (i) => {
+      const svg = s("svg", { viewBox: "0 0 120 170", role: "img" });
+      const liquid = s("path", {});
+      svg.append(liquid, s("path", { class: "glass", d: `M ${LT} ${TOP} L ${LB} ${BOT} L ${RB} ${BOT} L ${RT} ${TOP}` }));
+      for (let m = 1; m <= 4; m++) {
+        const y = levelY(m * STEP);
+        svg.append(s("line", { class: "mark", x1: xAt(y, false) - 12, x2: xAt(y, false), y1: y, y2: y }));
+        const t = s("text", { class: "mark-label", x: xAt(y, false) + 4, y: y + 4 });
+        t.textContent = m;
+        svg.append(t);
+      }
+      const reading = h("div", { className: "reading" });
+      const btn = (label, action) => {
+        const b = h("button", { type: "button", textContent: label });
+        b.addEventListener("click", () => act(action, i));
+        return b;
+      };
+      const acts = h("div", { className: "acts" },
+        btn("Add tea", "tea"), btn("Add water", "water"),
+        btn(`Pour into ${NAMES[1 - i]}`, "pour"), btn("Empty", "empty"));
+      bench.append(h("div", { className: "cup" }, h("div", { className: "name", textContent: `Cup ${NAMES[i]}` }), svg, reading, acts));
+      views[i] = { svg, liquid, reading, acts };
+    };
+
+    const paintCup = (i, vol) => {
+      const v = views[i];
+      const cup = cups[i];
+      if (vol <= 0.5) v.liquid.setAttribute("d", "");
+      else {
+        const y = levelY(vol);
+        v.liquid.setAttribute("d", `M ${xAt(y, true)} ${y} L ${LB} ${BOT} L ${RB} ${BOT} L ${xAt(y, false)} ${y} Z`);
+      }
+      v.liquid.setAttribute("fill", mix(strength(cup)));
+      const label = cup.vol ? `<b>${fraction(strength(cup))}</b> tea<br>${cup.vol / STEP} of 4 marks` : "Empty";
+      v.reading.innerHTML = label;
+      v.svg.setAttribute("aria-label", `Cup ${NAMES[i]}: ${cup.vol ? `${cup.vol / STEP} marks, ${fraction(strength(cup))} tea` : "empty"}`);
+      const [tea, water, pour, empty] = v.acts.children;
+      tea.disabled = water.disabled = !move(cups, "tea", i);
+      pour.disabled = !move(cups, "pour", i);
+      empty.disabled = !cup.vol;
+    };
+
+    // Ease each cup's level toward its new volume
+    const render = () => {
+      const from = [...shown];
+      const t0 = performance.now();
+      const frame = (now) => {
+        const p = reduce ? 1 : Math.min(1, (now - t0) / 260);
+        const e = 1 - (1 - p) ** 3;
+        cups.forEach((c, i) => { shown[i] = from[i] + (c.vol - from[i]) * e; paintCup(i, shown[i]); });
+        if (p < 1) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+      document.getElementById("undo").disabled = !history.length;
+      if (level) level.onChange?.();
+    };
+
+    const act = (action, i) => {
+      const next = move(cups, action, i);
+      if (!next || solved) return;
+      history.push(cups);
+      cups = next;
+      moves++;
+      render();
+    };
+
+    document.getElementById("undo").addEventListener("click", () => {
+      if (!history.length || solved) return;
+      cups = history.pop();
+      moves = Math.max(0, moves - 1);
+      render();
+    });
+    document.getElementById("reset").addEventListener("click", () => { if (!solved) resetBench(); });
+
+    const resetBench = () => { cups = start(); history = []; moves = 0; render(); };
+
+    // Levels
+    const done = new Set();
+    let current = 0, level = null, moves = 0, solved = false;
+
+    const choices = (options, box, after) => {
+      const wrap = h("div", { className: "choices" });
+      for (const opt of options) {
+        const b = h("button", { type: "button", innerHTML: opt.label });
+        b.addEventListener("click", () => {
+          b.classList.add(opt.right ? "right" : "wrong");
+          say(box, opt.right ? "good" : "bad", opt.feedback);
+          if (opt.right || opt.proceed) { wrap.querySelectorAll("button").forEach((x) => (x.disabled = true)); after(); }
+        });
+        wrap.append(b);
+      }
+      return wrap;
+    };
+
+    const LEVELS = [
+      {
+        title: "Half and half",
+        target: 1 / 2,
+        prompt: "Make a drink that is exactly half tea and half water, in either cup.",
+        win: "Equal parts tea and water. Any amount works: 1 mark of each, or 2 of each.",
+      },
+      {
+        title: "One to three",
+        target: 1 / 4,
+        question: {
+          text: "A recipe says 1 part tea to 3 parts water. What fraction of the drink is tea?",
+          options: [
+            { label: "1/3", feedback: "1 to 3 compares tea with water, not tea with the whole drink. Count every part in the cup: 1 + 3." },
+            { label: "1/4", right: true, feedback: "<strong>Right.</strong> 1 part tea out of 4 parts in total. Now pour it." },
+            { label: "3/4", feedback: "That's the water's share. Which part is the tea?" },
+          ],
+        },
+        prompt: "Make a 1 to 3 drink: a quarter tea.",
+        misstep: { at: 1 / 3, text: "That cup is 1/3 tea: 1 part tea to 2 parts water. A 1 to 3 drink needs one more part of water for each part of tea." },
+        win: "1 mark of tea and 3 marks of water fill the cup exactly.",
+      },
+      {
+        title: "Smaller than a mark",
+        target: 1 / 8,
+        question: {
+          text: "Each cup holds only 4 marks. Can you make a drink that is 1/8 tea?",
+          options: [
+            { label: "No. 1 part in 8 needs a cup with 8 marks", proceed: true, feedback: "That's true if you start from pure tea. But you don't have to. Try it." },
+            { label: "Yes, somehow", right: true, feedback: "<strong>Good instinct.</strong> Now find the somehow." },
+          ],
+        },
+        prompt: "Make a drink that is 1/8 tea.",
+        hintAfter: 8,
+        hint: "Hint: make a 1/4 drink first. What happens if you pour some into the other cup and add the same amount of water?",
+        win: "You diluted a drink that was already diluted. Half of 1/4 is 1/8. Chemists call this serial dilution, and repeating it takes you to 1/16, 1/32 and smaller.",
+      },
+      {
+        title: "Mix two mixes",
+        target: 3 / 8,
+        question: {
+          text: "You pour equal amounts of a 1/2 drink and a 1/4 drink together. How strong is the result?",
+          options: [
+            { label: "3/4", feedback: "Adding strengths would mean more tea than the two drinks contain together. The water mixes in too." },
+            { label: "1/8", feedback: "Multiplying is what happens when you dilute. Here you're combining two drinks. Where should the result land compared to 1/2 and 1/4?" },
+            { label: "3/8", right: true, feedback: "<strong>Right.</strong> Equal amounts average out: halfway between 2/8 and 4/8. Now pour it." },
+          ],
+        },
+        prompt: "Make a drink that is 3/8 tea.",
+        hintAfter: 10,
+        hint: "Hint: get a 1/2 drink in one cup and a 1/4 drink in the other. Then pour one mark of one into one mark of the other.",
+        win: "Equal amounts of 1/2 and 1/4 average to 3/8. Mixing equal amounts averages the strengths. Unequal amounts give a weighted average.",
+      },
+    ];
+
+    const go = (i) => {
+      current = i;
+      level = LEVELS[i];
+      solved = false;
+      resetBench();
+      renderRail();
+      const fb = h("div", { className: "feedback" });
+      const live = h("div", { className: "feedback" });
+      const goal = h("div", { className: "goal", hidden: !!level.question },
+        h("span", { className: "target", textContent: `Goal: ${fraction(level.target)} tea` }),
+        h("span", { className: "moves", id: "moves" }));
+      const prompt = h("p", { className: "prompt", textContent: level.prompt, hidden: !!level.question });
+      const kids = [h("h2", { textContent: `${i + 1}. ${level.title}` })];
+      let warned = false, hinted = false;
+      bench.inert = !!level.question;
+      if (level.question) {
+        kids.push(h("p", { className: "prompt", textContent: level.question.text }),
+          choices(level.question.options, fb, () => { goal.hidden = prompt.hidden = false; bench.inert = false; }), fb);
+      }
+      kids.push(prompt, goal, live);
+      task.replaceChildren(...kids);
+      level.onChange = () => {
+        const m = document.getElementById("moves");
+        if (m) m.textContent = moves ? `${moves} move${moves === 1 ? "" : "s"}` : "";
+        if (hits(cups, level.target)) {
+          solved = true;
+          say(live, "good", `<strong>Done in ${moves} moves.</strong> ${level.win}`);
+          finish();
+        } else if (level.misstep && !warned && hits(cups, level.misstep.at)) {
+          warned = true;
+          say(live, "bad", level.misstep.text);
+        } else if (level.hintAfter && !hinted && moves >= level.hintAfter) {
+          hinted = true;
+          say(live, "", level.hint);
+        }
+      };
+      level.onChange();
+    };
+
+    const finish = () => {
+      done.add(current);
+      renderRail();
+      if (current < LEVELS.length - 1) {
+        const next = h("button", { type: "button", textContent: "Next step" });
+        next.addEventListener("click", () => go(current + 1));
+        task.append(h("div", { className: "row" }, next));
+      } else {
+        task.append(h("p", { className: "feedback good", innerHTML: "<strong>That's all four.</strong> Strength is always a fraction of the whole cup. Diluting multiplies it, and mixing averages it." }));
+      }
+    };
+
+    const renderRail = () => {
+      stepsNav.replaceChildren(...LEVELS.map((l, i) => {
+        const b = h("button", { type: "button", textContent: i + 1, title: l.title });
+        b.setAttribute("role", "listitem");
+        b.setAttribute("aria-label", `Step ${i + 1}: ${l.title}${done.has(i) ? " (done)" : ""}`);
+        if (i === current) b.setAttribute("aria-current", "step");
+        if (done.has(i)) b.classList.add("done");
+        b.disabled = i > 0 && !done.has(i - 1) && i !== current;
+        b.addEventListener("click", () => go(i));
+        return b;
+      }));
+    };
+
+    buildCup(0);
+    buildCup(1);
+    go(0);
+  </script>
+</body>
+</html>

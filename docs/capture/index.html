@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Capture</title>
+  <meta name="description" content="Save a video to the On Inspire knowledge base.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#061018">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #061018;
+      --paper: #f3ead6;
+      --muted: #9aa7a3;
+      --gold: #d4b06a;
+      --aurora: #4ea8a0;
+      --ember: #c45c4a;
+      --line: rgba(243, 234, 214, 0.16);
+      --field: rgba(243, 234, 214, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: radial-gradient(90% 60% at 50% 0%, rgba(78, 168, 160, 0.12), transparent 70%), var(--void);
+      color: var(--paper);
+      font: 400 1rem/1.5 Figtree, system-ui, sans-serif;
+      min-height: 100vh; min-height: 100dvh;
+    }
+    main { max-width: 34rem; margin: 0 auto; padding: max(1.4rem, env(safe-area-inset-top)) 1rem 3rem; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.4rem; }
+    h1 { font: italic 500 2.3rem/1 "Cormorant Garamond", Georgia, serif; }
+    h2 { font: 500 1.3rem/1.2 "Cormorant Garamond", Georgia, serif; margin: 2.2rem 0 0.6rem; }
+    a { color: var(--gold); }
+    p.help { color: var(--muted); font-size: 0.92rem; }
+    label { display: block; color: var(--muted); font-size: 0.9rem; margin: 1rem 0 0.35rem; }
+    input[type="url"], input[type="text"], input[type="password"], textarea {
+      width: 100%; font: inherit; color: var(--paper);
+      background: var(--field); border: 1px solid var(--line); border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+    }
+    input[type="url"] { font-size: 1.05rem; padding: 1rem 0.9rem; }
+    textarea { min-height: 4.5rem; resize: vertical; }
+    input:focus, textarea:focus { outline: none; border-color: var(--gold); }
+    .with-button { display: flex; gap: 0.5rem; }
+    .with-button input { flex: 1; min-width: 0; }
+    button {
+      appearance: none; font: 500 0.95rem/1 Figtree, system-ui, sans-serif; color: var(--paper);
+      background: transparent; border: 1px solid var(--line); border-radius: 12px;
+      padding: 0.8rem 1rem; cursor: pointer;
+    }
+    button:hover { border-color: var(--gold); }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    button:disabled { opacity: 0.5; cursor: default; }
+    button.save {
+      width: 100%; margin-top: 1.4rem; padding: 1.05rem;
+      background: var(--gold); border-color: var(--gold); color: var(--void); font-size: 1.05rem;
+    }
+    button.save:hover { background: #e2c07e; }
+    button.quiet { border: 0; color: var(--muted); padding: 0.4rem; }
+    .toggle { display: flex; align-items: center; gap: 0.6rem; margin-top: 1rem; color: var(--paper); font-size: 0.95rem; }
+    .toggle input { width: 1.2rem; height: 1.2rem; accent-color: var(--gold); }
+    .status { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 12px; background: var(--field); border-left: 3px solid var(--muted); }
+    .status:empty { display: none; }
+    .status.good { border-left-color: var(--aurora); }
+    .status.bad { border-left-color: var(--ember); }
+    ul.runs { list-style: none; padding: 0; border-top: 1px solid var(--line); }
+    ul.runs li { display: grid; grid-template-columns: 0.7rem 1fr auto; gap: 0.7rem; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+    .dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--muted); }
+    .dot.running { background: var(--gold); animation: pulse 1.2s ease-in-out infinite; }
+    .dot.done { background: var(--aurora); }
+    .dot.failed { background: var(--ember); }
+    .runs .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.92rem; }
+    .runs .when { color: var(--muted); font-size: 0.82rem; }
+    .runs a { color: var(--muted); font-size: 0.82rem; }
+    @keyframes pulse { 50% { opacity: 0.35; } }
+    @media (prefers-reduced-motion: reduce) { .dot.running { animation: none; } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Capture</h1>
+      <button class="quiet" id="settings-toggle" type="button" hidden>Settings</button>
+    </header>
+
+    <!-- First run on this device: connect to the private knowledge repo -->
+    <section id="setup" hidden>
+      <p class="help">Connect this device to your knowledge base once. The token stays in this browser on this device. Nothing is sent anywhere except GitHub.</p>
+      <label for="token">GitHub token</label>
+      <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      <p class="help" style="margin-top:0.5rem">Create a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a> with access to <b>only</b> on-inspire-knowledge and one permission: <b>Actions: Read and write</b>.</p>
+      <button class="save" id="connect" type="button">Connect</button>
+      <div class="status" id="setup-status" role="status"></div>
+    </section>
+
+    <!-- Everyday use -->
+    <form id="capture" hidden>
+      <label for="url">Video link</label>
+      <div class="with-button">
+        <input id="url" type="url" inputmode="url" required placeholder="Paste or share a link" autocomplete="off">
+        <button type="button" id="paste">Paste</button>
+      </div>
+      <label for="note">Why I saved it <span style="opacity:.7">(optional)</span></label>
+      <textarea id="note" placeholder="e.g. good example for the Brilliant portfolio"></textarea>
+      <label for="tags">Tags <span style="opacity:.7">(optional, comma-separated)</span></label>
+      <input id="tags" type="text" autocomplete="off" placeholder="learning-design, career">
+      <label class="toggle"><input id="process" type="checkbox" checked> Turn into notes with Claude</label>
+      <button class="save" id="save" type="submit">Save to knowledge base</button>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <h2>Recent captures</h2>
+      <ul class="runs" id="runs"><li><span></span><span class="when">Loading…</span></li></ul>
+    </form>
+
+    <section id="settings" hidden>
+      <h2>Settings</h2>
+      <label class="toggle"><input id="instant" type="checkbox"> Save as soon as I share a link</label>
+      <p class="help" style="margin-top:0.4rem">Sharing a link to this app saves it right away with Claude processing on, skipping the note and tags.</p>
+      <button type="button" id="disconnect" style="margin-top:1.2rem">Disconnect this device</button>
+    </section>
+  </main>
+
+  <script>
+    const REPO = "scereal/on-inspire-knowledge";
+    const WORKFLOW = "capture.yml";
+    const API = `https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}`;
+    const $ = (id) => document.getElementById(id);
+
+    // Per-device storage. Private browsing can make it unavailable.
+    const store = {
+      get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+      set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+      del: (k) => { try { localStorage.removeItem(k); } catch {} },
+    };
+
+    const gh = (path, init = {}) => fetch(path.startsWith("http") ? path : `${API}${path}`, {
+      ...init,
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${store.get("token")}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+      },
+    });
+
+    const say = (el, kind, text) => { el.className = `status ${kind}`; el.textContent = text; };
+
+    // Pull the first link out of shared text and drop share-tracking parameters
+    const cleanUrl = (text) => {
+      const match = (text || "").match(/https?:\/\/\S+/);
+      if (!match) return "";
+      try {
+        const u = new URL(match[0].replace(/[).,]+$/, ""));
+        ["igsh", "igshid", "si", "feature", "utm_source", "utm_medium", "utm_campaign", "utm_content"].forEach((p) => u.searchParams.delete(p));
+        return u.toString();
+      } catch { return match[0]; }
+    };
+
+    const show = (view) => {
+      $("setup").hidden = view !== "setup";
+      $("capture").hidden = view !== "capture";
+      $("settings").hidden = view !== "settings";
+      $("settings-toggle").hidden = view === "setup";
+      $("settings-toggle").textContent = view === "settings" ? "Done" : "Settings";
+    };
+
+    // Setup ---------------------------------------------------------------------
+    $("connect").addEventListener("click", async () => {
+      const token = $("token").value.trim();
+      if (!token) return say($("setup-status"), "bad", "Paste your token first.");
+      store.set("token", token);
+      say($("setup-status"), "", "Checking…");
+      const res = await gh("").catch(() => null);
+      if (res && res.ok) { $("token").value = ""; start(); return; }
+      store.del("token");
+      say($("setup-status"), "bad", !res ? "Couldn't reach GitHub. Check your connection."
+        : res.status === 401 ? "GitHub rejected that token. Check that you copied all of it."
+        : "That token can't see the capture workflow. Give it access to on-inspire-knowledge with Actions: Read and write.");
+    });
+
+    // Capture -------------------------------------------------------------------
+    const capture = async ({ url, note = "", tags = "", process = true }) => {
+      const id = Math.random().toString(36).slice(2, 8);
+      const res = await gh("/dispatches", {
+        method: "POST",
+        body: JSON.stringify({ ref: "main", inputs: { url, note, tags, process: String(process), capture_id: id } }),
+      }).catch(() => null);
+      if (!res || !res.ok) {
+        const detail = res ? (await res.json().catch(() => ({}))).message || res.status : "no connection";
+        throw new Error(`GitHub didn't accept it (${detail}).`);
+      }
+      watch(id);
+    };
+
+    $("capture").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = cleanUrl($("url").value);
+      if (!url) return say($("status"), "bad", "That doesn't look like a link.");
+      $("save").disabled = true;
+      say($("status"), "", "Sending…");
+      try {
+        await capture({ url, note: $("note").value.trim(), tags: $("tags").value.trim(), process: $("process").checked });
+        say($("status"), "good", "Saved. It'll be in your knowledge base in about a minute.");
+        $("url").value = $("note").value = $("tags").value = "";
+      } catch (err) {
+        say($("status"), "bad", err.message);
+      } finally {
+        $("save").disabled = false;
+      }
+    });
+
+    $("paste").addEventListener("click", async () => {
+      try {
+        $("url").value = cleanUrl(await navigator.clipboard.readText()) || $("url").value;
+      } catch {
+        $("url").focus();
+        say($("status"), "", "Paste with your keyboard or long-press the field.");
+      }
+    });
+
+    // Recent captures -------------------------------------------------------------
+    let pollTimer = null, watching = null, watchUntil = 0;
+    const ago = (iso) => {
+      const s = (Date.now() - new Date(iso)) / 1000;
+      return s < 60 ? "just now" : s < 3600 ? `${Math.round(s / 60)} min ago` : s < 86400 ? `${Math.round(s / 3600)} h ago` : `${Math.round(s / 86400)} d ago`;
+    };
+    const describe = (run) => {
+      if (run.status !== "completed") return ["running", run.status === "queued" ? "Waiting to start" : "Transcribing and processing"];
+      return run.conclusion === "success" ? ["done", "Saved"] : ["failed", "Failed: open the run for details"];
+    };
+
+    const refresh = async () => {
+      const res = await gh("/runs?per_page=8&event=workflow_dispatch").catch(() => null);
+      if (!res || !res.ok) return;
+      const { workflow_runs: runs = [] } = await res.json();
+      $("runs").replaceChildren(...(runs.length ? runs.map((run) => {
+        const [kind, label] = describe(run);
+        const url = run.name.split(" ").slice(2).join(" ") || run.display_title;
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="dot ${kind}" title="${label}"></span><div><div class="what"></div><div class="when"></div></div><a target="_blank" rel="noopener">Details</a>`;
+        li.querySelector(".what").textContent = url.replace(/^https?:\/\/(www\.)?/, "");
+        li.querySelector(".when").textContent = `${label}, ${ago(run.created_at)}`;
+        li.querySelector("a").href = run.html_url;
+        return li;
+      }) : [Object.assign(document.createElement("li"), { textContent: "Nothing captured yet." })]));
+      const mine = watching && runs.find((r) => r.name.includes(` ${watching} `));
+      if (mine && mine.status === "completed") {
+        const ok = mine.conclusion === "success";
+        say($("status"), ok ? "good" : "bad", ok ? "Done. Run git pull on your laptop to see it." : "That capture failed. Open Details below to see why.");
+        watching = null;
+      }
+      const busy = runs.some((r) => r.status !== "completed") || (watching && Date.now() < watchUntil);
+      clearTimeout(pollTimer);
+      if (busy) pollTimer = setTimeout(refresh, 4000);
+    };
+    const watch = (id) => { watching = id; watchUntil = Date.now() + 60000; setTimeout(refresh, 2500); };
+
+    // Settings ------------------------------------------------------------------
+    $("settings-toggle").addEventListener("click", () => show($("settings").hidden ? "settings" : "capture"));
+    $("instant").addEventListener("change", (e) => store.set("instant", e.target.checked ? "1" : ""));
+    $("disconnect").addEventListener("click", () => { store.del("token"); show("setup"); });
+
+    // Start: handle a shared link (Android share sheet) or a fresh open ------------
+    const start = async () => {
+      show("capture");
+      $("instant").checked = store.get("instant") === "1";
+      const params = new URLSearchParams(location.search);
+      const shared = cleanUrl([params.get("url"), params.get("text"), params.get("title")].join(" "));
+      if (shared) {
+        history.replaceState(null, "", location.pathname);
+        $("url").value = shared;
+        if (store.get("instant") === "1") $("capture").requestSubmit();
+        else $("note").focus();
+      } else {
+        $("url").focus();
+      }
+      refresh();
+    };
+
+    if (store.get("token")) start(); else show("setup");
+    addEventListener("visibilitychange", () => { if (!document.hidden && store.get("token")) refresh(); });
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  </script>
+</body>
+</html>

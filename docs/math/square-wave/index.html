@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build a Square Wave</title>
+  <meta name="description" content="Build a square wave out of sine waves, one at a time, and discover the Fourier series recipe yourself.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../math.css">
+  <style>
+    .legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); padding: 0.3rem 0.5rem 0.2rem; }
+    .legend span::before { content: ""; display: inline-block; width: 1.2rem; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 0.45rem; background: currentColor; }
+    .legend .target { color: var(--gold); }
+    .legend .yours { color: var(--aurora); }
+    .legend .parts { color: rgba(78, 168, 160, 0.5); }
+    .legend .label { color: var(--muted); }
+    .readout { margin-left: auto; color: var(--paper); font-variant-numeric: tabular-nums; }
+    .readout::before { display: none !important; }
+    .freqs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; align-items: center; }
+    .freqs span { color: var(--muted); font-size: 0.92rem; margin-right: 0.3rem; }
+    .freqs button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+    .target-line { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; }
+    .sum-line { fill: none; stroke: var(--aurora); stroke-width: 2.6; stroke-linejoin: round; }
+    .part-line { fill: none; stroke: rgba(78, 168, 160, 0.38); stroke-width: 1.2; stroke-dasharray: 4 4; }
+    .axis { stroke: rgba(243, 234, 214, 0.22); stroke-width: 1; }
+    .grid { stroke: rgba(243, 234, 214, 0.08); stroke-width: 1; }
+    .tick { fill: var(--muted); font: 12px Figtree, system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="crumbs"><a href="../../">on inspire</a> / <a href="../">Cool math problems</a></nav>
+    <h1>Build a square wave</h1>
+    <p class="lede">Sine waves are smooth. A square wave has sharp corners. Can you build one out of the other?</p>
+
+    <div class="stage">
+      <svg id="plot" viewBox="0 0 640 280" role="img" aria-labelledby="plot-desc">
+        <desc id="plot-desc">A gold square wave and your sum of sine waves drawn over two periods.</desc>
+      </svg>
+      <div class="legend" aria-hidden="true">
+        <span class="target">square wave</span>
+        <span class="yours">your sum</span>
+        <span class="parts" id="parts-key">each sine</span>
+        <span class="readout" id="readout"></span>
+      </div>
+    </div>
+
+    <div class="steps" id="steps" role="list" aria-label="Steps"></div>
+    <section class="task" id="task" aria-live="polite"></section>
+
+    <section class="notes">
+      <h2>Design notes</h2>
+      <p><strong>Learning goal:</strong> find out, by experimenting, that a square wave is the sum (4/π)·sin(nt)/n over odd n, and that its overshoot never goes away.</p>
+      <ul>
+        <li>The learner experiments before seeing any formula. The recipe comes out of their own slider settings.</li>
+        <li>Each wrong answer gets its own feedback. Misconceptions targeted: "amplitude 1 matches a height of 1," "any extra sine helps," "the amplitudes halve each time," and "more terms remove the overshoot."</li>
+        <li>The gap readout is the root-mean-square distance, so the learner can see why 4/π beats 1.</li>
+      </ul>
+      <p>Built with Claude Code. The amplitudes, gap and overshoot values are checked by automated tests.</p>
+    </section>
+  </main>
+
+  <script src="logic.js"></script>
+  <script>
+    const { TAU, square, sum, gap, bestAmp, recipe, peak } = SquareWave;
+    const svg = document.getElementById("plot");
+    const task = document.getElementById("task");
+    const stepsNav = document.getElementById("steps");
+    const readout = document.getElementById("readout");
+    const partsKey = document.getElementById("parts-key");
+    const ns = "http://www.w3.org/2000/svg";
+    const fmt = (x) => x.toFixed(2);
+
+    // Plot geometry: two periods, y from -1.6 to 1.6
+    const W = 640, H = 280, PAD = 30;
+    const X = (t) => PAD + (t / (2 * TAU)) * (W - PAD * 1.4);
+    const Y = (y) => H / 2 - (y / 1.6) * (H / 2 - 18);
+    const el = (name, attrs) => {
+      const node = document.createElementNS(ns, name);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      return node;
+    };
+
+    // Static layer: axis, guides, square wave
+    for (const y of [1, -1]) {
+      svg.append(el("line", { class: "grid", x1: PAD, x2: W - 10, y1: Y(y), y2: Y(y) }));
+      const label = el("text", { class: "tick", x: PAD - 8, y: Y(y) + 4, "text-anchor": "end" });
+      label.textContent = y > 0 ? "1" : "−1";
+      svg.append(label);
+    }
+    svg.append(el("line", { class: "axis", x1: PAD, x2: W - 10, y1: Y(0), y2: Y(0) }));
+    let sq = `M ${X(0)} ${Y(0)}`;
+    for (let k = 0; k < 4; k++) {
+      const v = k % 2 === 0 ? 1 : -1;
+      sq += ` L ${X(k * Math.PI)} ${Y(v)} L ${X((k + 1) * Math.PI)} ${Y(v)}`;
+    }
+    sq += ` L ${X(4 * Math.PI)} ${Y(0)}`;
+    svg.append(el("path", { class: "target-line", d: sq }));
+    const partsLayer = el("g", {});
+    const sumLine = el("path", { class: "sum-line" });
+    svg.append(partsLayer, sumLine);
+
+    const pathFor = (fn) => {
+      const n = 900;
+      let d = "";
+      for (let i = 0; i <= n; i++) {
+        const t = (i / n) * 2 * TAU;
+        d += `${i ? "L" : "M"} ${X(t).toFixed(1)} ${Y(fn(t)).toFixed(1)} `;
+      }
+      return d;
+    };
+
+    const draw = (terms, { showParts = true, showGap = true, showPeak = false } = {}) => {
+      partsLayer.replaceChildren();
+      if (showParts && terms.length > 1) {
+        for (const term of terms) partsLayer.append(el("path", { class: "part-line", d: pathFor((t) => term.a * Math.sin(term.n * t)) }));
+      }
+      partsKey.hidden = !(showParts && terms.length > 1);
+      sumLine.setAttribute("d", pathFor((t) => sum(terms, t)));
+      readout.textContent = showPeak ? `Peak: ${fmt(peak(terms))}` : showGap ? `Gap: ${fmt(gap(terms))}` : "";
+    };
+
+    // Small DOM helpers for building each step
+    const h = (tag, props = {}, ...kids) => {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...kids);
+      return node;
+    };
+    const say = (box, kind, html) => { box.className = `feedback ${kind}`; box.innerHTML = html; };
+    const slider = (label, min, max, step, value, onInput) => {
+      const id = `s-${Math.random().toString(36).slice(2, 7)}`;
+      const input = h("input", { type: "range", id, min, max, step, value });
+      const out = h("output", { htmlFor: id, value: fmt(+value) });
+      input.addEventListener("input", () => { out.value = fmt(+input.value); onInput(+input.value); });
+      return { row: h("div", { className: "control" }, h("label", { htmlFor: id, textContent: label }), input, out), input };
+    };
+    const choices = (options, box, onRight) => {
+      const wrap = h("div", { className: "choices" });
+      for (const opt of options) {
+        const b = h("button", { type: "button", innerHTML: opt.label });
+        b.addEventListener("click", () => {
+          b.classList.add(opt.right ? "right" : "wrong");
+          say(box, opt.right ? "good" : "bad", opt.feedback);
+          if (opt.right) { wrap.querySelectorAll("button").forEach((x) => (x.disabled = x !== b)); onRight(); }
+        });
+        wrap.append(b);
+      }
+      return wrap;
+    };
+
+    const A1 = bestAmp(1), A3 = bestAmp(3);
+    const howFar = (a, best) => (Math.abs(a - best) < 0.15 ? "a little" : "quite a bit");
+    const done = new Set();
+    let current = 0;
+
+    const STEPS = [
+      {
+        title: "Fit one sine",
+        build() {
+          let a = 0.5;
+          const fb = h("div", { className: "feedback" });
+          const s = slider("Height of sin t", 0, 1.6, 0.01, a, (v) => { a = v; draw([{ n: 1, a }]); });
+          const check = h("button", { type: "button", className: "primary", textContent: "Check my fit" });
+          check.addEventListener("click", () => {
+            if (Math.abs(a - A1) <= 0.05) {
+              say(fb, "good", `<strong>That's the best fit.</strong> A height of about ${fmt(A1)} (exactly 4/π) beats 1. A sine is below the flat top for most of each half, so it has to overshoot at the peak to sit as close as possible on average.`);
+              finish();
+            } else if (Math.abs(a - 1) <= 0.05) {
+              say(fb, "bad", `<strong>Slide it a little to the right.</strong> A height of 1 matches the square wave's top, which feels right. But the sine only touches that top at one point. Everywhere else in the half it sags below, especially near the corners. Raising it a bit closes those gaps, and it costs only a small bulge over the middle.`);
+            } else if (a < A1) {
+              say(fb, "bad", `<strong>Slide it ${howFar(a, A1)} to the right.</strong> The sine sits under the flat top almost everywhere, so every point is a gap you could close. Raise it and watch the gap number fall. Stop when it starts rising again.`);
+            } else {
+              say(fb, "bad", `<strong>Slide it ${howFar(a, A1)} to the left.</strong> The hump now rises well above the flat top in the middle, and that overshoot costs more than you gain near the corners. Lower it until the gap number stops shrinking.`);
+            }
+          });
+          draw([{ n: 1, a }]);
+          return [h("p", { className: "prompt", innerHTML: "Drag the slider until the sine wave hugs the square wave as closely as it can. The <em>gap</em> in the corner measures how far apart they are." }), s.row, h("div", { className: "row" }, check), fb];
+        },
+      },
+      {
+        title: "Add a second sine",
+        build() {
+          let n = null, a = 0;
+          const fb = h("div", { className: "feedback" });
+          const terms = () => (n ? [{ n: 1, a: A1 }, { n, a }] : [{ n: 1, a: A1 }]);
+          const s = slider("Its height", 0, 0.8, 0.01, 0, (v) => { a = v; draw(terms()); });
+          s.input.disabled = true;
+          const freqs = h("div", { className: "freqs" }, h("span", { textContent: "Wiggles per period:" }));
+          for (const f of [2, 3, 4, 5]) {
+            const b = h("button", { type: "button", textContent: `sin ${f}t` });
+            b.setAttribute("aria-pressed", "false");
+            b.addEventListener("click", () => {
+              n = f;
+              freqs.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+              s.input.disabled = false;
+              draw(terms());
+            });
+            freqs.append(b);
+          }
+          const check = h("button", { type: "button", className: "primary", textContent: "Check my fit" });
+          check.addEventListener("click", () => {
+            if (!n) return say(fb, "bad", "Pick a sine to add first.");
+            if (n % 2 === 0) {
+              return say(fb, "bad", `The gap never drops below where it started, so the best height for sin ${n}t is zero. The square wave's second half is an upside-down copy of its first. sin ${n}t repeats itself instead of flipping, so it can't help. Compare the two halves of the plot.`);
+            }
+            if (n === 5) return say(fb, "bad", "sin 5t helps a little. There's a bigger improvement from a slower sine that also flips every half period. Try another.");
+            if (Math.abs(a - A3) <= 0.05) {
+              say(fb, "good", `<strong>Yes.</strong> sin 3t at about ${fmt(A3)} flattens the top and sharpens the corners. The gap fell from ${fmt(gap([{ n: 1, a: A1 }]))} to ${fmt(gap(terms()))}.`);
+              finish();
+            } else {
+              say(fb, "bad", a < A3
+                ? `<strong>Right sine. Now slide its height ${howFar(a, A3)} to the right.</strong> The top of each half still bulges up in the middle. sin 3t points down there and up near the corners, so more of it flattens the bulge and lifts the shoulders.`
+                : `<strong>Right sine. Now slide its height ${howFar(a, A3)} to the left.</strong> Too much sin 3t pulls the middle of each top below the line, leaving two humps with a dip between them. Ease off until the top is as flat as it gets.`);
+            }
+          });
+          draw(terms());
+          return [h("p", { className: "prompt", innerHTML: `Your first sine is set to its best height, ${fmt(A1)}. Pick a second sine to add, then set its height to shrink the gap further.` }), freqs, s.row, h("div", { className: "row" }, check), fb];
+        },
+      },
+      {
+        title: "Spot the pattern",
+        build() {
+          const fb = h("div", { className: "feedback" });
+          draw([{ n: 1, a: A1 }, { n: 3, a: A3 }]);
+          const opts = choices([
+            { label: "0.42, the same as sin 3t", feedback: "Equal heights would make the bumps bigger, not smaller. Each new sine is a smaller correction than the last." },
+            { label: "0.25", right: true, feedback: `<strong>Right.</strong> 1.27 ÷ 3 = 0.42 and 1.27 ÷ 5 = 0.25. The height falls like 1/n, so the full recipe is (4/π)·sin(nt)/n for every odd n.` },
+            { label: "0.14", feedback: "That's 1.27 ÷ 9, a 1/n² pattern. That's actually the recipe for a triangle wave. Check the ratio you found: 1.27 ÷ 0.42 is 3, not 9." },
+            { label: "0.21, half of 0.42", feedback: "Halving each time is a natural guess. But 1.27 went to 0.42 by dividing by 3, not 2. What number would you divide by next?" },
+          ], fb, () => { draw([{ n: 1, a: A1 }, { n: 3, a: A3 }, { n: 5, a: bestAmp(5) }]); finish(); });
+          return [h("p", { className: "prompt", innerHTML: `The best heights so far: sin t gets ${fmt(A1)} and sin 3t gets ${fmt(A3)}. The next useful sine is sin 5t. What height should it get?` }), opts, fb];
+        },
+      },
+      {
+        title: "Predict the overshoot",
+        build() {
+          const fb = h("div", { className: "feedback" });
+          const explore = h("div", { hidden: true });
+          const s = slider("Number of sines", 1, 60, 1, 3, (k) => draw(recipe(k), { showParts: false, showPeak: true }));
+          s.row.querySelector("output").value = "3";
+          s.input.addEventListener("input", () => (s.row.querySelector("output").value = s.input.value));
+          explore.append(h("p", { innerHTML: "Add up to 60 sines and watch the peak next to each jump." }), s.row);
+          draw(recipe(3), { showParts: false, showPeak: true });
+          const opts = choices([
+            { label: "It shrinks away to nothing", feedback: "It's tempting, because the fit gets better everywhere else. Try the slider below and watch the peak." },
+            { label: "It gets narrower but stays about the same height", right: true, feedback: `<strong>Right, and it surprised mathematicians too.</strong> This is the Gibbs phenomenon. The peak settles near ${fmt(peak(recipe(400)))}, overshooting by about 9% of the jump, however many sines you add. The horn just squeezes closer to the corner.` },
+            { label: "It grows taller", feedback: "The extra sines get smaller (1/n), so they can't keep stacking up. Try the slider below and watch the peak." },
+          ], fb, finish);
+          opts.addEventListener("click", () => (explore.hidden = false));
+          return [h("p", { className: "prompt", innerHTML: "Look at the little horn right next to each jump. If you keep adding sines with this recipe, what happens to it?" }), opts, fb, explore];
+        },
+      },
+    ];
+
+    const finish = () => {
+      done.add(current);
+      renderRail();
+      if (current < STEPS.length - 1) {
+        const next = h("button", { type: "button", textContent: "Next step" });
+        next.addEventListener("click", () => go(current + 1));
+        task.append(h("div", { className: "row" }, next));
+      } else {
+        task.append(h("p", { className: "feedback good", innerHTML: "<strong>You built a Fourier series.</strong> Any repeating shape, however sharp, can be written as a sum of sines. The heights of those sines are its Fourier coefficients." }));
+      }
+    };
+
+    const renderRail = () => {
+      stepsNav.replaceChildren(...STEPS.map((s, i) => {
+        const b = h("button", { type: "button", textContent: i + 1, title: s.title });
+        b.setAttribute("role", "listitem");
+        b.setAttribute("aria-label", `Step ${i + 1}: ${s.title}${done.has(i) ? " (done)" : ""}`);
+        if (i === current) b.setAttribute("aria-current", "step");
+        if (done.has(i)) b.classList.add("done");
+        b.disabled = i > 0 && !done.has(i - 1) && i !== current;
+        b.addEventListener("click", () => go(i));
+        return b;
+      }));
+    };
+
+    const go = (i) => {
+      current = i;
+      renderRail();
+      task.replaceChildren(h("h2", { textContent: `${i + 1}. ${STEPS[i].title}` }), ...STEPS[i].build());
+    };
+
+    go(0);
+  </script>
+</body>
+</html>

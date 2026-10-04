@@ -44,17 +44,21 @@
     #graph {
       position: fixed; inset: 0; z-index: 2; width: 100%; height: 100%;
       touch-action: manipulation;
+      pointer-events: none;
     }
+    .orbit { pointer-events: none; }
+    .edge { pointer-events: none; }
+    .node { pointer-events: auto; cursor: pointer; }
     .edge { fill: none; stroke: var(--aurora); stroke-width: 1.15; opacity: 0.35; }
     .edge.is-dim { opacity: 0.08; }
     .edge.is-live { opacity: 0.7; stroke-width: 1.6; }
-    .node { cursor: pointer; }
     .node:focus-visible { outline: none; }
     .node:focus-visible .halo { opacity: 1; }
     .halo {
       fill: none; stroke: var(--gold); stroke-width: 1.2; opacity: 0;
       transition: opacity 0.2s ease;
     }
+    .hit { fill: transparent; }
     .node:hover .halo { opacity: 0.85; }
     .core { fill: var(--gold); }
     .core.inspire { fill: var(--paper); }
@@ -70,6 +74,8 @@
     }
     .label.inspire { font-size: 28px; font-style: italic; }
     .label.leaf { font-size: 14px; fill: var(--muted); font-family: Figtree, system-ui, sans-serif; }
+    .label.leaf.linked { fill: var(--paper); }
+    .node:hover .label.linked, .node:focus-visible .label.linked { fill: var(--gold); }
     .node.is-dim { opacity: 0.16; }
     .node.is-dim { pointer-events: none; }
     .orbit { fill: none; stroke: rgba(243, 234, 214, 0.08); stroke-width: 1; }
@@ -77,6 +83,7 @@
       position: fixed; z-index: 3; left: 50%; bottom: 1.4rem;
       translate: -50% 0;
       display: flex; gap: 0.6rem; align-items: center;
+      pointer-events: auto;
     }
     button {
       appearance: none; border: 1px solid rgba(243, 234, 214, 0.22);
@@ -112,7 +119,7 @@
     <g id="world"></g>
   </svg>
   <div class="dock">
-    <button id="back" type="button" hidden>Back to Inspire</button>
+    <button id="back" type="button" hidden>Back to on inspire</button>
     <span class="hint" id="hint">Click a node, or use the keyboard</span>
   </div>
 
@@ -129,7 +136,12 @@
         id: "math",
         label: "Cool Math Problems",
         angle: -0.95,
-        children: ["The infinite hotel", "A folding square", "Lights out", "Prime spirals", "Hidden symmetries"],
+        children: [
+          { label: "Build a square wave", href: "math/square-wave/" },
+          { label: "Two cups of tea", href: "math/two-cups/" },
+          { label: "Integration by parts", href: "math/integration-by-parts/" },
+          { label: "All math problems", href: "math/" },
+        ],
       },
       {
         id: "cooking",
@@ -152,8 +164,8 @@
     ];
 
     const ROOT = 220;
-    const LEAF = 132;
-    const inspire = { id: "inspire", label: "Inspire", x: 0, y: 0, kind: "inspire" };
+    const LEAF = 158;
+    const inspire = { id: "inspire", label: "on inspire", x: 0, y: 0, kind: "inspire" };
     const hubs = HUBS.map((h) => ({
       ...h,
       x: Math.cos(h.angle) * ROOT,
@@ -161,18 +173,24 @@
       kind: "hub",
     }));
 
-    const leavesOf = (hub) =>
-      hub.children.map((label, i) => {
-        const a = hub.angle + Math.PI + ((i - (hub.children.length - 1) / 2) * 0.52);
+    const leavesOf = (hub) => {
+      const n = hub.children.length;
+      const spread = 1.45;
+      return hub.children.map((child, i) => {
+        const { label, href } = typeof child === "string" ? { label: child } : child;
+        const a = n === 1 ? hub.angle : hub.angle - spread / 2 + (spread * i) / (n - 1);
         return {
           id: `${hub.id}-${i}`,
           label,
+          href,
           parent: hub.id,
+          angle: a,
           x: hub.x + Math.cos(a) * LEAF,
           y: hub.y + Math.sin(a) * LEAF,
           kind: "leaf",
         };
       });
+    };
 
     let focus = "inspire";
     let cam = { x: 0, y: 0, k: 1 };
@@ -198,7 +216,30 @@
       setCam({ x: 0, y: 0, k: Math.max(k, 0.55) }, cam.k === 1 && cam.x === 0);
     };
 
-    const zoomTo = (node) => setCam({ x: node.x, y: node.y, k: Math.min(1.85, Math.max(1.15, 420 / Math.min(w, h) * 2.2)) });
+    // Fit the hub, its leaves and their labels between the header and the dock
+    const zoomTo = (node) => {
+      const box = [Infinity, Infinity, -Infinity, -Infinity];
+      const add = (x0, y0, x1, y1) => {
+        box[0] = Math.min(box[0], x0); box[1] = Math.min(box[1], y0);
+        box[2] = Math.max(box[2], x1); box[3] = Math.max(box[3], y1);
+      };
+      const hw = node.label.length * 4.4;
+      add(node.x - hw, node.y - 44, node.x + hw, node.y + 14);
+      for (const leaf of leavesOf(node)) {
+        const ox = Math.cos(leaf.angle);
+        const oy = Math.sin(leaf.angle);
+        const tw = leaf.label.length * 7.4;
+        const lx = leaf.x + ox * 16;
+        const ly = leaf.y + oy * 16 + 4;
+        const x0 = ox > 0.08 ? lx : ox < -0.08 ? lx - tw : lx - tw / 2;
+        add(x0, ly - 15, x0 + tw, ly + 6);
+        add(leaf.x - 10, leaf.y - 10, leaf.x + 10, leaf.y + 10);
+      }
+      const top = 96, bottom = 84, side = 20;
+      const k = Math.max(0.5, Math.min((w - 2 * side) / (box[2] - box[0]), (h - top - bottom) / (box[3] - box[1]), 2.6));
+      const mid = (top + h - bottom) / 2;
+      setCam({ x: (box[0] + box[2]) / 2, y: (box[1] + box[3]) / 2 - (mid - h / 2) / k, k });
+    };
 
     const applyView = () => {
       const tx = w / 2 - cam.x * cam.k;
@@ -215,6 +256,7 @@
       const nodes = el("g");
       const active = hubs.find((h) => h.id === focus);
       const shownLeaves = active ? leavesOf(active) : [];
+      graph.querySelector(".orbit").style.opacity = focus === "inspire" ? "1" : "0";
 
       for (const hub of hubs) {
         const line = el("line", {
@@ -241,16 +283,24 @@
           "data-id": n.id,
           "data-kind": n.kind,
         });
-        g.setAttribute("aria-label", n.kind === "leaf" ? `${n.label}, coming soon` : n.label);
+        g.setAttribute("aria-label", n.kind === "leaf" && !n.href ? `${n.label}, coming soon` : n.label);
+        if (n.href) g.setAttribute("role", "link");
         const r = n.kind === "inspire" ? 16 : n.kind === "hub" ? 9 : 5.5;
+        g.append(el("circle", { class: "hit", r: n.kind === "leaf" ? 16 : 26, cx: n.x, cy: n.y }));
         g.append(el("circle", { class: "halo", r: r + 10, cx: n.x, cy: n.y }));
         if (n.kind === "inspire") g.append(el("circle", { class: "ring", r: 26, cx: n.x, cy: n.y }));
         g.append(el("circle", { class: `core ${n.kind}`, r, cx: n.x, cy: n.y }));
-        const label = el("text", {
-          class: `label ${n.kind}`,
-          x: n.x,
-          y: n.y + (n.kind === "inspire" ? -36 : n.kind === "hub" ? -18 : 22),
-        });
+        const label = el("text", { class: `label ${n.kind}${n.href ? " linked" : ""}` });
+        if (n.kind === "leaf") {
+          const ox = Math.cos(n.angle);
+          const oy = Math.sin(n.angle);
+          label.setAttribute("x", n.x + ox * 16);
+          label.setAttribute("y", n.y + oy * 16 + 4);
+          label.style.textAnchor = ox > 0.08 ? "start" : ox < -0.08 ? "end" : "middle";
+        } else {
+          label.setAttribute("x", n.x);
+          label.setAttribute("y", n.y + (n.kind === "inspire" ? -36 : -22));
+        }
         label.textContent = n.label;
         g.append(label);
         g.addEventListener("click", () => select(n));
@@ -263,18 +313,26 @@
     };
 
     const select = (n) => {
+      if (n.href) {
+        location.href = n.href;
+        return;
+      }
       if (n.kind === "leaf") {
         announce(`${n.label} is a placeholder for later.`);
         hint.textContent = "This branch is a placeholder";
         return;
       }
-      if (n.id === "inspire" || (n.id === focus && n.kind === "hub")) {
+      if (n.kind === "hub" && n.id === focus) {
+        announce(`Already in ${n.label}`);
+        return;
+      }
+      if (n.id === "inspire") {
         focus = "inspire";
         history.replaceState(null, "", location.pathname + location.search);
         fitRoot();
         back.hidden = true;
         hint.textContent = "Click a node, or use the keyboard";
-        announce("Returned to Inspire");
+        announce("Returned to on inspire");
       } else {
         focus = n.id;
         history.replaceState(null, "", `#${n.id}`);
@@ -311,7 +369,7 @@
     });
 
     const tick = () => {
-      const ease = reduce ? 1 : 0.12;
+      const ease = reduce ? 1 : 0.1;
       cam.x += (target.x - cam.x) * ease;
       cam.y += (target.y - cam.y) * ease;
       cam.k += (target.k - cam.k) * ease;

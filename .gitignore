@@ -1,3 +1,6 @@
 notes/
 .DS_Store
 knowledge/
+
+# Local-only script that contains a hard-coded API key
+apps/transcriber/supadata_transcribe_code.py
