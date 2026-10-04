@@ -1,4 +1,48 @@
 {
+ "bounce": {
+  "acceptance_rate": 0.6904,
+  "accepted": 310,
+  "framework": "bounce",
+  "levels": {
+   "1": {
+    "accepted": 80,
+    "rejected": {
+     "distinct": 28,
+     "duplicate": 48
+    },
+    "target": 80,
+    "tried": 156
+   },
+   "2": {
+    "accepted": 80,
+    "rejected": {
+     "duplicate": 33
+    },
+    "target": 80,
+    "tried": 113
+   },
+   "3": {
+    "accepted": 70,
+    "rejected": {
+     "distinct": 5,
+     "duplicate": 3
+    },
+    "target": 70,
+    "tried": 78
+   },
+   "4": {
+    "accepted": 80,
+    "rejected": {
+     "clean": 12,
+     "duplicate": 10
+    },
+    "target": 80,
+    "tried": 102
+   }
+  },
+  "seed": 1,
+  "tried": 449
+ },
  "ibp": {
   "acceptance_rate": 0.4042,
   "accepted": 310,

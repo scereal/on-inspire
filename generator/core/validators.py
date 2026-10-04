@@ -77,6 +77,8 @@ def distinct_problem(steps):
         if len(set(labels)) != len(labels):
             return f"step {i} repeats an option label"
         numbers = [o.value for o in step.options if isinstance(o.value, (int, float))]
+        if numbers and all(float(n).is_integer() for n in numbers):
+            continue  # whole-number answers (counts, degrees) only need to differ, which is checked above
         for a_i, a in enumerate(numbers):
             for b in numbers[a_i + 1:]:
                 scale = max(abs(a), abs(b), 1e-9)

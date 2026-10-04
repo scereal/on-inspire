@@ -77,6 +77,15 @@ class ValidatorTest(unittest.TestCase):
         self.check(["edge"], "findable")
 
 
+class IntegerOptionsTest(unittest.TestCase):
+    def test_adjacent_whole_numbers_are_distinct(self):
+        from generator.core.validators import distinct_problem
+        step = Step("How many?", "choice", "10", options=[Option("10", correct=True, value=10), Option("11", value=11, misconception="m")])
+        self.assertIsNone(distinct_problem([step]))
+        step.options[1] = Option("10.0", value=10, misconception="m")
+        self.assertIsNotNone(distinct_problem([step]))
+
+
 class BankTest(unittest.TestCase):
     def test_duplicates_kept_once_and_deterministic(self):
         with mock.patch.object(Fake, "sample", lambda self, rng, level, theme: {"a": rng.randrange(1, 6), "flags": []}):
