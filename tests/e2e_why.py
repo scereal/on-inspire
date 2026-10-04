@@ -205,6 +205,34 @@ def square_wave(page, base, c, label):
             page.click("#task button:text-is('Next step')")
 
 
+def atlas(page, base, c, label):
+    page.goto(f"{base}/math/why/atlas.html")
+    page.wait_for_selector(".atlas-map [data-node]")
+    concepts = page.evaluate("() => window.CONCEPTS")
+    edges = sum(len(x["deeper"]) for x in concepts)
+    c.ok(page.locator(".atlas-map [data-node]").count() == len(concepts), f"{label}: atlas map shows every concept")
+    c.ok(page.locator(".atlas-map line.atlas-edge").count() == edges, f"{label}: atlas map draws every deeper link ({edges})")
+    page.click(".atlas-map [data-node='limit']")
+    c.ok(page.is_visible(".why-panel") and page.inner_text(".why-title") == next(x["title"] for x in concepts if x["id"] == "limit"),
+         f"{label}: clicking a map node opens it")
+    page.click(".why-close")
+    if label != "desktop":
+        return
+    for concept in concepts:  # every widget renders and responds once
+        page.evaluate("(id) => Why.open(id)", concept["id"])
+        w = page.locator(".why-widget")
+        ok = w.locator("svg").count() == 1 and w.locator(".w-readout").count() == 1
+        snapshot = lambda: (w.locator(".w-readout").inner_text(), w.locator("svg").inner_html()) if ok else ("", "")
+        before = snapshot()
+        rng = w.locator("input[type=range]")
+        if rng.count():  # move to whichever end of the range differs from the current value
+            rng.first.evaluate("(el) => { el.value = Number(el.value) >= Number(el.max) ? el.min : el.max; el.dispatchEvent(new Event('input')); }")
+        else:
+            w.locator(".w-controls button").first.click()
+        after = snapshot()
+        c.ok(ok and after[0] and after != before, f"widget for '{concept['id']}' ({concept['widget']['type']}) renders and responds")
+
+
 def main():
     base = serve()
     c, errors = Checker(), []
@@ -218,6 +246,7 @@ def main():
             two_cups(page, base, c, name)
             ibp(page, base, c, name)
             square_wave(page, base, c, name)
+            atlas(page, base, c, name)
             page.close()
 
         # Hostile environments: no localStorage, no KaTeX

@@ -82,7 +82,7 @@ window.CONCEPTS = [
   {
     "id": "area-shapes",
     "title": "Area of rectangles and triangles",
-    "body": "Area counts how many unit squares fit inside a shape. A rectangle $w$ wide and $h$ tall holds $w \\times h$ of them; that's the starting point.\n\nCut a rectangle along its diagonal and you get two identical right triangles, so each has half the area: $\\frac{1}{2} w h$. Any triangle can be split into two right triangles, so every triangle's area is $\\frac{1}{2} \\times \\text{base} \\times \\text{height}$. A region under a curve isn't made of rectangles or triangles, but it can be approximated by them as closely as we like, which is exactly what integrals do.",
+    "body": "Area counts how many unit squares fit inside a shape. A rectangle $w$ wide and $h$ tall holds $w \\times h$ of them; that's the starting point.\n\nCut a rectangle along its diagonal and you get two identical right triangles, so each has half the area: $\\frac{1}{2} w h$. Drop a perpendicular from a triangle's top corner to its base (extended if needed) and any triangle becomes the sum or difference of two right triangles, so every triangle's area is $\\frac{1}{2} \\times \\text{base} \\times \\text{height}$. A region under a curve isn't made of rectangles or triangles, but it can be approximated by them as closely as we like, which is exactly what integrals do.",
     "math": [
       "A_{\\text{rectangle}} = w h",
       "A_{\\text{triangle}} = \\tfrac{1}{2} b h"
