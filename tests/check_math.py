@@ -1,11 +1,12 @@
 """Check the math behind docs/math/.
 
-Run from the repo root:  python3 tests/check_math.py
+Run from the repo root:  .venv/bin/python tests/check_math.py
 
 - Integration by parts: every correct answer differentiates back to its integrand,
   every planted error does not, and every blank fits the rule.
 - Square wave: the Fourier coefficients and Gibbs overshoot quoted on the page.
 - Page logic: runs tests/logic_test.js with macOS's built-in JavaScriptCore.
+- Problem generator: unit tests plus a full audit of every banked problem.
 """
 import json
 import pathlib
@@ -70,6 +71,19 @@ print(result.stdout.rstrip())
 if result.returncode:
     print(result.stderr.rstrip())
 check("JavaScript logic tests", result.returncode == 0)
+
+# Problem generator --------------------------------------------------------------
+print("Problem generator")
+try:
+    import yaml  # noqa: F401  (the generator's other dependency besides sympy)
+    for name, cmd in [("generator unit tests", ["-m", "unittest", "discover", "-s", "generator/tests", "-t", "."]),
+                      ("bank audit", ["-m", "generator.audit_bank"])]:
+        result = subprocess.run([sys.executable, *cmd], cwd=ROOT, capture_output=True, text=True)
+        tail = (result.stdout + result.stderr).strip().splitlines()[-1:] or [""]
+        print(f"  {tail[0]}")
+        check(name, result.returncode == 0)
+except ImportError:
+    print("  skipped: run with the project venv (.venv/bin/python tests/check_math.py) to include the generator")
 
 print(f"\n{failures} failed" if failures else "\nall checks passed")
 sys.exit(1 if failures else 0)

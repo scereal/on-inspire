@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Problem Review</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../math.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+  <style>
+    .page { max-width: 54rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 0.8rem; }
+    th, td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 500; }
+    td.num { font-variant-numeric: tabular-nums; }
+    #stats { overflow-x: auto; }
+    .problem { border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; margin-top: 1rem; background: var(--panel); overflow-x: auto; overflow-wrap: anywhere; }
+    .problem.good { border-color: var(--aurora); }
+    .problem.rejected { border-color: var(--ember); opacity: 0.75; }
+    .meta { color: var(--muted); font-size: 0.82rem; }
+    .problem ol { padding-left: 1.2rem; margin-top: 0.6rem; }
+    .problem li { margin-top: 0.6rem; }
+    .opt { font-size: 0.92rem; margin-top: 0.2rem; }
+    .opt.right::before { content: "✓ "; color: var(--aurora); }
+    .opt.wrong::before { content: "✗ "; color: var(--ember); }
+    .tag { color: var(--muted); font-size: 0.8rem; }
+    .decide { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; align-items: center; }
+    .decide input { flex: 1; min-width: 12rem; font: inherit; color: var(--paper); background: var(--void); border: 1px solid var(--line); border-radius: 10px; padding: 0.55rem 0.7rem; }
+    textarea { width: 100%; min-height: 8rem; font: 0.85rem/1.4 ui-monospace, Menlo, monospace; color: var(--paper); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem; margin-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="crumbs"><a href="../">Cool math problems</a> / <a href="../practice/">Practice</a> / Review</nav>
+    <h1>Problem review</h1>
+    <p class="lede">Spot-check generated problems. Rejected problems are removed on the next build and should become a new validator rule.</p>
+
+    <h2>Acceptance by framework</h2>
+    <div id="stats">Loading…</div>
+
+    <h2>Sample to review</h2>
+    <div class="row"><button type="button" id="reshuffle">New sample</button> <span class="meta" id="counts"></span></div>
+    <div id="samples"></div>
+
+    <h2>Save your decisions</h2>
+    <p class="help">Decisions are kept in this browser. Copy them into <code>docs/math/bank/review.json</code>, then rebuild the banks.</p>
+    <div class="row"><button type="button" class="primary" id="copy">Copy decisions</button></div>
+    <textarea id="out" readonly aria-label="Decisions as JSON"></textarea>
+  </main>
+
+  <script>
+    const PER_FRAMEWORK = 10;
+    const $ = (id) => document.getElementById(id);
+    const store = {
+      get() { try { return JSON.parse(localStorage.getItem("review") || '{"reviewed":[],"rejected":[]}'); } catch { return { reviewed: [], rejected: [] }; } },
+      set(v) { try { localStorage.setItem("review", JSON.stringify(v)); } catch {} },
+    };
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const math = (n) => window.renderMathInElement && window.renderMathInElement(n, { delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }], throwOnError: false });
+    let banks = [];
+
+    const merge = (base, local) => ({
+      reviewed: [...new Set([...base.reviewed, ...local.reviewed])].filter((id) => !local.rejected.some((r) => r.id === id)),
+      rejected: [...base.rejected.filter((r) => !local.reviewed.includes(r.id)), ...local.rejected.filter((r) => !base.rejected.some((b) => b.id === r.id))],
+    });
+
+    async function load() {
+      const [index, report, saved] = await Promise.all(["index", "report", "review"].map((n) => fetch(`../bank/${n}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
+      if (!index) { $("stats").textContent = "Couldn't load the bank index."; return; }
+      if (saved) store.set(merge(saved, store.get()));
+      $("stats").innerHTML = `<table><tr><th>Framework</th><th>Problems</th><th>Tried</th><th>Accepted</th><th>Top rejection reasons</th></tr>${Object.entries(index).map(([id, fw]) => {
+        const r = report?.[id] || {};
+        const reasons = {};
+        Object.values(r.levels || {}).forEach((l) => Object.entries(l.rejected || {}).forEach(([k, v]) => (reasons[k] = (reasons[k] || 0) + v)));
+        const top = Object.entries(reasons).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => `${esc(k)} ${v}`).join(", ");
+        return `<tr><td>${esc(fw.title)}</td><td class="num">${r.accepted ?? "?"}</td><td class="num">${r.tried ?? "?"}</td><td class="num">${r.acceptance_rate != null ? Math.round(r.acceptance_rate * 100) + "%" : "?"}</td><td>${top}</td></tr>`;
+      }).join("")}</table>`;
+      banks = await Promise.all(Object.entries(index).flatMap(([id, fw]) => Object.keys(fw.levels).map((lvl) => fetch(`../bank/${id}-${lvl}.json`).then((r) => r.json()))));
+      sample();
+    }
+
+    function sample() {
+      const byFw = {};
+      banks.forEach((b) => (byFw[b.framework] = (byFw[b.framework] || []).concat(b.problems.map((p) => ({ ...p, misconceptions: b.misconceptions })))));
+      const picks = Object.values(byFw).flatMap((list) => [...list].sort(() => Math.random() - 0.5).slice(0, PER_FRAMEWORK));
+      $("samples").replaceChildren(...picks.map(card));
+      math($("samples"));
+      refresh();
+    }
+
+    function card(p) {
+      const div = document.createElement("article");
+      div.className = "problem";
+      div.dataset.id = p.id;
+      div.innerHTML = `<div class="meta">${esc(p.id)} · level ${p.level}${p.theme ? " · " + esc(p.theme.label) : ""} · seed ${p.seed}</div>
+        <p>${p.story}</p>
+        <ol>${p.steps.map((s) => `<li><div>${s.prompt}</div>${s.format === "choice"
+          ? s.options.map((o) => `<div class="opt ${o.correct ? "right" : "wrong"}">${o.label} ${o.misconception ? `<span class="tag">(${esc(o.misconception)})</span>` : ""}</div>`).join("")
+          : `<div class="opt right">${esc(s.answer)} ${esc(s.unit || "")} <span class="tag">(${esc(s.format)}${s.tolerance ? ", ± " + Number(s.tolerance.toPrecision(2)) : ""})</span></div>`}</li>`).join("")}</ol>
+        <div class="decide"><button type="button" data-act="good">Looks good</button><input type="text" placeholder="Why reject? (becomes a validator rule)" aria-label="Reason for rejecting ${esc(p.id)}"><button type="button" data-act="reject">Reject</button></div>`;
+      div.querySelector('[data-act="good"]').addEventListener("click", () => decide(p.id, "good"));
+      div.querySelector('[data-act="reject"]').addEventListener("click", () => decide(p.id, "reject", div.querySelector("input").value.trim() || "unspecified"));
+      return div;
+    }
+
+    function decide(id, verdict, reason) {
+      const d = store.get();
+      d.reviewed = d.reviewed.filter((x) => x !== id);
+      d.rejected = d.rejected.filter((x) => x.id !== id);
+      if (verdict === "good") d.reviewed.push(id); else d.rejected.push({ id, reason });
+      store.set(d);
+      refresh();
+    }
+
+    function refresh() {
+      const d = store.get();
+      document.querySelectorAll(".problem").forEach((el) => {
+        el.classList.toggle("good", d.reviewed.includes(el.dataset.id));
+        el.classList.toggle("rejected", d.rejected.some((r) => r.id === el.dataset.id));
+      });
+      $("counts").textContent = `${d.reviewed.length} marked good, ${d.rejected.length} rejected`;
+      $("out").value = JSON.stringify({ reviewed: [...d.reviewed].sort(), rejected: [...d.rejected].sort((a, b) => a.id.localeCompare(b.id)) }, null, 1);
+    }
+
+    $("reshuffle").addEventListener("click", sample);
+    $("copy").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText($("out").value); $("copy").textContent = "Copied"; }
+      catch { $("out").select(); $("copy").textContent = "Select-all and copy the text below"; }
+      setTimeout(() => ($("copy").textContent = "Copy decisions"), 2000);
+    });
+    addEventListener("DOMContentLoaded", load);
+  </script>
+</body>
+</html>
