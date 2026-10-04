@@ -1,0 +1,71 @@
+/* "Why?" panel. Uses the tokens from docs/math/math.css. */
+.why-open {
+  margin-top: 0.8rem; border-color: var(--aurora); color: var(--paper);
+  background: rgba(78, 168, 160, 0.12);
+}
+.why-open:hover { border-color: var(--gold); }
+
+.why-panel {
+  margin-top: 1rem; padding: 1rem 1.1rem 1.1rem; border-radius: 14px;
+  border: 1px solid rgba(78, 168, 160, 0.45);
+  background: linear-gradient(180deg, rgba(78, 168, 160, 0.08), rgba(6, 16, 24, 0) 60%), var(--panel);
+  max-width: 100%; overflow-wrap: anywhere;
+}
+.why-panel[hidden] { display: none; }
+.why-top { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.why-back { padding: 0.45rem 0.8rem; font-size: 0.85rem; }
+.why-trail { font-size: 0.82rem; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.why-trail button {
+  border: 0; background: none; padding: 0.15rem 0.2rem; color: var(--muted); font-size: 0.82rem;
+  text-decoration: underline; text-underline-offset: 0.2em; border-radius: 4px;
+}
+.why-trail button:hover { color: var(--paper); }
+.why-trail [aria-current] { color: var(--paper); }
+.why-trail .sep { opacity: 0.6; }
+.why-title { font: 500 1.45rem/1.2 var(--serif); margin: 0.9rem 0 0.5rem; }
+.why-title:focus { outline: none; }
+.why-title:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.why-kind { margin: -0.2rem 0 0.6rem; }
+.why-badge { font: 400 0.75rem/1 var(--sans); color: var(--aurora); border: 1px solid var(--aurora); border-radius: 999px; padding: 0.2rem 0.5rem; vertical-align: middle; }
+.why-body p { margin: 0 0 0.7rem; max-width: 40rem; }
+.why-term {
+  display: inline; padding: 0 0.15rem; border: 0; border-radius: 4px; font: inherit; line-height: 1.25; vertical-align: baseline; color: var(--gold);
+  background: rgba(212, 176, 106, 0.1); text-decoration: underline dotted; text-underline-offset: 0.22em; cursor: pointer;
+}
+.why-term:hover { background: rgba(212, 176, 106, 0.2); }
+.why-math { overflow-x: auto; margin: 0.4rem 0; }
+.why-widget {
+  margin: 0.9rem 0; border: 1px solid var(--line); border-radius: 12px; padding: 0.6rem;
+  background: rgba(6, 16, 24, 0.5);
+}
+.why-placeholder { color: var(--muted); font-size: 0.88rem; margin: 0.4rem; }
+.why-group { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.6rem; }
+.why-group-label { color: var(--muted); font-size: 0.85rem; margin-right: 0.3rem; min-width: 10.5rem; }
+.why-group button, .why-more button { padding: 0.45rem 0.75rem; font-size: 0.85rem; border-radius: 999px; }
+.why-group button.visited::after, .why-node.visited::after, .why-more button.visited::after { content: " ✓"; color: var(--aurora); }
+
+.why-map {
+  margin-top: 1rem; padding: 0.8rem; border-radius: 12px; border: 1px dashed var(--line);
+  display: grid; gap: 0.55rem; justify-items: center;
+}
+.why-map-row { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+.why-map-row.mid { align-items: center; width: 100%; justify-content: space-between; }
+.why-map-row.mid .side { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; align-items: center; }
+.why-node { padding: 0.4rem 0.65rem; font-size: 0.8rem; border-radius: 10px; }
+.why-node.centre {
+  display: inline-block; border: 1px solid var(--gold); color: var(--gold); background: rgba(212, 176, 106, 0.1);
+  font: 500 0.9rem/1.2 var(--sans); max-width: 14rem; text-align: center;
+}
+.why-map-row.up::before { content: "Used by ↑"; }
+.why-map-row.down::before { content: "Built on ↓"; }
+.why-map-row.up::before, .why-map-row.down::before { width: 100%; text-align: center; color: var(--muted); font-size: 0.75rem; }
+.why-map-row.up:empty, .why-map-row.down:empty { display: none; }
+.why-more-note { color: var(--muted); font-size: 0.8rem; margin: 0; }
+.why-more { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.6rem; font-size: 0.85rem; color: var(--muted); }
+.why-bottom { margin-top: 1rem; display: flex; justify-content: flex-end; }
+
+@media (max-width: 480px) {
+  .why-map-row.mid { flex-direction: column; }
+  .why-map-row.mid .side { width: 100%; }
+  .why-group-label { min-width: 0; width: 100%; }
+}
