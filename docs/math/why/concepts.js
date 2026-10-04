@@ -347,7 +347,9 @@ window.CONCEPTS = [
       "strength",
       "conservation"
     ],
-    "related": [],
+    "related": [
+      "average-of-function"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -517,7 +519,8 @@ window.CONCEPTS = [
       "area-shapes"
     ],
     "related": [
-      "derivative"
+      "derivative",
+      "average-of-function"
     ],
     "foundation": false,
     "claims": [
@@ -663,7 +666,9 @@ window.CONCEPTS = [
     "deeper": [
       "unit-circle"
     ],
-    "related": [],
+    "related": [
+      "product-to-sum"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -696,7 +701,9 @@ window.CONCEPTS = [
       "sin-h-over-h",
       "cos-h-minus-1-over-h"
     ],
-    "related": [],
+    "related": [
+      "sine-waves"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -1116,6 +1123,468 @@ window.CONCEPTS = [
     "deeper": [
       "check-by-differentiating",
       "product-rule"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "sine-waves",
+    "title": "Sine waves: height and frequency",
+    "body": "Walk around the [[unit-circle|unit circle]] at a steady pace and track your height: it rises, falls and repeats. Plot that height against time and you get $\\sin t$, a smooth wave that repeats every $2\\pi$.\n\nTwo dials change it. Multiplying by $A$ stretches it vertically: $A\\sin t$ swings between $-A$ and $A$ (the amplitude). Putting $n$ inside, $\\sin(nt)$, makes you walk the circle $n$ times as fast, so the wave fits $n$ full wiggles into each $2\\pi$. Every term in a Fourier series is a [[function]] of exactly this shape.",
+    "math": [
+      "A\\sin(nt)",
+      "\\sin\\!\\left(n\\left(t + \\tfrac{2\\pi}{n}\\right)\\right) = \\sin(nt)"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "single",
+      "prompt": "Change the height and the wiggles per period."
+    },
+    "deeper": [
+      "unit-circle",
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(sin(3*(t + 2*pi/3)) - sin(3*t))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "average-of-function",
+    "title": "The average of a function",
+    "body": "To average a list of numbers, add them and divide by how many there are. A function has infinitely many values, so instead you add them continuously, which is the [[integral-as-area|integral]], and divide by the length of the interval: $\\bar f = \\frac{1}{b-a}\\int_a^b f(x)\\,dx$.\n\nPicture it as levelling sand: the average is the height of the flat rectangle with the same area and width as the region under the curve. It's the continuous cousin of a [[weighted-average|weighted average]], and it's how the square-wave page measures the [[why-square-the-gap|gap]].",
+    "math": [
+      "\\bar f = \\frac{1}{b-a}\\int_a^b f(x)\\,dx",
+      "\\text{average of } \\sin \\text{ on } [0,\\pi] = \\frac{2}{\\pi}"
+    ],
+    "widget": {
+      "type": "riemann",
+      "mode": "average",
+      "f": "sin",
+      "a": 0,
+      "b": 3.14159,
+      "n": 12,
+      "prompt": "The dashed line is the average height. Its rectangle has the same area as the region under the curve."
+    },
+    "deeper": [
+      "integral-as-area"
+    ],
+    "related": [
+      "why-square-the-gap",
+      "weighted-average"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(sin(x), (x, 0, pi))/pi",
+        "equals": "2/pi"
+      }
+    ]
+  },
+  {
+    "id": "why-square-the-gap",
+    "title": "Why we square the gap",
+    "body": "To score how well a curve fits a target, look at the gap $d(t)$ between them at every point. You can't just [[average-of-function|average]] $d(t)$: where the curve is too high the gap is positive, where it's too low it's negative, and they cancel. A terrible fit could average to zero.\n\nSquaring fixes that. $d^2$ is never negative, so nothing cancels, and big misses cost much more than small ones. The page's \"gap\" is the root-mean-square: $\\sqrt{\\text{average of } d^2}$. There's a bonus: the average squared gap turns out to be a [[best-fit-parabola|parabola]] in the height you're choosing, and parabolas have one clear lowest point.",
+    "math": [
+      "\\text{gap} = \\sqrt{\\frac{1}{2\\pi}\\int_0^{2\\pi} \\big(a\\sin t - \\text{sq}(t)\\big)^2\\,dt}"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "gap",
+      "prompt": "Change the height. The plain average gap barely moves; the squared gap shows the real fit."
+    },
+    "deeper": [
+      "average-of-function"
+    ],
+    "related": [
+      "best-fit-parabola"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate((sin(t) - 1)**2, (t, 0, pi)) + integrate((sin(t) + 1)**2, (t, pi, 2*pi))",
+        "equals": "3*pi - 8"
+      }
+    ]
+  },
+  {
+    "id": "best-fit-parabola",
+    "title": "The best fit is the bottom of a parabola",
+    "body": "Write the average squared gap for height $a$ and expand the square: $E(a) = a^2\\,\\overline{\\sin^2} - 2a\\,\\overline{\\text{sq}\\cdot\\sin} + \\overline{\\text{sq}^2}$. For the square wave those averages are $\\frac{1}{2}$, $\\frac{2}{\\pi}$ and 1, so $E(a) = \\frac{a^2}{2} - \\frac{4a}{\\pi} + 1$.\n\nThat's a parabola opening upward. Its lowest point is where its slope is zero, which you find with the [[derivative]]: $E'(a) = a - \\frac{4}{\\pi} = 0$, so $a = \\frac{4}{\\pi} \\approx 1.27$. Squaring the gap ([[why-square-the-gap|why we do that]]) is what made the error a parabola. The general version of this answer is the [[projection]] formula.",
+    "math": [
+      "E(a) = \\frac{a^2}{2} - \\frac{4a}{\\pi} + 1",
+      "E'(a) = a - \\frac{4}{\\pi} = 0 \\;\\Rightarrow\\; a = \\frac{4}{\\pi}"
+    ],
+    "widget": {
+      "type": "parabola-min",
+      "prompt": "Drag a. The tangent is flat exactly at 4/π."
+    },
+    "deeper": [
+      "derivative",
+      "why-square-the-gap"
+    ],
+    "related": [
+      "projection"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(a**2/2 - 4*a/pi + 1, a).subs(a, 4/pi)",
+        "equals": "0"
+      },
+      {
+        "sympy": "(integrate((a*sin(t) - 1)**2, (t, 0, pi)) + integrate((a*sin(t) + 1)**2, (t, pi, 2*pi)))/(2*pi) - (a**2/2 - 4*a/pi + 1)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "projection",
+    "title": "The projection formula",
+    "body": "The [[best-fit-parabola|parabola argument]] works for any target $f$ and any building block $g$: the best height is $a = \\frac{\\int f\\,g}{\\int g^2}$, where both are [[integral-as-area|integrals]] over one period. It's the same as projecting one arrow onto another: how much of $f$ points in the direction of $g$, divided by the length of $g$ squared.\n\nFor the square wave and $\\sin t$: $\\int_0^{2\\pi}\\text{sq}\\cdot\\sin = 4$ and $\\int_0^{2\\pi}\\sin^2 = \\pi$, so $a = \\frac{4}{\\pi}$. Because different sines are [[orthogonality|orthogonal]], you can project onto each sine separately.",
+    "math": [
+      "a = \\frac{\\int f\\,g}{\\int g^2}",
+      "\\frac{4}{\\pi} = \\frac{\\int_0^{2\\pi} \\text{sq}(t)\\sin t\\,dt}{\\int_0^{2\\pi}\\sin^2 t\\,dt}"
+    ],
+    "widget": {
+      "type": "parabola-min",
+      "mode": "projection",
+      "prompt": "Move a away from 4/π in either direction. The error only goes up."
+    },
+    "deeper": [
+      "best-fit-parabola",
+      "integral-as-area"
+    ],
+    "related": [
+      "orthogonality"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(integrate(sin(t), (t, 0, pi)) - integrate(sin(t), (t, pi, 2*pi)))/integrate(sin(t)**2, (t, 0, 2*pi))",
+        "equals": "4/pi"
+      }
+    ]
+  },
+  {
+    "id": "integral-sin-half-period",
+    "title": "Why the area under one hump of sin is exactly 2",
+    "body": "By [[ftc|the fundamental theorem]], $\\int_0^\\pi \\sin t\\,dt = F(\\pi) - F(0)$ for any antiderivative $F$. Since [[derivative-of-sin-cos|the derivative of −cos is sin]], take $F = -\\cos$: $-\\cos\\pi - (-\\cos 0) = 1 + 1 = 2$.\n\nA curved hump with height 1 and width $\\pi \\approx 3.14$ has area exactly 2, a little less than two-thirds of the rectangle around it. The square wave is $+1$ on this half and $-1$ on the other, while $\\sin t$ is negative there too, so both halves contribute $+2$, giving the 4 in $\\frac{4}{\\pi}$. Compare it with [[average-of-sin-squared|the average of sin²]].",
+    "math": [
+      "\\int_0^{\\pi}\\sin t\\,dt = \\big[-\\cos t\\big]_0^{\\pi} = 2"
+    ],
+    "widget": {
+      "type": "riemann",
+      "f": "sin",
+      "a": 0,
+      "b": 3.14159,
+      "n": 6,
+      "prompt": "Add rectangles. The area under one hump closes in on exactly 2."
+    },
+    "deeper": [
+      "ftc",
+      "derivative-of-sin-cos"
+    ],
+    "related": [
+      "average-of-sin-squared"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(sin(t), (t, 0, pi))",
+        "equals": "2"
+      }
+    ]
+  },
+  {
+    "id": "average-of-sin-squared",
+    "title": "Why sin² averages to ½",
+    "body": "On the [[unit-circle|unit circle]], $\\sin^2 t + \\cos^2 t = 1$ at every angle. Over a full period, $\\cos$ is just $\\sin$ shifted by a quarter turn, so $\\sin^2$ and $\\cos^2$ take the same values and have the same [[average-of-function|average]].\n\nTwo equal averages that add up to 1 must each be $\\frac{1}{2}$. So $\\int_0^{2\\pi}\\sin^2 t\\,dt = \\frac{1}{2}\\cdot 2\\pi = \\pi$. That $\\pi$ is the denominator in $\\frac{4}{\\pi}$, and $\\sin^2(nt)$ averages to $\\frac{1}{2}$ for every $n$. Compare [[integral-sin-half-period|the area of one hump of sin]].",
+    "math": [
+      "\\sin^2 t + \\cos^2 t = 1",
+      "\\frac{1}{2\\pi}\\int_0^{2\\pi}\\sin^2 t\\,dt = \\frac{1}{2}"
+    ],
+    "widget": {
+      "type": "riemann",
+      "mode": "average",
+      "f": "sin2",
+      "a": 0,
+      "b": 6.28318,
+      "n": 24,
+      "prompt": "The dashed average line sits at exactly 1/2."
+    },
+    "deeper": [
+      "average-of-function",
+      "unit-circle"
+    ],
+    "related": [
+      "integral-sin-half-period"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(sin(t)**2, (t, 0, 2*pi))/(2*pi)",
+        "equals": "Rational(1, 2)"
+      }
+    ]
+  },
+  {
+    "id": "product-to-sum",
+    "title": "Turning a product of sines into a sum",
+    "body": "Write [[angle-addition|the cosine addition formula]] twice: $\\cos(A-B) = \\cos A\\cos B + \\sin A\\sin B$ and $\\cos(A+B) = \\cos A\\cos B - \\sin A\\sin B$. Subtract the second from the first and the $\\cos A\\cos B$ terms cancel, leaving $2\\sin A\\sin B$.\n\nSo a product of two sines is half the difference of two cosines. Products are hard to integrate; sums of cosines are easy. That's the key step in showing [[orthogonality|different sines are orthogonal]].",
+    "math": [
+      "\\sin A\\sin B = \\tfrac{1}{2}\\big[\\cos(A-B) - \\cos(A+B)\\big]"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "product",
+      "m": 2,
+      "n": 3,
+      "prompt": "The product sin 2t · sin 3t wiggles like ½[cos t − cos 5t]."
+    },
+    "deeper": [
+      "angle-addition"
+    ],
+    "related": [
+      "orthogonality"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(sin(a)*sin(b) - (cos(a - b) - cos(a + b))/2)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "orthogonality",
+    "title": "Different sines are orthogonal",
+    "body": "For whole numbers $m \\ne n$, $\\int_0^{2\\pi}\\sin(mt)\\sin(nt)\\,dt = 0$. [[product-to-sum|Turn the product into a sum]]: $\\frac{1}{2}[\\cos((m-n)t) - \\cos((m+n)t)]$. Each cosine completes a whole number of periods over $[0, 2\\pi]$, so its positive and negative [[integral-as-area|area]] cancel exactly.\n\nThat's what \"orthogonal\" means here, the function version of perpendicular arrows. It's why you can find each sine's best height on its own with [[projection|the projection formula]], without the others interfering. With $m = n$ you get $\\pi$ instead. It also explains [[half-wave-symmetry|why even sines don't help]] from another angle.",
+    "math": [
+      "\\int_0^{2\\pi}\\sin(mt)\\sin(nt)\\,dt = \\begin{cases}0 & m\\ne n\\\\ \\pi & m = n\\end{cases}"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "product",
+      "m": 2,
+      "n": 3,
+      "prompt": "Pick two different frequencies, then two equal ones. Watch the total area."
+    },
+    "deeper": [
+      "product-to-sum",
+      "integral-as-area"
+    ],
+    "related": [
+      "projection",
+      "half-wave-symmetry"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(sin(2*t)*sin(3*t), (t, 0, 2*pi))",
+        "equals": "0"
+      },
+      {
+        "sympy": "integrate(sin(3*t)**2, (t, 0, 2*pi))",
+        "equals": "pi"
+      }
+    ]
+  },
+  {
+    "id": "half-wave-symmetry",
+    "title": "Why even sines can't help build a square wave",
+    "body": "The square wave's second half is an upside-down copy of its first: $\\text{sq}(t + \\pi) = -\\text{sq}(t)$. Now compare the [[sine-waves|sines]]. An odd one like $\\sin 3t$ also flips: $\\sin(3(t + \\pi)) = -\\sin 3t$. An even one like $\\sin 2t$ doesn't: $\\sin(2(t+\\pi)) = \\sin 2t$, because $2\\pi$ is a full period.\n\nThe best height is $\\frac{\\int \\text{sq}\\cdot\\sin(nt)}{\\int\\sin^2(nt)}$. Split that top [[integral-as-area|integral]] into the two halves. For odd $n$ both factors flip, so the second half matches the first and they add. For even $n$ only the square wave flips, so the second half is the negative of the first and they cancel. The best height for every even sine is exactly 0. See also [[orthogonality]].",
+    "math": [
+      "\\text{sq}(t+\\pi) = -\\text{sq}(t)",
+      "\\sin(2(t+\\pi)) = \\sin 2t, \\quad \\sin(3(t+\\pi)) = -\\sin 3t"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "shift",
+      "prompt": "Try n = 2, 3, 4, 5. Even n: the halves cancel. Odd n: they add."
+    },
+    "deeper": [
+      "integral-as-area",
+      "sine-waves"
+    ],
+    "related": [
+      "orthogonality"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(sin(2*(t + pi)) - sin(2*t))",
+        "equals": "0"
+      },
+      {
+        "sympy": "simplify(sin(3*(t + pi)) + sin(3*t))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "coefficients-4-over-n-pi",
+    "title": "Why the heights are 4/(nπ)",
+    "body": "Apply [[projection|the projection formula]] to $\\sin(nt)$. The bottom is $\\int_0^{2\\pi}\\sin^2(nt) = \\pi$ ([[average-of-sin-squared|sin² averages ½]]). For the top, both halves contribute equally when $n$ is odd, so it's $2\\int_0^\\pi \\sin(nt)\\,dt$.\n\nThat integral is like [[integral-sin-half-period|the area of one hump]], but $\\sin(nt)$ is squeezed $n$ times, so by the [[chain-rule|chain rule]] its antiderivative is $-\\frac{1}{n}\\cos(nt)$: $\\int_0^\\pi\\sin(nt)\\,dt = \\frac{1 - \\cos n\\pi}{n} = \\frac{2}{n}$ for odd $n$. Top $= \\frac{4}{n}$, so the height is $\\frac{4}{n\\pi}$: 1.27, 0.42, 0.25, … falling like $\\frac{1}{n}$. Adding these up gives the [[partial-sums|partial sums]].",
+    "math": [
+      "b_n = \\frac{1}{\\pi}\\int_0^{2\\pi}\\text{sq}(t)\\sin(nt)\\,dt = \\begin{cases}\\frac{4}{n\\pi} & n \\text{ odd}\\\\ 0 & n \\text{ even}\\end{cases}"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "partials",
+      "prompt": "Each extra sine uses the next odd n with height 4/(nπ)."
+    },
+    "deeper": [
+      "projection",
+      "integral-sin-half-period",
+      "chain-rule",
+      "average-of-sin-squared"
+    ],
+    "related": [
+      "partial-sums"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(integrate(sin(3*t), (t, 0, pi)) - integrate(sin(3*t), (t, pi, 2*pi)))/pi",
+        "equals": "4/(3*pi)"
+      },
+      {
+        "sympy": "(integrate(sin(5*t), (t, 0, pi)) - integrate(sin(5*t), (t, pi, 2*pi)))/pi",
+        "equals": "4/(5*pi)"
+      },
+      {
+        "sympy": "(integrate(sin(2*t), (t, 0, pi)) - integrate(sin(2*t), (t, pi, 2*pi)))/pi",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "partial-sums",
+    "title": "Partial sums and what \"converges\" means",
+    "body": "A partial sum adds the first few terms: $S_N(t) = \\sum \\frac{4}{n\\pi}\\sin(nt)$ over the first $N$ odd $n$. Each $S_N$ is a smooth [[sine-waves|sum of sine waves]]. As $N$ grows, the sums get closer to the square wave.\n\n\"Converges\" is a [[limit]] statement: at each fixed $t$ away from a jump, $S_N(t)$ settles on the square wave's value. At $t = \\frac{\\pi}{2}$ it becomes $\\frac{4}{\\pi}(1 - \\frac{1}{3} + \\frac{1}{5} - \\dots) = 1$. At the jumps themselves the sums sit at 0, halfway. Next to the jumps there's a stubborn surprise: the [[gibbs|Gibbs overshoot]].",
+    "math": [
+      "S_N(t) = \\frac{4}{\\pi}\\sum_{k=0}^{N-1}\\frac{\\sin((2k+1)t)}{2k+1}",
+      "\\frac{4}{\\pi}\\left(1 - \\tfrac{1}{3} + \\tfrac{1}{5} - \\cdots\\right) = 1"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "partials",
+      "prompt": "Add sines one at a time and watch the sum close in."
+    },
+    "deeper": [
+      "limit",
+      "sine-waves"
+    ],
+    "related": [
+      "gibbs"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "4/pi*Sum((-1)**k/(2*k + 1), (k, 0, oo)).doit()",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "gibbs",
+    "title": "The Gibbs phenomenon: the overshoot that won't go away",
+    "body": "Next to each jump, every [[partial-sums|partial sum]] overshoots the square wave. Add more sines and the horn gets narrower and moves closer to the jump, but its height doesn't shrink: it settles at about 1.179, an overshoot of roughly 9% of the jump (from −1 to 1). The exact limit is $\\frac{2}{\\pi}\\int_0^\\pi\\frac{\\sin u}{u}\\,du$, an [[integral-as-area|area]] under $\\frac{\\sin u}{u}$.\n\nHow can the sums converge if the overshoot never shrinks? Because the horn gets narrower: at any fixed point the sums do settle, and the [[why-square-the-gap|average squared gap]] goes to zero. They just never fit the jump uniformly well. A sum of smooth waves can't make a sharp corner without ringing.",
+    "math": [
+      "\\lim_{N\\to\\infty}\\max S_N = \\frac{2}{\\pi}\\int_0^{\\pi}\\frac{\\sin u}{u}\\,du \\approx 1.179"
+    ],
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "zoom",
+      "prompt": "Zoomed in at the jump: add sines and watch the horn narrow while its peak stays near 1.179."
+    },
+    "deeper": [
+      "partial-sums",
+      "integral-as-area"
+    ],
+    "related": [
+      "why-square-the-gap"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "2/pi*Si(pi)",
+        "approx": 1.179,
+        "tol": 0.001
+      }
+    ]
+  },
+  {
+    "id": "sw-best-height",
+    "entry": true,
+    "title": "Why is the best height 4/π, not 1?",
+    "body": "The best height is the one that makes the [[why-square-the-gap|average squared gap]] as small as possible. That error is a [[best-fit-parabola|parabola in the height a]], and its lowest point is given by the [[projection|projection formula]]: $a = \\frac{\\int\\text{sq}\\cdot\\sin}{\\int\\sin^2}$.\n\nThe top is 4: each half of the period contributes [[integral-sin-half-period|the area of one hump, 2]]. The bottom is $\\pi$, because [[average-of-sin-squared|sin² averages ½]] over $2\\pi$. So $a = \\frac{4}{\\pi} \\approx$ {{A1}}. Height 1 matches the flat top at a single point, while 4/π trades a small bulge in the middle for a much closer fit everywhere else.",
+    "widget": {
+      "type": "parabola-min",
+      "prompt": "Find the lowest point of the error parabola, then compare it with a = 1."
+    },
+    "deeper": [
+      "projection",
+      "best-fit-parabola",
+      "integral-sin-half-period",
+      "average-of-sin-squared"
+    ],
+    "related": [
+      "why-square-the-gap"
+    ],
+    "foundation": false
+  },
+  {
+    "id": "sw-why-sin3t",
+    "entry": true,
+    "title": "Why sin 3t, and why not sin 2t?",
+    "body": "Even sines can't help: the square wave flips sign every half period, and an even sine repeats instead of flipping, so the two halves of its projection cancel. That's [[half-wave-symmetry|half-wave symmetry]], and it makes the best height for sin 2t exactly 0.\n\nFor sin 3t, both halves add. Because different sines are [[orthogonality|orthogonal]], its best height doesn't depend on the sin t already there: it's $\\frac{\\int\\text{sq}\\cdot\\sin 3t}{\\int\\sin^2 3t} = \\frac{4}{3\\pi} \\approx$ {{A3}}.",
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "shift",
+      "prompt": "Compare n = 2 with n = 3: one cancels, one adds."
+    },
+    "deeper": [
+      "half-wave-symmetry",
+      "orthogonality"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "sw-pattern",
+    "entry": true,
+    "title": "Why do the heights fall like 1/n?",
+    "body": "Every height comes from the same projection, and [[coefficients-4-over-n-pi|working it out for sin(nt) gives 4/(nπ)]]. The area under one squeezed hump of $\\sin(nt)$ is $\\frac{2}{n}$, so the heights are $\\frac{4}{\\pi}\\cdot\\frac{1}{n}$: 1.27, then ÷3, then ÷5, and so on.",
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "partials",
+      "prompt": "Add sines one by one: each uses height 4/(nπ) for the next odd n."
+    },
+    "deeper": [
+      "coefficients-4-over-n-pi"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "sw-gibbs",
+    "entry": true,
+    "title": "Why doesn't the overshoot go away?",
+    "body": "The [[partial-sums|partial sums]] do converge: at every point away from a jump they settle on the square wave. But right next to the jump each sum overshoots, and as you add sines the horn only gets narrower, not lower. Its peak settles near {{peak}}, about 9% of the jump. That's the [[gibbs|Gibbs phenomenon]]: smooth waves can't make a sharp corner without ringing.",
+    "widget": {
+      "type": "wave-mixer",
+      "mode": "zoom",
+      "prompt": "Add sines while zoomed in on the jump. The peak readout barely moves."
+    },
+    "deeper": [
+      "gibbs",
+      "partial-sums"
     ],
     "related": [],
     "foundation": false

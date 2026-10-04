@@ -116,3 +116,5 @@
 .w-cell { fill: rgba(243, 234, 214, 0.05); stroke: var(--line); }
 .w-cell.done { stroke: var(--aurora); fill: rgba(78, 168, 160, 0.15); }
 .w-big { fill: var(--paper); font: 500 20px Figtree, system-ui, sans-serif; }
+.w-gapline { stroke: rgba(196, 92, 74, 0.45); stroke-width: 1; }
+.w-curve.dashed { stroke-dasharray: 7 5; }

@@ -44,6 +44,26 @@
     stretchArea: (name, a, lo, hi) => WidgetMath.riemann((x) => WidgetMath.fn(name)(a * x), lo, hi, 4000),
     productChange: (u, v, du, dv) => ({ udv: u * dv, vdu: v * du, corner: du * dv }),
     squeeze: (h) => ({ inner: Math.sin(h) / 2, sector: h / 2, outer: Math.tan(h) / 2 }),
+    square: (t) => { const s = Math.sin(t); return Math.abs(s) < 1e-12 ? 0 : Math.sign(s); },
+    productIntegral: (m, n) => WidgetMath.riemann((t) => Math.sin(m * t) * Math.sin(n * t), 0, 2 * Math.PI, 4000),
+    rmsGap: (a) => Math.sqrt(WidgetMath.riemann((t) => (a * Math.sin(t) - WidgetMath.square(t)) ** 2, 0, 2 * Math.PI, 2000) / (2 * Math.PI)),
+    errorParabola: (a) => (a * a) / 2 - (4 * a) / Math.PI + 1,
+    halfContributions(n) {
+      const first = WidgetMath.riemann((t) => WidgetMath.square(t) * Math.sin(n * t), 0, Math.PI, 2000);
+      const second = WidgetMath.riemann((t) => WidgetMath.square(t) * Math.sin(n * t), Math.PI, 2 * Math.PI, 2000);
+      return { first, second, total: first + second };
+    },
+    partialSum(N, t) {
+      let s = 0;
+      for (let k = 0; k < N; k++) { const n = 2 * k + 1; s += (4 / (n * Math.PI)) * Math.sin(n * t); }
+      return s;
+    },
+    peakOf(N) {
+      const top = 2 * N - 1, end = Math.min(Math.PI / 2, (4 * Math.PI) / top);
+      let best = -Infinity;
+      for (let i = 1; i <= 3000; i++) best = Math.max(best, WidgetMath.partialSum(N, (i / 3000) * end));
+      return best;
+    },
     fractionOf: (a, b) => a * b,
     serial(start, rounds) {
       const out = [];
@@ -694,6 +714,115 @@
     };
     button(ui.controls, "Differentiate", () => { state.poly = WidgetMath.diffPoly(state.poly); state.k += 1; draw(); });
     const init = () => { state = { poly: cfg.poly || [0, 0, 0, 1], k: 0 }; draw(); };
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+
+  // Wave mixer: sines against the square wave. Modes: single, gap, product, shift, partials, zoom.
+  W["wave-mixer"] = function (box, cfg) {
+    const M = WidgetMath, mode = cfg.mode || "single";
+    const prompts = {
+      single: "Change the height and the number of wiggles per period.",
+      gap: "Change the height. Compare the plain average gap with the average squared gap.",
+      product: "Pick two frequencies. When they differ, the shaded areas cancel exactly.",
+      shift: "Pick a frequency. The dashed curve is the second half of square·sin(nt), shifted back onto the first.",
+      partials: "Add more sines and watch the sum close in on the square wave.",
+      zoom: "Add sines while zoomed in on the jump. The overshoot narrows but never shrinks.",
+    };
+    const ui = shell(box, cfg.prompt || prompts[mode]);
+    let state;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const zoom = mode === "zoom";
+      const P = zoom ? plotArea(ui.svg, -0.15, 0.9, -0.3, 1.35)
+        : mode === "shift" ? plotArea(ui.svg, 0, Math.PI, -1.3, 1.3)
+        : plotArea(ui.svg, 0, 2 * Math.PI, -1.6, 1.6);
+      const span = zoom ? [-0.15, 0.9] : [0, 2 * Math.PI];
+      if (mode !== "product" && mode !== "shift") P.curve(M.square, span[0], span[1], "w-curve alt");
+      if (mode === "single") {
+        P.curve((t) => state.a * Math.sin(state.n * t), 0, 2 * Math.PI);
+        ui.readout.textContent = `${fmt(state.a, 2)}·sin(${state.n}t): height ${fmt(state.a, 2)}, ${state.n} full wiggle${state.n === 1 ? "" : "s"} per 2π (period ${fmt((2 * Math.PI) / state.n, 3)}).`;
+      } else if (mode === "gap") {
+        const f = (t) => state.a * Math.sin(t);
+        let d = "";
+        for (let i = 0; i <= 240; i++) { const t = (2 * Math.PI * i) / 240; d += `M${P.X(t)} ${P.Y(f(t))} L${P.X(t)} ${P.Y(M.square(t))} `; }
+        el("path", { d, class: "w-gapline" }, ui.svg);
+        P.curve(f, 0, 2 * Math.PI);
+        const mean = M.riemann((t) => f(t) - M.square(t), 0, 2 * Math.PI, 2000) / (2 * Math.PI);
+        ui.readout.textContent = `height ${fmt(state.a, 2)}: average gap ${fmt(mean, 3)} (pluses and minuses cancel), average squared gap ${fmt(M.rmsGap(state.a) ** 2, 3)}, gap readout ${fmt(M.rmsGap(state.a), 3)}`;
+      } else if (mode === "product") {
+        const { m, n } = state;
+        const g = (t) => Math.sin(m * t) * Math.sin(n * t);
+        let pos = "", neg = "";
+        for (let i = 0; i < 240; i++) {
+          const t = (2 * Math.PI * i) / 240, w = (2 * Math.PI) / 240, y = g(t + w / 2);
+          const r = `M${P.X(t)} ${P.Y(0)} L${P.X(t)} ${P.Y(y)} L${P.X(t + w)} ${P.Y(y)} L${P.X(t + w)} ${P.Y(0)} Z `;
+          if (y >= 0) pos += r; else neg += r;
+        }
+        el("path", { d: pos, class: "w-bar" }, ui.svg);
+        el("path", { d: neg, class: "w-bar neg" }, ui.svg);
+        P.curve((t) => Math.sin(m * t), 0, 2 * Math.PI, "w-curve faint");
+        P.curve((t) => Math.sin(n * t), 0, 2 * Math.PI, "w-curve alt faint");
+        P.curve(g, 0, 2 * Math.PI);
+        ui.readout.textContent = `∫ sin(${m}t)·sin(${n}t) over a period = ${fmt(M.productIntegral(m, n), 4)}${m === n ? " = π (same frequency)" : " (different frequencies cancel)"}`;
+      } else if (mode === "shift") {
+        // Overlay the second half (shifted back by π) on the first: odd n coincide, even n mirror.
+        const n = state.n;
+        const first = (t) => M.square(t) * Math.sin(n * t);
+        const second = (t) => M.square(t + Math.PI) * Math.sin(n * (t + Math.PI));
+        P.curve(first, 0.001, Math.PI - 0.001);
+        P.curve(second, 0.001, Math.PI - 0.001, "w-curve alt dashed");
+        const h = M.halfContributions(n);
+        ui.readout.textContent = n % 2
+          ? `n = ${n} (odd): the second half (dashed) lies exactly on the first, so the halves add: total ${fmt(h.total, 3)}`
+          : `n = ${n} (even): the second half (dashed) is the first flipped upside down, point by point, so the halves cancel: total ${fmt(h.total, 3)}`;
+      } else {
+        const N = state.N;
+        P.curve((t) => M.partialSum(N, t), span[0], span[1], "w-curve", zoom ? 600 : 480);
+        if (zoom) el("line", { x1: P.X(span[0]), x2: P.X(span[1]), y1: P.Y(1.179), y2: P.Y(1.179), class: "w-average" }, ui.svg);
+        ui.readout.textContent = zoom
+          ? `${N} sines: peak ${fmt(M.peakOf(N), 3)} (dashed line: 1.179, the limit it never drops below)`
+          : `${N} sine${N === 1 ? "" : "s"} (up to sin ${2 * N - 1}t): the sum hugs the square wave more closely everywhere except at the jumps.`;
+      }
+    };
+    const inputs = [];
+    const add = (...args) => inputs.push(slider(ui.controls, ...args));
+    const defaults = { single: { a: 1, n: 1 }, gap: { a: 1 }, product: { m: cfg.m ?? 2, n: cfg.n ?? 3 }, shift: { n: 2 }, partials: { N: 3 }, zoom: { N: 5 } }[mode];
+    if (mode === "single") { add("Height", 0, 1.6, 0.01, 1, (v) => { state.a = v; draw(); }); add("Wiggles per period", 1, 6, 1, 1, (v) => { state.n = v; draw(); }); }
+    if (mode === "gap") add("Height of sin t", 0, 1.8, 0.01, 1, (v) => { state.a = v; draw(); });
+    if (mode === "product") { add("First frequency m", 1, 5, 1, defaults.m, (v) => { state.m = v; draw(); }); add("Second frequency n", 1, 5, 1, defaults.n, (v) => { state.n = v; draw(); }); }
+    if (mode === "shift") add("Frequency n", 1, 6, 1, 2, (v) => { state.n = v; draw(); });
+    if (mode === "partials" || mode === "zoom") add("Number of sines", 1, 60, 1, defaults.N, (v) => { state.N = v; draw(); });
+    const init = () => { state = { ...defaults }; inputs.forEach((x, i) => (x.value = Object.values(defaults)[i])); draw(); };
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Parabola minimum: the square-wave error E(a) is a parabola; its lowest point is the best height.
+  W["parabola-min"] = function (box, cfg) {
+    const M = WidgetMath;
+    const ui = shell(box, cfg.prompt || (cfg.mode === "projection"
+      ? "The best height is (area of square·sin) ÷ (area of sin²). Move a and see why nothing beats it."
+      : "Drag a. The average squared gap traces a parabola; its lowest point is the best fit."));
+    let state;
+    const best = 4 / Math.PI;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, 0, 2.4, 0, 1.2);
+      P.curve(M.errorParabola, 0, 2.4);
+      const a = state.a, E = M.errorParabola(a), slope = a - 4 / Math.PI;
+      el("line", { x1: P.X(a - 0.4), x2: P.X(a + 0.4), y1: P.Y(E - 0.4 * slope), y2: P.Y(E + 0.4 * slope), class: "w-secant" }, ui.svg);
+      el("line", { x1: P.X(best), x2: P.X(best), y1: P.Y(0), y2: P.Y(M.errorParabola(best)), class: "w-average" }, ui.svg);
+      el("circle", { cx: P.X(a), cy: P.Y(E), r: 6, class: "w-point" }, ui.svg);
+      const t = el("text", { x: P.X(best) + 6, y: P.Y(0) - 8, class: "w-label" }, ui.svg);
+      t.textContent = "4/π";
+      ui.readout.textContent = cfg.mode === "projection"
+        ? `a = ${fmt(a, 3)}: E = ${fmt(E, 4)}. Best: ∫square·sin ÷ ∫sin² = 4 ÷ π = ${fmt(best, 4)}, where E bottoms out at ${fmt(M.errorParabola(best), 4)}.`
+        : `a = ${fmt(a, 3)}: average squared gap E = ${fmt(E, 4)}, slope dE/da = ${fmt(slope, 4)}${Math.abs(slope) < 0.005 ? " (flat: the minimum)" : ""}`;
+    };
+    const init = () => { state = { a: 1 }; ai.value = 1; draw(); };
+    const ai = slider(ui.controls, "Height a", 0, 2.4, 0.005, 1, (v) => { state.a = v; draw(); });
     ui.reset.addEventListener("click", init); init();
     return { reset: init };
   };

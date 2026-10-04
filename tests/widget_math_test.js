@@ -44,6 +44,19 @@ const sq = M.squeeze(0.5);
 check("squeeze: inner triangle ≤ sector ≤ outer triangle", sq.inner < sq.sector && sq.sector < sq.outer);
 check("squeeze: cos h ≤ sin h / h ≤ 1", Math.cos(0.5) <= Math.sin(0.5) / 0.5 && Math.sin(0.5) / 0.5 <= 1);
 check("angle addition matches the unit circle", near(M.unitPoint(0.7 + 0.4).y, Math.sin(0.7) * Math.cos(0.4) + Math.cos(0.7) * Math.sin(0.4), 1e-12));
+// Square wave
+check("∫ sin 2t sin 3t over a period ≈ 0", near(M.productIntegral(2, 3), 0, 1e-6));
+check("∫ sin² 3t over a period ≈ π", near(M.productIntegral(3, 3), Math.PI, 1e-6));
+check("square-wave gap is smallest at 4/π", (() => {
+  let best = 0, bestGap = Infinity;
+  for (let a = 0; a <= 2; a += 0.001) { const g = M.rmsGap(a); if (g < bestGap) { bestGap = g; best = a; } }
+  return near(best, 4 / Math.PI, 0.002);
+})());
+check("error parabola E(a) = a²/2 − 4a/π + 1", near(M.errorParabola(1), 0.5 - 4 / Math.PI + 1, 1e-12));
+check("even harmonics: the two halves cancel", near(M.halfContributions(2).total, 0, 1e-6));
+check("odd harmonics: the two halves add", near(M.halfContributions(3).total, 4 / 3, 1e-4));  // midpoint rule, 2000 strips
+check("partial sum at π/2 approaches 1", near(M.partialSum(200, Math.PI / 2), 1, 0.005));
+check("Gibbs peak stays near 1.179", near(M.peakOf(60), 1.179, 0.005));
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");

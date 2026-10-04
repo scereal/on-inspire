@@ -170,6 +170,41 @@ def ibp(page, base, c, label):
             page.click(".task .row button:text-is('Next problem')")
 
 
+SW_ENTRIES = ["sw-best-height", "sw-why-sin3t", "sw-pattern", "sw-gibbs"]
+
+
+def square_wave(page, base, c, label):
+    page.goto(f"{base}/math/square-wave/")
+    page.wait_for_selector("#task")
+    set_range = "(el, v) => { el.value = v; el.dispatchEvent(new Event('input')); }"
+    page.locator("input[type=range]").evaluate(set_range, "1.27")
+    page.click("text=Check my fit")
+    for i in range(4):
+        if i == 1:
+            page.click("text=sin 3t")
+            page.locator("input[type=range]").evaluate(set_range, "0.42")
+            page.click("text=Check my fit")
+        elif i == 2:
+            page.click(".choices button:text-is('0.25')")
+        elif i == 3:
+            page.click(".choices button:has-text('narrower')")
+        why = page.locator("#task .why-open")
+        c.ok(why.count() == 1, f"{label}: square wave step {i + 1} offers Why?")
+        if why.count():
+            why.click()
+            entry = page.evaluate("() => (window.CONCEPTS || []).find(x => x.id === %r)?.title" % SW_ENTRIES[i])
+            c.ok(entry and page.inner_text(".why-title") == entry, f"{label}: square wave step {i + 1} shows {SW_ENTRIES[i]}")
+            body = page.inner_text(".why-body")
+            c.ok("{{" not in body, f"{label}: square wave step {i + 1} fills its numbers")
+            if i == 0:
+                c.ok("1.27" in body, f"{label}: step 1 entry shows the page's 1.27")
+            page.click(".why-body .why-term >> nth=0")
+            c.ok(page.is_enabled(".why-back"), f"{label}: square wave step {i + 1} entry links deeper")
+            page.click(".why-close")
+        if i < 3:
+            page.click("#task button:text-is('Next step')")
+
+
 def main():
     base = serve()
     c, errors = Checker(), []
@@ -182,6 +217,7 @@ def main():
             page.unroute("**/why/concepts.js")
             two_cups(page, base, c, name)
             ibp(page, base, c, name)
+            square_wave(page, base, c, name)
             page.close()
 
         # Hostile environments: no localStorage, no KaTeX
