@@ -44,6 +44,47 @@
   "seed": 1,
   "tried": 767
  },
+ "mixing": {
+  "acceptance_rate": 0.2129,
+  "accepted": 310,
+  "framework": "mixing",
+  "levels": {
+   "1": {
+    "accepted": 50,
+    "rejected": {
+     "distinct": 45,
+     "duplicate": 69,
+     "exists": 20,
+     "findable": 49
+    },
+    "target": 50,
+    "tried": 233
+   },
+   "2": {
+    "accepted": 140,
+    "rejected": {
+     "duplicate": 22,
+     "plausible": 89
+    },
+    "target": 140,
+    "tried": 251
+   },
+   "3": {
+    "accepted": 120,
+    "rejected": {
+     "clean": 24,
+     "distinct": 683,
+     "duplicate": 4,
+     "exists": 44,
+     "plausible": 97
+    },
+    "target": 120,
+    "tried": 972
+   }
+  },
+  "seed": 1,
+  "tried": 1456
+ },
  "projectile": {
   "acceptance_rate": 0.3596,
   "accepted": 320,
