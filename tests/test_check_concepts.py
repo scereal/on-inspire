@@ -90,6 +90,21 @@ class CheckConceptsTest(unittest.TestCase):
         (d / "items.js").write_text('window.ITEMS = [{"title": "Pick u", "why": "ibp-pick-u"}];')
         self.assertEqual(cc.attach_calls([d / "index.html"]), {"ibp-pick-u": set()})
 
+    def test_main_fails_when_a_page_loses_its_wiring(self):
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        d = Path(tempfile.mkdtemp())
+        pages = []
+        for name in ("a", "b"):
+            (d / name).mkdir()
+            pages.append(d / name / "index.html")
+        pages[0].write_text('Why.attach(fb, "start", { A1: 1 });')
+        pages[1].write_text("<p>no wiring here</p>")
+        concepts = VALID + [node("other-entry", deeper=["base"], entry=True)]
+        with mock.patch.object(cc, "PAGES", pages), mock.patch.object(cc, "load", lambda: concepts):
+            self.assertEqual(cc.main(), 1)
+
     def test_unattached_entry(self):
         self.assertReports(self.broken(lambda c: c.append(node("loose", deeper=["base"], entry=True))), "entry 'loose' isn't attached to any page")
 

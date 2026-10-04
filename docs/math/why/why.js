@@ -70,6 +70,8 @@
     panel.className = "why-panel";
     panel.hidden = true;
     panel.setAttribute("aria-label", "Why is this the case?");
+    // Pages put feedback in aria-live regions; the panel opts out so it isn't re-read on every click.
+    panel.setAttribute("aria-live", "off");
     panel.addEventListener("click", (e) => {
       const t = e.target.closest("button");
       if (!t) return;

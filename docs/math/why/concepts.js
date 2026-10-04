@@ -272,7 +272,7 @@ window.CONCEPTS = [
   {
     "id": "diluting-multiplies",
     "title": "Diluting multiplies the strength",
-    "body": "Add water and the concentrate stays the same while the total grows. Double the volume with an equal amount of water and the same concentrate is spread through twice as much drink, so the [[strength]] is multiplied by $\\frac{1}{2}$, not reduced by a fixed amount.\n\nMore generally, going from volume $m$ to volume $M$ multiplies strength by $\\frac{m}{M}$: you're taking [[fraction-of-a-fraction|a fraction of a fraction]]. That's why diluting a $\\frac{1}{4}$ drink with equal water gives $\\frac{1}{8}$, not $\\frac{1}{4} - \\frac{1}{8}$ or some other subtraction.",
+    "body": "Add water and the concentrate stays the same while the total grows. Double the volume with an equal amount of water and the same concentrate is spread through twice as much drink, so the [[strength]] is multiplied by $\\frac{1}{2}$, not reduced by a fixed amount.\n\nMore generally, going from volume $m$ to volume $M$ multiplies strength by $\\frac{m}{M}$: you're taking [[fraction-of-a-fraction|a fraction of a fraction]]. That's why diluting a $\\frac{1}{4}$ drink with equal water gives $\\frac{1}{8}$: half of what it was, not $\\frac{1}{4}$ minus some fixed amount.",
     "math": [
       "s_{\\text{new}} = s \\times \\frac{m}{M}",
       "\\frac{1}{4} \\times \\frac{1}{2} = \\frac{1}{8}"
@@ -622,7 +622,7 @@ window.CONCEPTS = [
   {
     "id": "cos-h-minus-1-over-h",
     "title": "Why (cos h − 1) / h → 0",
-    "body": "Also $\\frac{0}{0}$ at $h = 0$. Multiply top and bottom by $\\cos h + 1$ and use $\\cos^2 h - 1 = -\\sin^2 h$: $\\frac{\\cos h - 1}{h} = -\\frac{\\sin h}{h}\\cdot\\frac{\\sin h}{\\cos h + 1}$.\n\nNow take the [[limit]] piece by piece. [[sin-h-over-h|sin h / h goes to 1]], and $\\frac{\\sin h}{\\cos h + 1}$ goes to $\\frac{0}{2} = 0$. So the whole thing goes to $-1 \\times 0 = 0$. Geometrically: near the top of the circle, cos barely changes, so its rate of change at 0 is zero.",
+    "body": "Also $\\frac{0}{0}$ at $h = 0$. Multiply top and bottom by $\\cos h + 1$ and use $\\cos^2 h - 1 = -\\sin^2 h$: $\\frac{\\cos h - 1}{h} = -\\frac{\\sin h}{h}\\cdot\\frac{\\sin h}{\\cos h + 1}$.\n\nNow take the [[limit]] piece by piece. [[sin-h-over-h|sin h / h goes to 1]], and $\\frac{\\sin h}{\\cos h + 1}$ goes to $\\frac{0}{2} = 0$. So the whole thing goes to $-1 \\times 0 = 0$. Geometrically: at angle 0 the point sits at $(1, 0)$, the right-hand end of the circle, where cos is at its maximum. Near a maximum a curve is flat, so cos's rate of change at 0 is zero.",
     "math": [
       "\\frac{\\cos h - 1}{h} = -\\frac{\\sin h}{h}\\cdot\\frac{\\sin h}{\\cos h + 1} \\to -1 \\cdot 0 = 0"
     ],
@@ -653,7 +653,7 @@ window.CONCEPTS = [
   {
     "id": "angle-addition",
     "title": "The angle-addition formulas",
-    "body": "On the [[unit-circle|unit circle]], turning by $a$ and then by $b$ is the same as turning by $a + b$. Work out where the point lands in two ways. Directly, it's at $(\\cos(a+b), \\sin(a+b))$. Or start from the point at angle $a$ and rotate it by $b$: rotating a point $(x, y)$ by $b$ gives $(x\\cos b - y\\sin b,\\ x\\sin b + y\\cos b)$.\n\nSet the two equal and you get the formulas below. They're the engine behind the derivative of sine and cosine, and behind the product-to-sum identities used in Fourier series.",
+    "body": "On the [[unit-circle|unit circle]], turning by $a$ and then by $b$ is the same as turning by $a + b$. Work out where the point lands in two ways. Directly, it's at $(\\cos(a+b), \\sin(a+b))$. Or start from the point at angle $a$ and rotate it by $b$. Rotating by $b$ sends the arrow to $(1, 0)$ to $(\\cos b, \\sin b)$ and the arrow to $(0, 1)$ to $(-\\sin b, \\cos b)$ (it's the first arrow turned a quarter turn further). Rotation keeps sums and stretches of arrows, and $(x, y)$ is $x$ copies of $(1, 0)$ plus $y$ copies of $(0, 1)$, so it lands at $(x\\cos b - y\\sin b,\\ x\\sin b + y\\cos b)$.\n\nSet the two equal and you get the formulas below. They're the engine behind the derivative of sine and cosine, and behind the product-to-sum identities used in Fourier series.",
     "math": [
       "\\sin(a+b) = \\sin a\\cos b + \\cos a \\sin b",
       "\\cos(a+b) = \\cos a\\cos b - \\sin a \\sin b"
@@ -1576,7 +1576,7 @@ window.CONCEPTS = [
     "id": "sw-gibbs",
     "entry": true,
     "title": "Why doesn't the overshoot go away?",
-    "body": "The [[partial-sums|partial sums]] do converge: at every point away from a jump they settle on the square wave. But right next to the jump each sum overshoots, and as you add sines the horn only gets narrower, not lower. Its peak settles near {{peak}}, about 9% of the jump. That's the [[gibbs|Gibbs phenomenon]]: smooth waves can't make a sharp corner without ringing.",
+    "body": "The [[partial-sums|partial sums]] do converge: at every point away from a jump they settle on the square wave. But right next to the jump each sum overshoots, and as you add sines the horn only gets narrower, not lower. Its peak settles near {{peak}}, overshooting by about 9% of the jump. That's the [[gibbs|Gibbs phenomenon]]: smooth waves can't make a sharp corner without ringing.",
     "widget": {
       "type": "wave-mixer",
       "mode": "zoom",

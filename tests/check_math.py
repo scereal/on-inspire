@@ -82,7 +82,7 @@ print("  " + (result.stdout.strip().splitlines() or [""])[-1])
 if result.returncode:
     print(result.stdout + result.stderr)
 check("concept network and claims", result.returncode == 0)
-result = subprocess.run([sys.executable, "-m", "unittest", "tests.test_check_concepts"], cwd=ROOT, capture_output=True, text=True)
+result = subprocess.run([sys.executable, "-m", "unittest", "tests.test_check_concepts", "tests.test_concept_content"], cwd=ROOT, capture_output=True, text=True)
 check("concept checker tests", result.returncode == 0)
 
 # Problem generator --------------------------------------------------------------

@@ -70,6 +70,9 @@ def panel_tests(page, base, c, label):
     c.ok("Value is 7" in page.inner_text(".why-panel .why-body"), f"{label}: entry variables filled in")
     c.ok(page.is_disabled(".why-back"), f"{label}: Back disabled at the first concept")
     c.ok(page.evaluate("document.activeElement.classList.contains('why-title')"), f"{label}: focus on the title")
+    c.ok(page.evaluate("""() => { let n = document.querySelector('.why-panel');
+        for (; n; n = n.parentElement) { const v = n.getAttribute('aria-live'); if (v) return v === 'off'; } return true; }"""),
+         f"{label}: the panel isn't announced as a live region")
 
     page.click(".why-body [data-concept='a']")                      # a term in the text
     c.ok(title(page) == "Title a", f"{label}: term opens its concept")
@@ -161,6 +164,9 @@ def ibp(page, base, c, label):
         c.ok(why.count() == 1, f"{label}: IBP problem {i + 1} offers Why?")
         if why.count():
             why.click()
+            c.ok(page.evaluate("""() => { let n = document.querySelector('.why-panel');
+                for (; n; n = n.parentElement) { const v = n.getAttribute('aria-live'); if (v) return v === 'off'; } return true; }"""),
+                 f"{label}: IBP problem {i + 1} panel isn't announced as a live region")
             entry = page.evaluate("() => (window.CONCEPTS || []).find(x => x.id === %r)?.title" % IBP_ENTRIES[i])
             c.ok(entry and page.inner_text(".why-title") == entry, f"{label}: IBP problem {i + 1} shows {IBP_ENTRIES[i]}")
             page.click(".why-body .why-term >> nth=0")
@@ -179,6 +185,7 @@ def square_wave(page, base, c, label):
     set_range = "(el, v) => { el.value = v; el.dispatchEvent(new Event('input')); }"
     page.locator("input[type=range]").evaluate(set_range, "1.27")
     page.click("text=Check my fit")
+    c.ok(page.is_disabled("#task button:text-is('Check my fit')"), f"{label}: square wave Check is disabled after success")
     for i in range(4):
         if i == 1:
             page.click("text=sin 3t")
@@ -216,7 +223,16 @@ def atlas(page, base, c, label):
     c.ok(page.is_visible(".why-panel") and page.inner_text(".why-title") == next(x["title"] for x in concepts if x["id"] == "limit"),
          f"{label}: clicking a map node opens it")
     page.click(".why-close")
+    page.click(".atlas-map [data-node='sw-best-height']")
+    c.ok("{{" not in page.inner_text(".why-body"), f"{label}: atlas entries show example numbers, not {{{{A1}}}}")
+    page.click(".why-close")
     if label != "desktop":
+        wide = []
+        for concept in concepts:
+            page.evaluate("(id) => Why.open(id)", concept["id"])
+            if page.evaluate("document.documentElement.scrollWidth") > page.viewport_size["width"]:
+                wide.append(concept["id"])
+        c.ok(not wide, f"{label}: every widget fits without sideways scroll (overflowing: {wide})")
         return
     for concept in concepts:  # every widget renders and responds once
         page.evaluate("(id) => Why.open(id)", concept["id"])

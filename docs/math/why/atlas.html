@@ -51,6 +51,8 @@
   <script>
     (function () {
       const all = window.CONCEPTS || [];
+      // Entries normally get these numbers from their page; the atlas shows the square wave's values.
+      const EXAMPLE = { A1: "1.27", A3: "0.42", peak: "1.18" };
       const sections = [
         ["Questions on the pages", (c) => c.entry],
         ["Ideas", (c) => !c.entry && !c.foundation],
@@ -82,7 +84,7 @@
           b.dataset.node = c.id;
           b.className = c.entry ? "entry" : c.foundation ? "foundation" : "";
           b.textContent = c.title;
-          b.addEventListener("click", () => Why.open(c.id, {}, b));
+          b.addEventListener("click", () => Why.open(c.id, EXAMPLE, b));
           row.append(b);
           nodes[c.id] = b;
         }
@@ -124,7 +126,7 @@
           b.type = "button";
           b.dataset.open = c.id;
           b.textContent = "Open";
-          b.addEventListener("click", () => Why.open(c.id, {}, b));
+          b.addEventListener("click", () => Why.open(c.id, EXAMPLE, b));
           li.append(b);
           ul.append(li);
         }

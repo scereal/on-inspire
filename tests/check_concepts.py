@@ -155,12 +155,11 @@ def verify_claims(concepts):
 
 def main():
     concepts = load()
-    calls = attach_calls()
-    # Orphans can only be judged once every page has wired in its entries
-    pages_wired = all(attach_calls([page]) for page in PAGES)
-    found = problems(concepts, calls, require_reachable=pages_wired) + verify_claims(concepts)
-    if not pages_wired:
-        print("note: orphan check skipped until all three pages attach their entries")
+    calls = attach_calls(PAGES)
+    found = problems(concepts, calls) + verify_claims(concepts)
+    for page in PAGES:
+        if not attach_calls([page]):
+            found.append(f"{page.parent.name}: page attaches no 'Why?' entries")
     for line in found:
         print("FAIL", line)
     entries = sum(1 for c in concepts if c.get("entry"))
