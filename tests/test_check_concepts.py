@@ -20,7 +20,7 @@ def node(id, deeper=(), related=(), foundation=False, body=None, entry=False, wi
 
 
 VALID = [
-    node("start", deeper=["middle"], entry=True, body="Height is {A1} because of [[middle|the middle idea]]."),
+    node("start", deeper=["middle"], entry=True, body="Height is {{A1}} because of [[middle|the middle idea]], and $\\frac{d}{dx}$ is not a variable."),
     node("middle", deeper=["base"], related=["side"], body="Built on [[base]], compare [[side]]."),
     node("side", deeper=["base"]),
     node("base", foundation=True, claims=[{"sympy": "integrate(sin(x), (x, 0, pi))", "equals": "2"}]),
@@ -77,10 +77,18 @@ class CheckConceptsTest(unittest.TestCase):
         self.assertReports(self.broken(lambda c: c[1].pop("widget")), "no widget")
 
     def test_entry_variable_not_supplied(self):
-        self.assertReports(self.broken(lambda c: None, attach={"start": set()}), "{A1} is not supplied")
+        self.assertReports(self.broken(lambda c: None, attach={"start": set()}), "variable 'A1' is not supplied")
 
     def test_attach_to_unknown_entry(self):
         self.assertReports(self.broken(lambda c: None, attach={"start": {"A1"}, "nope": set()}), "page attaches unknown entry 'nope'")
+
+    def test_attach_ids_from_sibling_json(self):
+        import tempfile
+        from pathlib import Path
+        d = Path(tempfile.mkdtemp())
+        (d / "index.html").write_text('<script src="items.js"></script> Why.attach(fb, item.why);')
+        (d / "items.js").write_text('window.ITEMS = [{"title": "Pick u", "why": "ibp-pick-u"}];')
+        self.assertEqual(cc.attach_calls([d / "index.html"]), {"ibp-pick-u": set()})
 
     def test_unattached_entry(self):
         self.assertReports(self.broken(lambda c: c.append(node("loose", deeper=["base"], entry=True))), "entry 'loose' isn't attached to any page")

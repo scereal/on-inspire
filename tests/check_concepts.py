@@ -15,7 +15,7 @@ WIDGETS = {"secant", "limit-zoom", "riemann", "accumulator", "unit-circle", "wav
            "product-rectangle", "chain-stretch", "derivative-ladder", "fraction-bar"}
 REQUIRED = ("id", "title", "body", "deeper", "related", "foundation")
 TERM = re.compile(r"\[\[([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
-VAR = re.compile(r"\{([A-Za-z_]\w*)\}")
+VAR = re.compile(r"\{\{([A-Za-z_]\w*)\}\}")  # {{name}}: single braces belong to LaTeX
 
 
 def load(path=CONCEPTS):
@@ -30,10 +30,13 @@ def attach_calls(page_paths=PAGES):
         text = Path(path).read_text(encoding="utf-8")
         for entry, obj in pattern.findall(text):
             calls.setdefault(entry, set()).update(re.findall(r"([A-Za-z_]\w*)\s*:", obj or ""))
-        # Step data that names its entry (why: "id"), attached by a generic Why.attach(el, step.why) call
+        # Step data that names its entry (why: "id"), attached by a generic Why.attach(el, step.why) call.
+        # The data may live in the page or in a script beside it (e.g. items.js).
         if re.search(r"Why\.attach\(\s*[^,]+,\s*[A-Za-z_][\w.]*\.why\s*\)", text):
-            for entry in re.findall(r'\bwhy:\s*"([^"]+)"', text):
-                calls.setdefault(entry, set())
+            sources = [text] + [p.read_text(encoding="utf-8") for p in sorted(Path(path).parent.glob("*.js"))]
+            for source in sources:
+                for entry in re.findall(r'"?\bwhy"?\s*:\s*"([^"]+)"', source):
+                    calls.setdefault(entry, set())
     return calls
 
 
@@ -75,7 +78,7 @@ def problems(concepts, attach, require_reachable=True):
         if c.get("entry"):
             for var in sorted(set(VAR.findall(c.get("body", "")))):
                 if var not in attach.get(cid, set()):
-                    found.append(f"entry '{cid}': {{{var}}} is not supplied by its page")
+                    found.append(f"entry '{cid}': variable '{var}' is not supplied by its page")
 
     for entry in sorted(attach):
         if entry not in by_id or not by_id[entry].get("entry"):

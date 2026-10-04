@@ -468,5 +468,656 @@ window.CONCEPTS = [
     ],
     "related": [],
     "foundation": false
+  },
+  {
+    "id": "derivative",
+    "title": "The derivative is the limit of slopes",
+    "body": "The slope of a straight line is rise over run. A curve has no single slope, but you can draw a line through two of its points, $x$ and $x + h$, and take that line's slope: $\\frac{f(x+h) - f(x)}{h}$. That line is a secant.\n\nNow slide the second point toward the first. As $h$ shrinks, the secant swings into the tangent, the line that just touches the curve at $x$. The derivative is the [[limit]] of those slopes. It tells you how fast the [[function]]'s output is changing at that exact input. It's the reverse of finding [[integral-as-area|area]].",
+    "math": [
+      "f'(x) = \\lim_{h\\to 0} \\frac{f(x+h) - f(x)}{h}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "square",
+      "x0": 1,
+      "prompt": "Shrink h. The secant's slope settles on 2, the slope of x² at x = 1."
+    },
+    "deeper": [
+      "limit",
+      "function"
+    ],
+    "related": [
+      "integral-as-area"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(((1 + h)**2 - 1)/h, h, 0)",
+        "equals": "2"
+      }
+    ]
+  },
+  {
+    "id": "integral-as-area",
+    "title": "The integral is area, built from thin rectangles",
+    "body": "To find the area under a curve, cut it into thin vertical strips. Each strip is almost a rectangle, and [[area-shapes|a rectangle's area is width times height]], so add up $f(x_i)\\,\\Delta x$ for all of them. That sum is close but not exact, because the curve's top isn't flat.\n\nUse more, thinner strips and the error shrinks. The integral is the [[limit]] of that sum as the strips get infinitely thin: $\\int_a^b f(x)\\,dx$. The $\\int$ is a stretched S for \"sum\", and $dx$ stands for the vanishing width. Area below the axis counts as negative. It's the reverse of the [[derivative]].",
+    "math": [
+      "\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty} \\sum_{i=1}^{n} f(x_i)\\,\\Delta x"
+    ],
+    "widget": {
+      "type": "riemann",
+      "f": "square",
+      "a": 0,
+      "b": 1,
+      "n": 4,
+      "prompt": "Add rectangles. The total closes in on the exact area under x² from 0 to 1, which is 1/3."
+    },
+    "deeper": [
+      "limit",
+      "area-shapes"
+    ],
+    "related": [
+      "derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(x**2, (x, 0, 1))",
+        "equals": "Rational(1, 3)"
+      },
+      {
+        "sympy": "limit(Sum(((k + Rational(1, 2))/n)**2/n, (k, 0, n - 1)).doit(), n, oo)",
+        "equals": "Rational(1, 3)"
+      }
+    ]
+  },
+  {
+    "id": "ftc",
+    "title": "The fundamental theorem: area grows at the rate of the height",
+    "body": "Let $A(x)$ be the area under $f$ from a fixed start up to $x$. Move $x$ a tiny step $h$ to the right and you add one thin strip, about $f(x)$ tall and $h$ wide. So $\\frac{A(x+h) - A(x)}{h} \\approx f(x)$, and in the limit the [[derivative]] of the area function is the height: $A'(x) = f(x)$.\n\nThat links the two halves of calculus. To find an [[integral-as-area|area]], find any function whose derivative is $f$ (an antiderivative $F$), then subtract: $\\int_a^b f = F(b) - F(a)$. Differentiating and integrating undo each other, up to [[antiderivative-plus-c|a constant]].",
+    "math": [
+      "\\frac{d}{dx}\\int_a^x f(t)\\,dt = f(x)",
+      "\\int_a^b f(x)\\,dx = F(b) - F(a)"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "prompt": "Sweep x. The slope of the area graph always matches the height of cos x."
+    },
+    "deeper": [
+      "derivative",
+      "integral-as-area"
+    ],
+    "related": [
+      "antiderivative-plus-c"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(integrate(cos(t), (t, 0, x)), x)",
+        "equals": "cos(x)"
+      }
+    ]
+  },
+  {
+    "id": "antiderivative-plus-c",
+    "title": "Antiderivatives come with a + C",
+    "body": "An antiderivative of $f$ is any function whose [[derivative]] is $f$. But adding a constant doesn't change slopes: $\\sin x$, $\\sin x + 5$ and $\\sin x - 2$ all have derivative $\\cos x$. Shifting a graph up or down leaves every slope the same.\n\nIs that the only freedom? Yes. If two functions have the same derivative everywhere, their difference has derivative 0, and a function whose slope is zero everywhere can't rise or fall, so it's a constant. That's why every indefinite integral ends with $+ C$, and why [[ftc|the fundamental theorem]] can use any antiderivative: the constant cancels in $F(b) - F(a)$.",
+    "math": [
+      "\\int \\cos x\\,dx = \\sin x + C"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "mode": "shift",
+      "prompt": "Shift the antiderivative up and down. The slope at x never changes."
+    },
+    "deeper": [
+      "derivative",
+      "ftc"
+    ],
+    "related": [
+      "check-by-differentiating"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sin(x) + 5, x)",
+        "equals": "cos(x)"
+      }
+    ]
+  },
+  {
+    "id": "sin-h-over-h",
+    "title": "Why sin h / h → 1 as h → 0",
+    "body": "Plug in $h = 0$ and you get $\\frac{0}{0}$, so we need a [[limit]]. On the [[unit-circle|unit circle]], take a small angle $h$ and compare three shapes that share a corner at the centre. A triangle inside the circular wedge has area $\\frac{1}{2}\\sin h$. The wedge (sector) itself has area $\\frac{1}{2}h$, because a full circle of area $\\pi$ spans $2\\pi$ radians. A triangle reaching out to the tangent line has area $\\frac{1}{2}\\tan h$. They're nested, so their [[area-shapes|areas]] are in order: $\\sin h \\le h \\le \\tan h$.\n\nDivide through by $\\sin h$ and flip: $\\cos h \\le \\frac{\\sin h}{h} \\le 1$. As $h \\to 0$, $\\cos h \\to 1$, so $\\frac{\\sin h}{h}$ is squeezed between two things heading to 1. It has nowhere else to go. Its cousin [[cos-h-minus-1-over-h|(cos h − 1)/h → 0]] follows from this one.",
+    "math": [
+      "\\sin h \\le h \\le \\tan h",
+      "\\cos h \\le \\frac{\\sin h}{h} \\le 1"
+    ],
+    "widget": {
+      "type": "unit-circle",
+      "mode": "squeeze",
+      "prompt": "Shrink h. The three areas pinch together, and sin h / h is squeezed toward 1."
+    },
+    "deeper": [
+      "limit",
+      "unit-circle",
+      "area-shapes"
+    ],
+    "related": [
+      "cos-h-minus-1-over-h"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(sin(h)/h, h, 0)",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "cos-h-minus-1-over-h",
+    "title": "Why (cos h − 1) / h → 0",
+    "body": "Also $\\frac{0}{0}$ at $h = 0$. Multiply top and bottom by $\\cos h + 1$ and use $\\cos^2 h - 1 = -\\sin^2 h$: $\\frac{\\cos h - 1}{h} = -\\frac{\\sin h}{h}\\cdot\\frac{\\sin h}{\\cos h + 1}$.\n\nNow take the [[limit]] piece by piece. [[sin-h-over-h|sin h / h goes to 1]], and $\\frac{\\sin h}{\\cos h + 1}$ goes to $\\frac{0}{2} = 0$. So the whole thing goes to $-1 \\times 0 = 0$. Geometrically: near the top of the circle, cos barely changes, so its rate of change at 0 is zero.",
+    "math": [
+      "\\frac{\\cos h - 1}{h} = -\\frac{\\sin h}{h}\\cdot\\frac{\\sin h}{\\cos h + 1} \\to -1 \\cdot 0 = 0"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "cosh_minus_1_over_h",
+      "at": 0,
+      "limit": 0,
+      "prompt": "Zoom in toward h = 0. The values flatten out at 0."
+    },
+    "deeper": [
+      "sin-h-over-h",
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((cos(h) - 1)/h, h, 0)",
+        "equals": "0"
+      },
+      {
+        "sympy": "simplify((cos(h) - 1)/h + sin(h)/h*sin(h)/(cos(h) + 1))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "angle-addition",
+    "title": "The angle-addition formulas",
+    "body": "On the [[unit-circle|unit circle]], turning by $a$ and then by $b$ is the same as turning by $a + b$. Work out where the point lands in two ways. Directly, it's at $(\\cos(a+b), \\sin(a+b))$. Or start from the point at angle $a$ and rotate it by $b$: rotating a point $(x, y)$ by $b$ gives $(x\\cos b - y\\sin b,\\ x\\sin b + y\\cos b)$.\n\nSet the two equal and you get the formulas below. They're the engine behind the derivative of sine and cosine, and behind the product-to-sum identities used in Fourier series.",
+    "math": [
+      "\\sin(a+b) = \\sin a\\cos b + \\cos a \\sin b",
+      "\\cos(a+b) = \\cos a\\cos b - \\sin a \\sin b"
+    ],
+    "widget": {
+      "type": "unit-circle",
+      "mode": "two-angle",
+      "prompt": "Change a and b. The point at a + b always matches the formula."
+    },
+    "deeper": [
+      "unit-circle"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(sin(a + b) - (sin(a)*cos(b) + cos(a)*sin(b)))",
+        "equals": "0"
+      },
+      {
+        "sympy": "simplify(cos(a + b) - (cos(a)*cos(b) - sin(a)*sin(b)))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-sin-cos",
+    "title": "Why the derivative of sin is cos (and of cos is −sin)",
+    "body": "Use the [[derivative|definition]]: $\\frac{\\sin(x+h) - \\sin x}{h}$. Expand with [[angle-addition|angle addition]]: $\\sin(x+h) = \\sin x\\cos h + \\cos x\\sin h$. Regroup to get $\\sin x\\cdot\\frac{\\cos h - 1}{h} + \\cos x\\cdot\\frac{\\sin h}{h}$.\n\nAs $h \\to 0$, [[cos-h-minus-1-over-h|the first fraction goes to 0]] and [[sin-h-over-h|the second goes to 1]]. What's left is $\\cos x$. The same steps with $\\cos(x+h) = \\cos x\\cos h - \\sin x\\sin h$ give $-\\sin x$. So differentiating cycles: sin → cos → −sin → −cos → sin.",
+    "math": [
+      "\\frac{d}{dx}\\sin x = \\cos x",
+      "\\frac{d}{dx}\\cos x = -\\sin x"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "sin",
+      "x0": 0.8,
+      "prompt": "Shrink h at x = 0.8. The slope heads to cos(0.8) ≈ 0.697."
+    },
+    "deeper": [
+      "derivative",
+      "angle-addition",
+      "sin-h-over-h",
+      "cos-h-minus-1-over-h"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sin(x), x)",
+        "equals": "cos(x)"
+      },
+      {
+        "sympy": "diff(cos(x), x)",
+        "equals": "-sin(x)"
+      }
+    ]
+  },
+  {
+    "id": "product-rule",
+    "title": "The product rule",
+    "body": "Think of $u(x)\\,v(x)$ as the area of a rectangle with sides $u$ and $v$. Nudge $x$ and both sides grow a little, by $du$ and $dv$. The new area is the old one plus a strip $u\\,dv$ along one side, a strip $v\\,du$ along the other, and a tiny corner $du\\,dv$.\n\nDivide by the step and take the [[limit]]: the strips give $u v' + v u'$, while the corner is a product of two small things, so it shrinks faster than the step and drops out. That's the [[derivative]] of a product. Run it backwards and you get integration by parts. It sits alongside the [[chain-rule|chain rule]], the other way of combining functions.",
+    "math": [
+      "(uv)' = u'v + uv'"
+    ],
+    "widget": {
+      "type": "product-rectangle",
+      "prompt": "Shrink the change. The two strips dominate and the corner vanishes."
+    },
+    "deeper": [
+      "derivative",
+      "limit"
+    ],
+    "related": [
+      "chain-rule"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(x*exp(x), x)",
+        "equals": "exp(x) + x*exp(x)"
+      }
+    ]
+  },
+  {
+    "id": "chain-rule",
+    "title": "The chain rule: squeezing a curve multiplies its slopes",
+    "body": "Compare $g(x)$ with $g(ax)$. The second runs through the same values $a$ times faster: it's the same curve squeezed horizontally by a factor of $a$. Squeezing a hill makes it $a$ times steeper, so the slope of $g(ax)$ at $x$ is $a$ times the slope of $g$ at $ax$: $\\frac{d}{dx}g(ax) = a\\,g'(ax)$.\n\nIn general, if $x$ feeds into an inside function and its output feeds into $f$, the rates multiply: $\\frac{d}{dx}f(g(x)) = f'(g(x))\\,g'(x)$. It's a [[derivative]] fact. Together with the [[product-rule|product rule]] it handles almost every combination of functions.",
+    "math": [
+      "\\frac{d}{dx}\\,g(ax) = a\\,g'(ax)",
+      "\\frac{d}{dx}\\,f(g(x)) = f'(g(x))\\,g'(x)"
+    ],
+    "widget": {
+      "type": "chain-stretch",
+      "f": "sin",
+      "a": 2,
+      "prompt": "Change the squeeze factor a. The slope at x₀ is a times the original slope."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "product-rule"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sin(3*x), x)",
+        "equals": "3*cos(3*x)"
+      }
+    ]
+  },
+  {
+    "id": "power-rule",
+    "title": "The power rule: the derivative of xⁿ is n xⁿ⁻¹",
+    "body": "Expand $(x+h)^n$: it's $x^n + n x^{n-1}h$ plus terms that contain $h^2$ or higher powers. For $n = 3$: $(x+h)^3 = x^3 + 3x^2 h + 3x h^2 + h^3$.\n\nSo the secant slope $\\frac{(x+h)^n - x^n}{h} = n x^{n-1} + (\\text{terms with } h)$, and as $h \\to 0$ only $n x^{n-1}$ survives: that's the [[derivative]]. Each differentiation lowers the power by one, so after enough steps a polynomial becomes a constant and then 0. That's exactly why [[polynomial-as-u|the polynomial should be u]] in integration by parts.",
+    "math": [
+      "\\frac{d}{dx}x^n = n x^{n-1}",
+      "(x+h)^3 = x^3 + 3x^2h + 3xh^2 + h^3"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "cube",
+      "x0": 1,
+      "prompt": "Shrink h at x = 1. The slope of x³ heads to 3·1² = 3."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "polynomial-as-u"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(x**3, x)",
+        "equals": "3*x**2"
+      },
+      {
+        "sympy": "expand((x + h)**3)",
+        "equals": "x**3 + 3*x**2*h + 3*x*h**2 + h**3"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-exp",
+    "title": "Why eˣ is its own derivative",
+    "body": "For any base $b$, $\\frac{b^{x+h} - b^x}{h} = b^x\\cdot\\frac{b^h - 1}{h}$, so the slope of $b^x$ is $b^x$ times a constant, the [[limit]] of $\\frac{b^h - 1}{h}$. For $b = 2$ that constant is about 0.69; for $b = 3$ it's about 1.10.\n\nSomewhere between 2 and 3 there's a base where the constant is exactly 1. That number is $e \\approx 2.718$, and for it the [[derivative]] of $e^x$ is $e^x$ itself: the function's slope always equals its height. Combined with the chain rule, $\\frac{d}{dx}e^{ax} = a\\,e^{ax}$.",
+    "math": [
+      "\\lim_{h\\to 0}\\frac{e^h - 1}{h} = 1",
+      "\\frac{d}{dx}e^x = e^x"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "exph_minus_1_over_h",
+      "at": 0,
+      "limit": 1,
+      "prompt": "Zoom in toward h = 0. (eʰ − 1)/h settles at exactly 1."
+    },
+    "deeper": [
+      "derivative",
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(exp(x), x)",
+        "equals": "exp(x)"
+      },
+      {
+        "sympy": "limit((exp(h) - 1)/h, h, 0)",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "parts-is-product-rule-backwards",
+    "title": "Integration by parts is the product rule run backwards",
+    "body": "The [[product-rule|product rule]] says $(uv)' = u'v + uv'$. Integrate both sides. The left side is the integral of a derivative, so by [[ftc|the fundamental theorem]] it's just $uv$. The right side splits in two: $uv = \\int v\\,du + \\int u\\,dv$.\n\nRearranged, that's $\\int u\\,dv = uv - \\int v\\,du$. Geometrically, the two integrals are two regions that together fill the rectangle $uv$. You trade the integral you can't do for one you can, which is why choosing $u$ well matters. The minus sign comes from moving one region to the other side; see [[minus-sign-in-parts|where the minus comes from]].",
+    "math": [
+      "\\int u\\,dv = uv - \\int v\\,du"
+    ],
+    "widget": {
+      "type": "product-rectangle",
+      "mode": "parts",
+      "prompt": "Move the end point. The two regions always add up to the rectangle uv."
+    },
+    "deeper": [
+      "product-rule",
+      "ftc"
+    ],
+    "related": [
+      "minus-sign-in-parts"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(integrate(x*cos(x), x) - (x*sin(x) - integrate(sin(x), x)))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "minus-sign-in-parts",
+    "title": "Where the minus sign in uv − ∫v du comes from",
+    "body": "Start from [[parts-is-product-rule-backwards|uv = ∫u dv + ∫v du]]. The two integrals are pieces of one rectangle, and together they make the whole. To isolate the piece you want, subtract the other piece from the whole: $\\int u\\,dv = uv - \\int v\\,du$.\n\nSo the minus isn't a convention to memorize; it's \"whole minus the other part\". Writing a plus there double-counts the second region, which is why a flipped sign always gives an answer that fails the differentiation check.",
+    "math": [
+      "uv = \\int u\\,dv + \\int v\\,du \\;\\Longrightarrow\\; \\int u\\,dv = uv - \\int v\\,du"
+    ],
+    "widget": {
+      "type": "product-rectangle",
+      "mode": "parts",
+      "prompt": "Read the gold region as 'whole rectangle minus teal'. That's the minus sign."
+    },
+    "deeper": [
+      "parts-is-product-rule-backwards"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(integrate(log(x), x) - (x*log(x) - integrate(1, x)))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "polynomial-as-u",
+    "title": "Why the polynomial should be u",
+    "body": "Integration by parts swaps $\\int u\\,dv$ for $\\int v\\,du$. It only helps if the new integral is simpler. Differentiating a polynomial lowers its power by one ([[power-rule|the power rule]]), so with $u = x^n$ the new integral has $x^{n-1}$, then $x^{n-2}$, until the power reaches 0 and the integral is easy. That takes exactly $n$ rounds.\n\nMeanwhile $e^{ax}$, $\\sin$ and $\\cos$ never get simpler when integrated: they just stay exponentials or cycle between sin and cos. So they belong in $dv$, where they're integrated without harm. Choose the other way round and the power of $x$ goes up instead. Each round is one application of [[parts-is-product-rule-backwards|uv − ∫v du]].",
+    "math": [
+      "x^3 \\to 3x^2 \\to 6x \\to 6 \\to 0"
+    ],
+    "widget": {
+      "type": "derivative-ladder",
+      "prompt": "Differentiate repeatedly. Only the polynomial ever reaches 0."
+    },
+    "deeper": [
+      "power-rule",
+      "parts-is-product-rule-backwards"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(x**3, x, 4)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "one-over-a",
+    "title": "Why integrating g(ax) brings out 1/a",
+    "body": "The [[chain-rule|chain rule]] says differentiating $G(ax)$ gives $a\\,G'(ax)$: an extra factor of $a$. So if $G$ is an antiderivative of $g$, then $\\frac{1}{a}G(ax)$ differentiates to exactly $g(ax)$. That's the [[antiderivative-plus-c|antiderivative]]: $\\int g(ax)\\,dx = \\frac{1}{a}G(ax) + C$.\n\nIn pictures: $g(ax)$ is $g$ squeezed $a$ times narrower, so every area under it is $a$ times smaller. That's why $\\int e^{3x}dx = \\frac{1}{3}e^{3x}$ and $\\int \\cos 2x\\,dx = \\frac{1}{2}\\sin 2x$. Forgetting the $\\frac{1}{a}$ is the most common slip in integration, along with [[integral-of-sin|sign errors on sin and cos]].",
+    "math": [
+      "\\int g(ax)\\,dx = \\frac{1}{a}\\,G(ax) + C"
+    ],
+    "widget": {
+      "type": "chain-stretch",
+      "f": "sin",
+      "a": 2,
+      "mode": "area",
+      "prompt": "Change a. One hump's area is always 2 ÷ a."
+    },
+    "deeper": [
+      "chain-rule",
+      "antiderivative-plus-c"
+    ],
+    "related": [
+      "integral-of-sin"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(exp(3*x), x)",
+        "equals": "exp(3*x)/3"
+      },
+      {
+        "sympy": "integrate(cos(2*x), x)",
+        "equals": "sin(2*x)/2"
+      }
+    ]
+  },
+  {
+    "id": "integral-of-sin",
+    "title": "Why ∫ sin x dx = −cos x",
+    "body": "We need a function whose derivative is $\\sin x$. From [[derivative-of-sin-cos|the derivatives of sin and cos]], $\\frac{d}{dx}\\cos x = -\\sin x$, so $\\frac{d}{dx}(-\\cos x) = \\sin x$. That makes $-\\cos x$ an [[antiderivative-plus-c|antiderivative]]: $\\int \\sin x\\,dx = -\\cos x + C$.\n\nThe minus sign is easy to drop. Check the picture: from 0 to $\\pi$, $\\sin x$ is positive, so the area must be positive. $-\\cos\\pi - (-\\cos 0) = 1 + 1 = 2$. A plus sign would give $-2$, a negative area for a positive curve. With [[one-over-a|a squeezed sine]], also remember the 1/a.",
+    "math": [
+      "\\int \\sin x\\,dx = -\\cos x + C",
+      "\\int_0^{\\pi}\\sin x\\,dx = 2"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "sin",
+      "prompt": "Sweep x from 0 to π. The area climbs to 2, the shape of −cos x shifted up by 1."
+    },
+    "deeper": [
+      "derivative-of-sin-cos",
+      "antiderivative-plus-c"
+    ],
+    "related": [
+      "one-over-a"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(sin(x), x)",
+        "equals": "-cos(x)"
+      },
+      {
+        "sympy": "integrate(sin(x), (x, 0, pi))",
+        "equals": "2"
+      }
+    ]
+  },
+  {
+    "id": "check-by-differentiating",
+    "title": "Check any integral by differentiating it",
+    "body": "Integrating can be hard; differentiating is mechanical. And by [[ftc|the fundamental theorem]], they undo each other: if $F$ is right, then $F' = f$ exactly. So after any integration, differentiate your answer and compare with the integrand.\n\nIt catches every common slip: a wrong sign (like [[integral-of-sin|∫ sin = +cos]]), a missing $\\frac{1}{a}$, a dropped term from parts. It can't catch a wrong constant, but [[antiderivative-plus-c|every antiderivative differs by a constant]] anyway, so the $+ C$ covers that. Example: $\\frac{d}{dx}(x\\sin x + \\cos x) = \\sin x + x\\cos x - \\sin x = x\\cos x$. ✓",
+    "math": [
+      "\\frac{d}{dx}\\left(x\\sin x + \\cos x\\right) = x\\cos x"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "prompt": "Sweep x. Differentiating the area gives back the curve you started with."
+    },
+    "deeper": [
+      "ftc",
+      "antiderivative-plus-c"
+    ],
+    "related": [
+      "integral-of-sin"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(x*sin(x) + cos(x), x)",
+        "equals": "x*cos(x)"
+      }
+    ]
+  },
+  {
+    "id": "ibp-pick-u",
+    "entry": true,
+    "title": "Why u = x for ∫ x e²ˣ dx?",
+    "body": "Differentiating $x$ gives 1, the simplest possible thing ([[polynomial-as-u|the polynomial should be u]]), and $e^{2x}$ is easy to integrate: $v = \\frac{1}{2}e^{2x}$. Then [[parts-is-product-rule-backwards|uv − ∫v du]] leaves $\\int \\frac{1}{2}e^{2x}\\,dx$, which you can do on sight.\n\nWith $u = e^{2x}$ instead, $v = \\frac{x^2}{2}$ and the new integral has $x^2$: harder than where you started.",
+    "widget": {
+      "type": "derivative-ladder",
+      "poly": [
+        0,
+        1
+      ],
+      "prompt": "Differentiate once. x becomes 1, and the integral that's left is easy."
+    },
+    "deeper": [
+      "polynomial-as-u",
+      "parts-is-product-rule-backwards"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-sign",
+    "entry": true,
+    "title": "Why is it + cos x, not − cos x?",
+    "body": "The last step subtracts $\\int \\sin x\\,dx$. [[integral-of-sin|That integral is −cos x]], and subtracting a negative gives a plus: $x\\sin x - (-\\cos x) = x\\sin x + \\cos x$.\n\n[[check-by-differentiating|Check by differentiating]]: $\\frac{d}{dx}(x\\sin x + \\cos x) = \\sin x + x\\cos x - \\sin x = x\\cos x$. With $-\\cos x$ you'd get $x\\cos x + 2\\sin x$ instead.",
+    "widget": {
+      "type": "accumulator",
+      "f": "sin",
+      "prompt": "Watch the area under sin x. It follows −cos x, not +cos x."
+    },
+    "deeper": [
+      "integral-of-sin",
+      "check-by-differentiating"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-v",
+    "entry": true,
+    "title": "Why v = ⅓e³ˣ, not 3e³ˣ?",
+    "body": "$v$ has to be a function whose derivative is $e^{3x}$. But [[derivative-of-exp|differentiating e³ˣ]] gives $3e^{3x}$: the inner 3 comes out. To undo that, divide by 3: [[one-over-a|integrating g(ax) brings out 1/a]], so $v = \\frac{1}{3}e^{3x}$.\n\n$3e^{3x}$ is what you'd get by differentiating, the opposite of what $v$ needs.",
+    "widget": {
+      "type": "chain-stretch",
+      "f": "exp",
+      "a": 3,
+      "prompt": "Squeeze eˣ into e³ˣ. Slopes triple, so the antiderivative needs a 1/3."
+    },
+    "deeper": [
+      "one-over-a",
+      "derivative-of-exp"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-blank",
+    "entry": true,
+    "title": "Why does 2x eˣ go in the box?",
+    "body": "In [[parts-is-product-rule-backwards|uv − ∫v du]] the new integral is $\\int v\\,du$. With $u = x^2$ and $dv = e^x dx$: $v = e^x$ and $du = 2x\\,dx$, so the box holds $e^x\\cdot 2x$.\n\nThe power of $x$ dropped from 2 to 1. One more round brings it to 0 ([[polynomial-as-u|that's why the polynomial is u]]).",
+    "widget": {
+      "type": "derivative-ladder",
+      "poly": [
+        0,
+        0,
+        1
+      ],
+      "prompt": "Differentiate x² twice. Each round of parts uses one of these steps."
+    },
+    "deeper": [
+      "parts-is-product-rule-backwards",
+      "polynomial-as-u"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-chain",
+    "entry": true,
+    "title": "Why ½ sin 2x, not sin 2x?",
+    "body": "[[chain-rule|Differentiating sin 2x]] gives $2\\cos 2x$: the inner 2 comes out. So $\\int \\cos 2x\\,dx$ must undo that factor: $\\frac{1}{2}\\sin 2x$. [[one-over-a|Integrating g(ax) always brings out 1/a.]]\n\nThat makes the last term $\\frac{1}{2}\\cdot\\frac{1}{2}\\sin 2x = \\frac{1}{4}\\sin 2x$.",
+    "widget": {
+      "type": "chain-stretch",
+      "f": "cos",
+      "a": 2,
+      "prompt": "Squeeze cos x into cos 2x. Its slopes double, so its antiderivative needs a ½."
+    },
+    "deeper": [
+      "one-over-a",
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-minus",
+    "entry": true,
+    "title": "Why minus ∫ v du?",
+    "body": "Because $uv$ is a whole made of two parts, $\\int u\\,dv$ and $\\int v\\,du$, [[minus-sign-in-parts|the part you want is the whole minus the other part]]. A plus sign double-counts. Here that turns the correct $x\\ln x - x + C$ into the wrong $x\\ln x + x + C$.",
+    "widget": {
+      "type": "product-rectangle",
+      "mode": "parts",
+      "prompt": "The gold region is the rectangle minus the teal one. That's the minus sign."
+    },
+    "deeper": [
+      "minus-sign-in-parts"
+    ],
+    "related": [],
+    "foundation": false
+  },
+  {
+    "id": "ibp-check",
+    "entry": true,
+    "title": "Why is ½x² ln x − ¼x² the right one?",
+    "body": "[[check-by-differentiating|Differentiate each candidate.]] Using the [[product-rule|product rule]] on $\\frac{1}{2}x^2\\ln x$: $x\\ln x + \\frac{1}{2}x^2\\cdot\\frac{1}{x} = x\\ln x + \\frac{1}{2}x$. Then $-\\frac{1}{4}x^2$ contributes $-\\frac{1}{2}x$. Total: $x\\ln x$. ✓\n\nThe others leave something extra behind, which is how you know they're wrong without redoing the integral.",
+    "widget": {
+      "type": "product-rectangle",
+      "prompt": "The product rule as area: two strips for the two terms of the derivative."
+    },
+    "deeper": [
+      "check-by-differentiating",
+      "product-rule"
+    ],
+    "related": [],
+    "foundation": false
   }
 ];

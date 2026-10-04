@@ -29,7 +29,7 @@
 
   function bodyHtml(c) {
     let text = c.body || "";
-    if (c.entry) text = text.replace(/\{([A-Za-z_]\w*)\}/g, (m, k) => (k in vars ? esc(vars[k]) : m));
+    if (c.entry) text = text.replace(/\{\{([A-Za-z_]\w*)\}\}/g, (m, k) => (k in vars ? esc(vars[k]) : m));
     text = text.replace(/\[\[([a-z0-9-]+)(?:\|([^\]]*))?\]\]/g, (m, id, shown) =>
       `<button type="button" class="why-term" data-concept="${id}">${shown || esc(label(id))}</button>`);
     return text.split(/\n\n+/).map((p) => `<p>${p}</p>`).join("");

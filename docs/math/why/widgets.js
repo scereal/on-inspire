@@ -39,6 +39,11 @@
     },
     combine: (cups) => cups.reduce((s, c) => s + c.conc, 0) / cups.reduce((s, c) => s + c.marks, 0),
     dilute: (cup, water) => ({ marks: cup.marks + water, conc: cup.conc }),
+    accumulate: (f, a, x, n = 400) => (x === a ? 0 : WidgetMath.riemann(f, a, x, n)),
+    diffPoly: (coeffs) => (coeffs.length <= 1 ? coeffs.map(() => 0) : coeffs.slice(1).map((c, i) => c * (i + 1))),
+    stretchArea: (name, a, lo, hi) => WidgetMath.riemann((x) => WidgetMath.fn(name)(a * x), lo, hi, 4000),
+    productChange: (u, v, du, dv) => ({ udv: u * dv, vdu: v * du, corner: du * dv }),
+    squeeze: (h) => ({ inner: Math.sin(h) / 2, sector: h / 2, outer: Math.tan(h) / 2 }),
     fractionOf: (a, b) => a * b,
     serial(start, rounds) {
       const out = [];
@@ -217,6 +222,8 @@
 
   // Unit circle: drag the point, or use the slider
   W["unit-circle"] = function (box, cfg) {
+    if (cfg.mode === "squeeze") return unitSqueeze(box, cfg);
+    if (cfg.mode === "two-angle") return unitTwoAngle(box, cfg);
     const ui = shell(box, cfg.prompt || "Drag the point around the circle.");
     ui.svg.setAttribute("viewBox", "0 0 480 260");
     const cx = 150, cy = 130, r = 105;
@@ -466,6 +473,228 @@
     const fi = slider(ui.controls, "Parts taken", 0, cfg.parts ?? 4, 1, cfg.filled ?? 3, (v) => { state.filled = v; draw(); });
     ui.reset.addEventListener("click", init);
     init();
+    return { reset: init };
+  };
+
+
+  // Unit circle, squeeze picture for sin h / h → 1
+  function unitSqueeze(box, cfg) {
+    const ui = shell(box, cfg.prompt || "Shrink the angle h. The three areas squeeze sin h / h toward 1.");
+    const cx = 60, cy = 230, r = 200;
+    let state;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const h = state.h, P = WidgetMath.unitPoint(h), sq = WidgetMath.squeeze(h);
+      el("path", { d: `M${cx} ${cy} L${cx + r} ${cy} L${cx + r} ${cy - r * Math.tan(h)} Z`, class: "w-tri outer" }, ui.svg);
+      el("path", { d: `M${cx} ${cy} L${cx + r} ${cy} A${r} ${r} 0 0 0 ${cx + r * P.x} ${cy - r * P.y} Z`, class: "w-sector" }, ui.svg);
+      el("path", { d: `M${cx} ${cy} L${cx + r} ${cy} L${cx + r * P.x} ${cy - r * P.y} Z`, class: "w-tri inner" }, ui.svg);
+      el("path", { d: `M${cx + r} ${cy} A${r} ${r} 0 0 0 ${cx} ${cy - r}`, class: "w-circle" }, ui.svg);
+      const t = el("text", { x: 300, y: 40, class: "w-label" }, ui.svg);
+      t.textContent = `½ sin h = ${fmt(sq.inner, 4)}`;
+      const t2 = el("text", { x: 300, y: 64, class: "w-label sin" }, ui.svg);
+      t2.textContent = `½ h = ${fmt(sq.sector, 4)}`;
+      const t3 = el("text", { x: 300, y: 88, class: "w-label cos" }, ui.svg);
+      t3.textContent = `½ tan h = ${fmt(sq.outer, 4)}`;
+      ui.readout.textContent = `h = ${fmt(h, 3)}:  cos h = ${fmt(Math.cos(h), 4)} ≤ sin h / h = ${fmt(Math.sin(h) / h, 4)} ≤ 1`;
+    };
+    const init = () => { state = { h: 0.9 }; hi.value = 0.9; draw(); };
+    const hi = slider(ui.controls, "Angle h", 0.02, 1.2, 0.01, 0.9, (v) => { state.h = v; draw(); });
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  }
+
+  // Unit circle, two angles: rotating by a then b lands at a + b
+  function unitTwoAngle(box, cfg) {
+    const ui = shell(box, cfg.prompt || "Set two angles. The point for a + b matches the angle-addition formula.");
+    const cx = 130, cy = 130, r = 105;
+    let state;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const { a, b } = state;
+      el("circle", { cx, cy, r, class: "w-circle" }, ui.svg);
+      el("line", { x1: cx - r - 10, x2: cx + r + 10, y1: cy, y2: cy, class: "w-axis" }, ui.svg);
+      el("line", { x1: cx, x2: cx, y1: cy - r - 10, y2: cy + r + 10, class: "w-axis" }, ui.svg);
+      const pa = WidgetMath.unitPoint(a), pab = WidgetMath.unitPoint(a + b);
+      el("line", { x1: cx, y1: cy, x2: cx + r * pa.x, y2: cy - r * pa.y, class: "w-cos" }, ui.svg);
+      el("line", { x1: cx, y1: cy, x2: cx + r * pab.x, y2: cy - r * pab.y, class: "w-sin" }, ui.svg);
+      el("circle", { cx: cx + r * pab.x, cy: cy - r * pab.y, r: 6, class: "w-point" }, ui.svg);
+      const f = Math.sin(a) * Math.cos(b) + Math.cos(a) * Math.sin(b);
+      const t = el("text", { x: 270, y: 70, class: "w-label sin" }, ui.svg);
+      t.textContent = `sin(a + b) = ${fmt(pab.y, 4)}`;
+      const t2 = el("text", { x: 270, y: 96, class: "w-label" }, ui.svg);
+      t2.textContent = `sin a cos b + cos a sin b = ${fmt(f, 4)}`;
+      ui.readout.textContent = `a = ${fmt(a, 2)}, b = ${fmt(b, 2)}: both sides agree.`;
+    };
+    const init = () => { state = { a: 0.6, b: 0.5 }; ai.value = 0.6; bi.value = 0.5; draw(); };
+    const ai = slider(ui.controls, "Angle a", 0, 3.14, 0.01, 0.6, (v) => { state.a = v; draw(); });
+    const bi = slider(ui.controls, "Angle b", 0, 3.14, 0.01, 0.5, (v) => { state.b = v; draw(); });
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  }
+
+  // Area accumulator: the area so far, graphed; its slope is f (FTC). "shift" mode shows +C.
+  W.accumulator = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "cos");
+    const a = cfg.a ?? 0, b = cfg.b ?? 2 * Math.PI;
+    const ui = shell(box, cfg.prompt || (cfg.mode === "shift"
+      ? "Shift the curve up or down. Every shifted copy has the same slopes, so the same derivative."
+      : "Sweep x. The lower graph is the area so far; its slope always equals the height of f."));
+    let state;
+    const vals = [];
+    for (let i = 0; i <= 200; i++) { const x = a + ((b - a) * i) / 200; vals.push([x, WidgetMath.accumulate(f, a, x, 300)]); }
+    const Amin = Math.min(...vals.map((v) => v[1])), Amax = Math.max(...vals.map((v) => v[1]));
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const x = state.x;
+      const top = { X: (t) => 36 + ((t - a) / (b - a)) * 434, Y: (y) => 70 - y * 50 };
+      const lowSpan = Math.max(Amax - Amin, 1) + (cfg.mode === "shift" ? 3 : 0);
+      const low = { Y: (y) => 245 - ((y - Amin + (cfg.mode === "shift" ? 1.5 : 0)) / lowSpan) * 100 };
+      el("line", { x1: 36, x2: 470, y1: top.Y(0), y2: top.Y(0), class: "w-axis" }, ui.svg);
+      let d = "", shade = `M${top.X(a)} ${top.Y(0)} `;
+      for (let i = 0; i <= 200; i++) {
+        const t = a + ((b - a) * i) / 200;
+        d += `${i ? "L" : "M"}${top.X(t)} ${top.Y(f(t))} `;
+        if (t <= x) shade += `L${top.X(t)} ${top.Y(f(t))} `;
+      }
+      shade += `L${top.X(x)} ${top.Y(0)} Z`;
+      if (cfg.mode !== "shift") el("path", { d: shade, class: "w-bar" }, ui.svg);
+      el("path", { d, class: "w-curve" }, ui.svg);
+      const lbl = el("text", { x: 40, y: 14, class: "w-label" }, ui.svg); lbl.textContent = "f(x)";
+      const lbl2 = el("text", { x: 40, y: 140, class: "w-label" }, ui.svg); lbl2.textContent = cfg.mode === "shift" ? "F(x) + C" : "area so far, A(x)";
+      const shifts = cfg.mode === "shift" ? [-1, 0, 1].map((k) => k + state.c) : [0];
+      for (const c of shifts) {
+        let dl = "";
+        vals.forEach(([t, A], i) => { if (cfg.mode === "shift" || t <= x) dl += `${i ? "L" : "M"}${top.X(t)} ${low.Y(A + c)} `; });
+        el("path", { d: dl, class: `w-curve alt${c === state.c ? "" : " faint"}` }, ui.svg);
+      }
+      const Ax = WidgetMath.accumulate(f, a, x, 600);
+      const slope = (WidgetMath.accumulate(f, a, x + 1e-3, 600) - WidgetMath.accumulate(f, a, x - 1e-3, 600)) / 2e-3;
+      const scale = 100 / lowSpan / (434 / (b - a));
+      el("line", { x1: top.X(x) - 30, x2: top.X(x) + 30, y1: low.Y(Ax + state.c) + 30 * slope * scale, y2: low.Y(Ax + state.c) - 30 * slope * scale, class: "w-secant" }, ui.svg);
+      el("circle", { cx: top.X(x), cy: top.Y(f(x)), r: 4, class: "w-point" }, ui.svg);
+      el("circle", { cx: top.X(x), cy: low.Y(Ax + state.c), r: 4, class: "w-point" }, ui.svg);
+      ui.readout.textContent = cfg.mode === "shift"
+        ? `C = ${fmt(state.c, 2)}: at x = ${fmt(x, 2)} every copy has slope ${fmt(slope, 3)} = f(x).`
+        : `x = ${fmt(x, 2)}: area so far = ${fmt(Ax, 3)}, its slope = ${fmt(slope, 3)}, and f(x) = ${fmt(f(x), 3)}`;
+    };
+    const init = () => { state = { x: (a + b) / 3, c: 0 }; xi.value = state.x; if (ci) ci.value = 0; draw(); };
+    const xi = slider(ui.controls, "x", a + 0.01, b - 0.01, 0.01, (a + b) / 3, (v) => { state.x = v; draw(); });
+    const ci = cfg.mode === "shift" ? slider(ui.controls, "Shift C", -1.5, 1.5, 0.05, 0, (v) => { state.c = v; draw(); }) : null;
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Product rectangle: d(uv) = u dv + v du (+ a vanishing corner). "parts" mode: uv = ∫u dv + ∫v du.
+  W["product-rectangle"] = function (box, cfg) {
+    const ui = shell(box, cfg.prompt || (cfg.mode === "parts"
+      ? "Move the end point. The two shaded regions always add up to the rectangle uv."
+      : "Grow u and v a little. The change in area is two strips plus a tiny corner."));
+    let state;
+    const S = 40, x0 = 40, y0 = 235;
+    if (cfg.mode === "parts") {
+      const curve = (u) => 0.2 * u * u + 0.5;  // v as a function of u
+      const draw = () => {
+        ui.svg.innerHTML = "";
+        const u1 = state.u, v1 = curve(u1);
+        let under = `M${x0} ${y0} `, left = `M${x0} ${y0 - curve(0) * S} `, line = "";
+        for (let i = 0; i <= 100; i++) {
+          const u = (u1 * i) / 100, v = curve(u);
+          under += `L${x0 + u * S} ${y0 - v * S} `;
+          left += `L${x0 + u * S} ${y0 - v * S} `;
+          line += `${i ? "L" : "M"}${x0 + u * S} ${y0 - v * S} `;
+        }
+        under += `L${x0 + u1 * S} ${y0} Z`;
+        left += `L${x0} ${y0 - v1 * S} Z`;
+        el("path", { d: under, class: "w-bar" }, ui.svg);
+        el("path", { d: left, class: "w-tri" }, ui.svg);
+        el("rect", { x: x0, y: y0 - curve(0) * S, width: 0.1, height: curve(0) * S, class: "w-rect" }, ui.svg);
+        el("rect", { x: x0, y: y0 - v1 * S, width: u1 * S, height: v1 * S, class: "w-rect" }, ui.svg);
+        el("path", { d: line, class: "w-curve" }, ui.svg);
+        const vdu = WidgetMath.riemann(curve, 0, u1, 400);
+        const udv = u1 * v1 - vdu;  // the curve starts at u = 0, so the whole is just u·v
+        ui.readout.textContent = `∫u dv (gold) ${fmt(udv, 3)} + ∫v du (teal) ${fmt(vdu, 3)} = ${fmt(udv + vdu, 3)} = u·v, so ∫u dv = uv − ∫v du.`;
+      };
+      const init = () => { state = { u: 4 }; ui1.value = 4; draw(); };
+      const ui1 = slider(ui.controls, "End point u", 0.5, 9.5, 0.1, 4, (v) => { state.u = v; draw(); });
+      ui.reset.addEventListener("click", init); init();
+      return { reset: init };
+    }
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const { u, v, du, dv } = state;
+      el("rect", { x: x0, y: y0 - v * S, width: u * S, height: v * S, class: "w-rect" }, ui.svg);
+      el("rect", { x: x0 + u * S, y: y0 - v * S, width: du * S, height: v * S, class: "w-bar" }, ui.svg);
+      el("rect", { x: x0, y: y0 - (v + dv) * S, width: u * S, height: dv * S, class: "w-tri" }, ui.svg);
+      el("rect", { x: x0 + u * S, y: y0 - (v + dv) * S, width: du * S, height: dv * S, class: "w-corner" }, ui.svg);
+      const pc = WidgetMath.productChange(u, v, du, dv);
+      ui.readout.textContent = `Δ(uv) = u·dv (gold) ${fmt(pc.udv, 3)} + v·du (teal) ${fmt(pc.vdu, 3)} + corner ${fmt(pc.corner, 4)}. The corner shrinks fastest, so d(uv) = u dv + v du.`;
+    };
+    const init = () => { state = { u: 4, v: 3, du: 1, dv: 1 }; gi.value = 1; draw(); };
+    const gi = slider(ui.controls, "Size of the change", 0.02, 1.5, 0.01, 1, (x) => { state.du = x; state.dv = x; draw(); });
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Chain stretch: g(x) vs g(ax). Slopes scale by a; areas by 1/a ("area" mode).
+  W["chain-stretch"] = function (box, cfg) {
+    const name = cfg.f || "sin";
+    const g = WidgetMath.fn(name);
+    const ui = shell(box, cfg.prompt || (cfg.mode === "area"
+      ? "Squeeze the wave by a. One hump gets a times narrower, so its area is divided by a."
+      : "Squeeze the curve by a. Its slopes get a times steeper."));
+    let state;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const a = state.a;
+      const P = plotArea(ui.svg, 0, 2 * Math.PI, -1.4 * (cfg.mode === "area" ? 1 : Math.max(1, a * 0.6)), 1.4 * (cfg.mode === "area" ? 1 : Math.max(1, a * 0.6)));
+      P.curve(g, 0, 2 * Math.PI, "w-curve faint");
+      if (cfg.mode === "area") {
+        const end = Math.PI / a;
+        let d = `M${P.X(0)} ${P.Y(0)} `;
+        for (let i = 0; i <= 100; i++) { const x = (end * i) / 100; d += `L${P.X(x)} ${P.Y(g(a * x))} `; }
+        d += `L${P.X(end)} ${P.Y(0)} Z`;
+        el("path", { d, class: "w-bar" }, ui.svg);
+        P.curve((x) => g(a * x), 0, 2 * Math.PI, "w-curve alt");
+        ui.readout.textContent = `one hump of ${name}(${fmt(a, 2)}x) has area ${fmt(WidgetMath.stretchArea(name, a, 0, Math.PI / a), 4)} = 2 ÷ ${fmt(a, 2)}: integrating g(ax) brings out 1/a.`;
+      } else {
+        P.curve((x) => g(a * x), 0, 2 * Math.PI, "w-curve alt");
+        const x0 = 0.4, h = 1e-5;
+        const s2 = (g(a * (x0 + h)) - g(a * x0)) / h;
+        ui.readout.textContent = `slope of ${name}(x) at a·x₀: ${fmt((g(a * x0 + h) - g(a * x0)) / h, 3)}; slope of ${name}(${fmt(a, 2)}x) at x₀: ${fmt(s2, 3)} = ${fmt(a, 2)} × that.`;
+      }
+    };
+    const init = () => { state = { a: cfg.a ?? 2 }; ai.value = state.a; draw(); };
+    const ai = slider(ui.controls, "Squeeze factor a", 0.5, 4, 0.05, cfg.a ?? 2, (v) => { state.a = v; draw(); });
+    ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Derivative ladder: polynomials step down to 0; exponentials and sines never do.
+  W["derivative-ladder"] = function (box, cfg) {
+    const ui = shell(box, cfg.prompt || "Differentiate again and again. Which column ever reaches 0?");
+    ui.svg.setAttribute("viewBox", "0 0 480 150");
+    const sup = ["", "", "²", "³", "⁴", "⁵"];
+    const polyText = (c) => {
+      const terms = [];
+      for (let i = c.length - 1; i >= 0; i--) if (c[i]) terms.push(i === 0 ? `${c[i]}` : `${c[i] === 1 ? "" : c[i]}x${sup[i]}`);
+      return terms.join(" + ") || "0";
+    };
+    const trig = ["sin x", "cos x", "−sin x", "−cos x"];
+    let state;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const cols = [["polynomial", polyText(state.poly)], ["exponential", `${2 ** state.k === 1 ? "" : 2 ** state.k}e²ˣ`], ["sine", trig[state.k % 4]]];
+      cols.forEach(([head, val], i) => {
+        const x = 20 + i * 155;
+        el("rect", { x, y: 30, width: 140, height: 80, rx: 10, class: `w-cell${val === "0" ? " done" : ""}` }, ui.svg);
+        const t = el("text", { x: x + 70, y: 22, class: "w-label", "text-anchor": "middle" }, ui.svg); t.textContent = head;
+        const v = el("text", { x: x + 70, y: 78, class: "w-big", "text-anchor": "middle" }, ui.svg); v.textContent = val;
+      });
+      ui.readout.textContent = `after ${state.k} derivative${state.k === 1 ? "" : "s"}: the polynomial ${state.poly.every((c) => c === 0) ? "has reached 0, so that's when parts stops" : "is getting simpler"}; the others never get simpler.`;
+    };
+    button(ui.controls, "Differentiate", () => { state.poly = WidgetMath.diffPoly(state.poly); state.k += 1; draw(); });
+    const init = () => { state = { poly: cfg.poly || [0, 0, 0, 1], k: 0 }; draw(); };
+    ui.reset.addEventListener("click", init); init();
     return { reset: init };
   };
 

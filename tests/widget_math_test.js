@@ -30,6 +30,20 @@ check("1 mark at 1/2 + 1 mark at 1/4 = 3/8", near(M.combine([{ marks: 1, conc: 0
 check("diluting with equal water halves strength", near(M.strength(M.dilute({ marks: 2, conc: 1 }, 2)), 0.25, 1e-12));
 check("a fraction of a fraction multiplies", near(M.fractionOf(1 / 2, 1 / 4), 1 / 8, 1e-12));
 check("serial dilution halves each round", M.serial(1, 3).map((x) => M.toFraction(x)).join() === "1/2,1/4,1/8");
+// Calculus core + integration by parts
+const A = (x) => M.accumulate(M.fn("cos"), 0, x, 4000);
+check("accumulated area's slope matches f (FTC)", near((A(1.2 + 1e-3) - A(1.2 - 1e-3)) / 2e-3, Math.cos(1.2), 1e-3));
+let poly = [0, 0, 0, 1];  // x³ as coefficients of x⁰..x³
+for (let i = 0; i < 4; i++) poly = M.diffPoly(poly);
+check("differentiating x³ four times gives 0", poly.every((c) => c === 0));
+check("x³ differentiated once is 3x²", M.diffPoly([0, 0, 0, 1]).join() === "0,0,3");
+check("sin(2x) over [0, π/2] has area 1", near(M.stretchArea("sin", 2, 0, Math.PI / 2), 1, 1e-6));
+const pc = M.productChange(3, 2, 0.5, 0.25);
+check("product rule strips add up to the change in uv", near(pc.udv + pc.vdu + pc.corner, 3.5 * 2.25 - 6, 1e-12));
+const sq = M.squeeze(0.5);
+check("squeeze: inner triangle ≤ sector ≤ outer triangle", sq.inner < sq.sector && sq.sector < sq.outer);
+check("squeeze: cos h ≤ sin h / h ≤ 1", Math.cos(0.5) <= Math.sin(0.5) / 0.5 && Math.sin(0.5) / 0.5 <= 1);
+check("angle addition matches the unit circle", near(M.unitPoint(0.7 + 0.4).y, Math.sin(0.7) * Math.cos(0.4) + Math.cos(0.7) * Math.sin(0.4), 1e-12));
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");

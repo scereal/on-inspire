@@ -25,7 +25,7 @@ def node(id, deeper=(), related=(), foundation=False, body=None, entry=False):
 
 
 FIXTURE = [
-    node("e1", deeper=["a"], entry=True, body="Value is {V}, because of [[a|idea A]] and $x^2$."),
+    node("e1", deeper=["a"], entry=True, body="Value is {{V}}, because of [[a|idea A]] and $x^2$."),
     node("e2", deeper=["b"], entry=True),
     node("a", deeper=["f1"], related=["b"], body="A rests on [[f1]]; compare [[b]]."),
     node("b", deeper=["f1"]),
@@ -144,6 +144,32 @@ def two_cups(page, base, c, label):
             page.click(".task .row button:text-is('Next step')")
 
 
+IBP_ENTRIES = ["ibp-pick-u", "ibp-sign", "ibp-v", "ibp-blank", "ibp-chain", "ibp-minus", "ibp-check"]
+
+
+def ibp(page, base, c, label):
+    page.goto(f"{base}/math/integration-by-parts/")
+    page.wait_for_selector(".task")
+    items = page.evaluate("() => window.IBP_ITEMS")
+    for i, item in enumerate(items):
+        if item["type"] == "error":
+            page.locator(".work button").nth(item["wrong"]).click()
+        else:
+            right = next(j for j, o in enumerate(item["options"]) if o.get("right"))
+            page.locator(".choices button").nth(right).click()
+        why = page.locator(".task .why-open")
+        c.ok(why.count() == 1, f"{label}: IBP problem {i + 1} offers Why?")
+        if why.count():
+            why.click()
+            entry = page.evaluate("() => (window.CONCEPTS || []).find(x => x.id === %r)?.title" % IBP_ENTRIES[i])
+            c.ok(entry and page.inner_text(".why-title") == entry, f"{label}: IBP problem {i + 1} shows {IBP_ENTRIES[i]}")
+            page.click(".why-body .why-term >> nth=0")
+            c.ok(page.is_enabled(".why-back"), f"{label}: IBP problem {i + 1} entry links deeper")
+            page.click(".why-close")
+        if i < len(items) - 1:
+            page.click(".task .row button:text-is('Next problem')")
+
+
 def main():
     base = serve()
     c, errors = Checker(), []
@@ -155,6 +181,7 @@ def main():
             panel_tests(page, base, c, name)
             page.unroute("**/why/concepts.js")
             two_cups(page, base, c, name)
+            ibp(page, base, c, name)
             page.close()
 
         # Hostile environments: no localStorage, no KaTeX
