@@ -1,0 +1,11 @@
+id: clay
+framework: bounce
+label: a lump of clay
+visuals: {color: "#9a7a5a", shape: blob, scene: floor}
+physics: {restitution: [0.05, 0.20], height: [0.5, 5]}
+levels: [3]
+stories:
+  1: ["You drop a lump of clay from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]
+  2: ["You drop a lump of clay from {h} m. Each bounce it rises back to {pct}% of the height it fell from, and it keeps bouncing."]
+  3: ["You drop a lump of clay from {h} m. Its coefficient of restitution is {e}: it leaves the floor at {e} times the speed it hit with."]
+  4: ["You drop a lump of clay from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]

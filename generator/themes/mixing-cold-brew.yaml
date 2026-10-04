@@ -1,0 +1,12 @@
+id: cold-brew
+framework: mixing
+label: cold-brew concentrate
+visuals: {color: "#5a3620", shape: cup, scene: cafe}
+concentrate: cold-brew coffee concentrate
+physics: {strength: [0.2, 1]}
+ratios: [[1, 1], [1, 2], [2, 1], [2, 3]]
+levels: [1, 2, 3]
+stories:
+  1: ["Cold-brew coffee concentrate is usually cut with water. You have two cups: one with {ma} marks, one with {mb}."]
+  2: ["You're cutting cold-brew concentrate with water using two cups: one with {ma} marks, one with {mb}."]
+  3: ["You're cutting cold-brew concentrate with water using two cups: one with {ma} marks, one with {mb}."]

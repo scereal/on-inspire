@@ -1,0 +1,10 @@
+id: moon-ball
+framework: projectile
+label: a ball on the Moon
+visuals: {color: "#f3ead6", shape: ball, scene: moon}
+physics: {speed: [1, 20], height: [0.5, 20], distance: [1, 120], g: [1.6, 1.6]}
+levels: [1, 2, 3]
+stories:
+  1: ["On the Moon (gravity 1.6 m/s²), an astronaut rolls a ball off a {h} m rock. It should land {d} m out."]
+  2: ["On the Moon (gravity 1.6 m/s²), an astronaut tosses a ball upward at {vy} m/s toward a crater {d} m away."]
+  3: ["On the Moon (gravity 1.6 m/s²), an astronaut throws at {v} m/s toward a flag {d} m away."]

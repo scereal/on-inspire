@@ -1,0 +1,10 @@
+id: water-balloon
+framework: projectile
+label: a water balloon
+visuals: {color: "#4ea8a0", shape: balloon, scene: backyard}
+physics: {speed: [1, 20], height: [0.5, 10], distance: [1, 40], g: [9.8, 9.8]}
+levels: [1, 2, 4]
+stories:
+  1: ["You lob a water balloon horizontally off a {h} m balcony at a friend standing {d} m away."]
+  2: ["You toss a water balloon upward at {vy} m/s toward a friend {d} m away."]
+  4: ["You throw a water balloon at {vx} m/s horizontally over a {H} m fence that's {w} m away."]

@@ -1,0 +1,11 @@
+id: tennis-ball
+framework: bounce
+label: a tennis ball
+visuals: {color: "#c8d64a", shape: ball, scene: floor}
+physics: {restitution: [0.70, 0.78], height: [0.5, 5]}
+levels: [1, 2, 3, 4]
+stories:
+  1: ["You drop a tennis ball from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]
+  2: ["You drop a tennis ball from {h} m. Each bounce it rises back to {pct}% of the height it fell from, and it keeps bouncing."]
+  3: ["You drop a tennis ball from {h} m. Its coefficient of restitution is {e}: it leaves the floor at {e} times the speed it hit with."]
+  4: ["You drop a tennis ball from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]

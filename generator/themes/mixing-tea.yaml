@@ -1,0 +1,12 @@
+id: tea
+framework: mixing
+label: strong tea
+visuals: {color: "#b06222", shape: cup, scene: kitchen}
+concentrate: strong tea
+physics: {strength: [0.05, 1]}
+ratios: [[1, 1], [1, 2], [1, 3], [2, 1], [1, 4], [2, 3], [3, 1]]
+levels: [1, 2, 3]
+stories:
+  1: ["You have strong tea, water, and two cups: one with {ma} marks, one with {mb}."]
+  2: ["You have strong tea, water, and two cups: one with {ma} marks, one with {mb}."]
+  3: ["You have strong tea, water, and two cups: one with {ma} marks, one with {mb}."]

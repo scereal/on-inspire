@@ -1,0 +1,11 @@
+id: basketball
+framework: bounce
+label: a basketball
+visuals: {color: "#e08a3c", shape: ball-large, scene: floor}
+physics: {restitution: [0.75, 0.88], height: [0.5, 5]}
+levels: [1, 2, 3, 4]
+stories:
+  1: ["You drop a basketball from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]
+  2: ["You drop a basketball from {h} m. Each bounce it rises back to {pct}% of the height it fell from, and it keeps bouncing."]
+  3: ["You drop a basketball from {h} m. Its coefficient of restitution is {e}: it leaves the floor at {e} times the speed it hit with."]
+  4: ["You drop a basketball from {h} m. Each bounce it rises back to {pct}% of the height it fell from."]

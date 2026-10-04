@@ -1,0 +1,12 @@
+id: orange-juice
+framework: mixing
+label: orange juice concentrate
+visuals: {color: "#f0a030", shape: cup, scene: kitchen}
+concentrate: orange juice concentrate
+physics: {strength: [0.1, 0.5]}
+ratios: [[1, 3], [1, 2], [2, 3], [1, 4]]
+levels: [1, 2, 3]
+stories:
+  1: ["The can of frozen orange juice concentrate says to mix it with water. You have two cups: one with {ma} marks, one with {mb}."]
+  2: ["You're mixing orange juice from concentrate with two cups: one with {ma} marks, one with {mb}."]
+  3: ["You're mixing orange juice from concentrate with two cups: one with {ma} marks, one with {mb}."]

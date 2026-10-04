@@ -1,0 +1,9 @@
+id: bb
+framework: projectile
+label: a BB
+visuals: {color: "#9aa7a3", shape: pellet, scene: range}
+# Short, level shots only: over longer flights drag slows a BB noticeably.
+physics: {speed: [30, 100], height: [0.7, 1.5], distance: [5, 30], g: [9.8, 9.8]}
+levels: [1]
+stories:
+  1: ["A BB is fired level from a rest {h} m above the floor. The target on the floor is {d} m away."]

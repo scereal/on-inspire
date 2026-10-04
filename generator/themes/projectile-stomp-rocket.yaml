@@ -1,0 +1,9 @@
+id: stomp-rocket
+framework: projectile
+label: a stomp rocket
+visuals: {color: "#c45c4a", shape: rocket, scene: field}
+physics: {speed: [5, 25], distance: [2, 60], g: [9.8, 9.8]}
+levels: [2, 3]
+stories:
+  2: ["A stomp of the pad launches the foam rocket upward at {vy} m/s. Aim it so it lands in a bucket {d} m away."]
+  3: ["Your stomp rocket always leaves the pad at {v} m/s. The landing zone is {d} m away."]

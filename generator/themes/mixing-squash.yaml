@@ -1,0 +1,12 @@
+id: squash
+framework: mixing
+label: fruit squash
+visuals: {color: "#d94f6a", shape: cup, scene: kitchen}
+concentrate: berry squash
+physics: {strength: [0.05, 0.34]}
+ratios: [[1, 4], [1, 3], [1, 5], [1, 2]]
+levels: [1, 2, 3]
+stories:
+  1: ["A bottle of berry squash (cordial) is meant to be diluted with water. You have two cups: one with {ma} marks, one with {mb}."]
+  2: ["You're diluting berry squash with two cups: one with {ma} marks, one with {mb}."]
+  3: ["You're diluting berry squash with two cups: one with {ma} marks, one with {mb}."]
