@@ -29,6 +29,11 @@
     asym: (x) => (x + 1) / (x - 2),
     rootdiff: (x) => (Math.sqrt(x + 4) - 2) / x,
     hole3: (x) => (x * x - 9) / (x - 3),
+    // Unit 140.4: elementary functions
+    ln: (x) => (x > 0 ? Math.log(x) : NaN),
+    atan: Math.atan,
+    tan: (x) => (Math.abs(Math.cos(x)) < 1e-9 ? NaN : Math.tan(x)),
+    xpowx: (x) => (x > 0 ? Math.pow(x, x) : NaN),
   };
 
   const WidgetMath = {
@@ -38,6 +43,9 @@
     },
     secantSlope: (f, x0, h) => (f(x0 + h) - f(x0)) / h,
     // Draw a curve point only if it's finite and not far outside the window (clips blow-ups near asymptotes)
+    // secant widget: h shrinks from 1.5 (or 3/4 of a narrower window) as the slider moves
+    secantH: (s, span) => Math.min(1.5, 0.75 * span) * Math.pow(10, -s / 30),
+    circleSlope: (x, y) => -x / y,          // implicit differentiation of x² + y² = r²
     farLabel: (X) => (X >= 1e4 ? X.toExponential(0) : String(Math.round(X))),
     plottable: (y, ymin, ymax) => Number.isFinite(y) && y >= ymin - 3 * (ymax - ymin) && y <= ymax + 3 * (ymax - ymin),
     // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
@@ -216,7 +224,7 @@
         ui.readout.textContent = `input x = ${fmt(x, 2)} → output f(x) = ${fmt(f(x), 3)}`;
         return;
       }
-      const h = 1.5 * Math.pow(10, -state.s / 30);
+      const h = WidgetMath.secantH(state.s, span);
       const m = WidgetMath.secantSlope(f, x0, h);
       const ext = span;
       line.setAttribute("x1", P.X(x0 - ext)); line.setAttribute("y1", P.Y(f(x0) - m * ext));
@@ -906,6 +914,33 @@
     };
     const input = slider(ui.controls, infinity ? "Push x out" : "Close in", 0, 100, 1, 0, (v) => { t = v / 100; draw(); });
     const init = () => { t = 0; input.value = 0; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Circle tangent: implicit differentiation on x² + y² = r²
+  W["circle-tangent"] = function (box, cfg) {
+    const r = cfg.r ?? 5;
+    const ui = shell(box, cfg.prompt || "Move the point around the circle and watch the tangent's slope, −x/y.");
+    let deg;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const yr = r * 1.35, xr = yr * (434 / 226);
+      const P = plotArea(ui.svg, -xr, xr, -yr, yr);
+      const k = (P.B - P.T) / (2 * yr);
+      el("circle", { cx: P.X(0), cy: P.Y(0), r: r * k, class: "w-circle" }, ui.svg);
+      const th = (deg * Math.PI) / 180, x = r * Math.cos(th), y = r * Math.sin(th);
+      const ext = r * 0.9, dx = -Math.sin(th) * ext, dy = Math.cos(th) * ext;
+      el("line", { x1: P.X(x - dx), y1: P.Y(y - dy), x2: P.X(x + dx), y2: P.Y(y + dy), class: "w-secant" }, ui.svg);
+      el("circle", { cx: P.X(x), cy: P.Y(y), r: 6, class: "w-point" }, ui.svg);
+      ui.readout.textContent = Math.abs(y) < 1e-9
+        ? `point (${fmt(x, 2)}, 0): the tangent is vertical, since −x/y divides by 0`
+        : `point (${fmt(x, 2)}, ${fmt(y, 2)}): slope = −x/y = ${fmt(WidgetMath.circleSlope(x, y), 3)}`;
+    };
+    const start = cfg.deg ?? 53.13;
+    const input = slider(ui.controls, "Move the point", 0, 359, 1, Math.round(start), (v) => { deg = v; draw(); });
+    const init = () => { deg = start; input.value = Math.round(start); draw(); };
     ui.reset.addEventListener("click", init);
     init();
     return { reset: init };

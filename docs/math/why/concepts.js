@@ -498,7 +498,8 @@ window.CONCEPTS = [
       "integral-as-area",
       "average-vs-instantaneous-rate",
       "differentiable-implies-continuous",
-      "sum-and-constant-rules"
+      "sum-and-constant-rules",
+      "second-derivative"
     ],
     "foundation": false,
     "claims": [
@@ -711,7 +712,8 @@ window.CONCEPTS = [
       "cos-h-minus-1-over-h"
     ],
     "related": [
-      "sine-waves"
+      "sine-waves",
+      "derivative-of-arctan"
     ],
     "foundation": false,
     "claims": [
@@ -770,7 +772,9 @@ window.CONCEPTS = [
       "derivative"
     ],
     "related": [
-      "product-rule"
+      "product-rule",
+      "implicit-differentiation",
+      "inverse-function-derivative"
     ],
     "foundation": false,
     "claims": [
@@ -832,7 +836,9 @@ window.CONCEPTS = [
       "derivative",
       "limit"
     ],
-    "related": [],
+    "related": [
+      "derivative-of-ln"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -2047,6 +2053,204 @@ window.CONCEPTS = [
       {
         "sympy": "simplify(((2*x + 1) - 3) - 2*(x - 1))",
         "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-ln",
+    "title": "Why the derivative of ln x is 1/x",
+    "body": "$y = \\ln x$ means $e^y = x$: the natural log undoes [[derivative-of-exp|the exponential]]. Differentiate both sides of $e^y = x$, remembering that $y$ depends on $x$: $e^y\\,y' = 1$, so $y' = \\frac{1}{e^y} = \\frac{1}{x}$. That's the [[inverse-function-derivative|inverse-function rule]] in action.\n\nWhat about $\\ln(5x)$? Since $\\ln(5x) = \\ln 5 + \\ln x$, the 5 only shifts the graph up by a constant, and shifting doesn't change slopes. So $(\\ln(kx))' = \\frac{1}{x}$ too, not $\\frac{k}{x}$. It's also what powers [[logarithmic-differentiation|logarithmic differentiation]].",
+    "math": [
+      "(\\ln x)' = \\frac{1}{x}",
+      "(\\ln kx)' = \\frac{1}{x}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "ln",
+      "x0": 2,
+      "span": 1.5,
+      "prompt": "Shrink h at x = 2: the slope settles on 1/2, which is 1/x."
+    },
+    "deeper": [
+      "derivative-of-exp",
+      "inverse-function-derivative"
+    ],
+    "related": [
+      "logarithmic-differentiation"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(log(x), x)",
+        "equals": "1/x"
+      },
+      {
+        "sympy": "simplify(diff(log(5*x), x))",
+        "equals": "1/x"
+      }
+    ]
+  },
+  {
+    "id": "inverse-function-derivative",
+    "title": "The slope of an inverse is the reciprocal slope",
+    "body": "If $g$ undoes $f$, then $f(g(x)) = x$. Differentiate with the [[chain-rule]]: $f'(g(x))\\cdot g'(x) = 1$, so $g'(x) = \\frac{1}{f'(g(x))}$. On a graph, the inverse is the mirror image across $y = x$, which swaps rise and run, so every slope flips to its reciprocal.\n\nThe catch is the point. $f(x) = x^3 + x$ has $f(1) = 2$ and $f'(1) = 4$, so $(f^{-1})'(2) = \\frac{1}{4}$. You evaluate $f'$ at the input 1 that $f$ sends to 2, not at 2 itself. The [[derivative]] of $\\sqrt{x}$ works the same way: it undoes $x^2$, so at $x = 4$ its slope is $\\frac{1}{2 \\cdot 2} = \\frac{1}{4}$.",
+    "math": [
+      "(f^{-1})'(b) = \\frac{1}{f'(a)} \\quad \\text{where } f(a) = b"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "sqrt",
+      "x0": 4,
+      "prompt": "√x undoes x². At x = 4 its slope settles on 1/4, the reciprocal of x²'s slope 4 at x = 2."
+    },
+    "deeper": [
+      "derivative",
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sqrt(x), x).subs(x, 4)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "1/diff(x**3 + x, x).subs(x, 1)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "(x**3 + x).subs(x, 1)",
+        "equals": "2"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-arctan",
+    "title": "Why the derivative of arctan x is 1/(1 + x²)",
+    "body": "$y = \\arctan x$ means $\\tan y = x$, with $y$ between $-\\frac{\\pi}{2}$ and $\\frac{\\pi}{2}$. Differentiate both sides: $\\sec^2 y \\cdot y' = 1$, so $y' = \\cos^2 y$. The identity $1 + \\tan^2 y = \\sec^2 y$ (from the [[unit-circle|unit circle]]) turns that into $\\frac{1}{1 + x^2}$. It's the [[inverse-function-derivative|inverse-function rule]] again.\n\nSo $(\\arctan x)' = \\frac{1}{1 + x^2}$: slope 1 at the origin, $\\frac{1}{2}$ at $x = 1$, and flattening toward 0 far out, matching the horizontal asymptotes at $\\pm\\frac{\\pi}{2}$. The same method gives $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$.",
+    "math": [
+      "(\\arctan x)' = \\frac{1}{1 + x^2}",
+      "(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "atan",
+      "x0": 1,
+      "prompt": "Shrink h at x = 1: the slope settles on 1/2 = 1/(1 + 1²)."
+    },
+    "deeper": [
+      "inverse-function-derivative",
+      "unit-circle"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(atan(x), x)",
+        "equals": "1/(x**2 + 1)"
+      },
+      {
+        "sympy": "diff(atan(x), x).subs(x, 1)",
+        "equals": "1/2"
+      },
+      {
+        "sympy": "diff(asin(x), x)",
+        "equals": "1/sqrt(1 - x**2)"
+      }
+    ]
+  },
+  {
+    "id": "implicit-differentiation",
+    "title": "Implicit differentiation",
+    "body": "Some curves aren't written as $y = f(x)$. The circle $x^2 + y^2 = 25$ is one. Treat $y$ as a function of $x$ anyway and differentiate both sides. The [[chain-rule]] turns $y^2$ into $2y\\,y'$, not just $2y$, because $y$ depends on $x$.\n\nSo $2x + 2y\\,y' = 0$, which gives $y' = -\\frac{x}{y}$. At $(3, 4)$ the slope is $-\\frac{3}{4}$, perpendicular to the radius (slope $\\frac{4}{3}$), just as geometry says a tangent to a circle should be. At $(5, 0)$ the formula divides by zero: the tangent there is vertical.",
+    "math": [
+      "2x + 2y\\,y' = 0 \\implies y' = -\\frac{x}{y}"
+    ],
+    "widget": {
+      "type": "circle-tangent",
+      "r": 5,
+      "deg": 53.13,
+      "prompt": "Move the point around x² + y² = 25: the tangent's slope is always −x/y."
+    },
+    "deeper": [
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "idiff(x**2 + y**2 - 25, y, x)",
+        "equals": "-x/y"
+      },
+      {
+        "sympy": "(-x/y).subs({x: 3, y: 4})",
+        "equals": "-3/4"
+      }
+    ]
+  },
+  {
+    "id": "logarithmic-differentiation",
+    "title": "Logarithmic differentiation",
+    "body": "For $y = x^x$, neither the power rule (fixed exponent) nor the exponential rule (fixed base) applies. Take the log of both sides: $\\ln y = x \\ln x$. Differentiate, using [[implicit-differentiation|implicit differentiation]] on the left and the [[derivative-of-ln|derivative of ln]]: $\\frac{y'}{y} = \\ln x + 1$. Then multiply back by $y$: $y' = x^x(\\ln x + 1)$.\n\nThe same trick tames tangled products and quotients, because logs turn them into sums: $\\ln\\frac{x^2(x + 1)^3}{x + 2} = 2\\ln x + 3\\ln(x + 1) - \\ln(x + 2)$. The step people forget is the last one: multiplying by $y$.",
+    "math": [
+      "\\ln y = x\\ln x \\implies \\frac{y'}{y} = \\ln x + 1 \\implies y' = x^x(\\ln x + 1)"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "xpowx",
+      "x0": 1,
+      "span": 0.8,
+      "prompt": "At x = 1 the slope of xˣ settles on 1 · (ln 1 + 1) = 1."
+    },
+    "deeper": [
+      "derivative-of-ln",
+      "chain-rule"
+    ],
+    "related": [
+      "implicit-differentiation"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(diff(x**x, x) - x**x*(log(x) + 1))",
+        "equals": "0"
+      },
+      {
+        "sympy": "diff(x**x, x).subs(x, 1)",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "second-derivative",
+    "title": "The second derivative: how the slope changes",
+    "body": "Differentiate a [[derivative]] and you get the second derivative, $f''$, which measures how the slope itself is changing. For a position $s(t)$, $s'$ is velocity and $s''$ is acceleration.\n\nOn a graph, $f'' > 0$ means the slopes are increasing, so the curve bends upward (concave up, like a cup). $f'' < 0$ means it bends downward. A ball thrown upward at 20 m/s has height $h(t) = 20t - 4.9t^2$. Its velocity $h'(t) = 20 - 9.8t$ falls steadily, and $h''(t) = -9.8$ everywhere: the graph is concave down, and that $-9.8$ is gravity.",
+    "math": [
+      "h(t) = 20t - 4.9t^2, \\quad h'(t) = 20 - 9.8t, \\quad h''(t) = -9.8"
+    ],
+    "widget": {
+      "type": "derivative-ladder",
+      "poly": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "prompt": "Differentiate again and again: each column is the slope of the one before it."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t, 2)",
+        "equals": "-49/5"
+      },
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t).subs(t, 1)",
+        "equals": "51/5"
       }
     ]
   }

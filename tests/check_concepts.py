@@ -12,7 +12,7 @@ CONCEPTS = ROOT / "docs/math/why/concepts.js"
 PAGES = [ROOT / "docs/math/square-wave/index.html", ROOT / "docs/math/two-cups/index.html",
          ROOT / "docs/math/integration-by-parts/index.html"]
 WIDGETS = {"secant", "limit-zoom", "riemann", "accumulator", "unit-circle", "wave-mixer", "parabola-min",
-           "product-rectangle", "chain-stretch", "derivative-ladder", "fraction-bar", "far-out"}
+           "product-rectangle", "chain-stretch", "derivative-ladder", "fraction-bar", "far-out", "circle-tangent"}
 REQUIRED = ("id", "title", "body", "deeper", "related", "foundation")
 TERM = re.compile(r"\[\[([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
 VAR = re.compile(r"\{\{([A-Za-z_]\w*)\}\}")  # {{name}}: single braces belong to LaTeX

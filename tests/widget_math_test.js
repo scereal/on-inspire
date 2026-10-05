@@ -88,5 +88,13 @@ check("unknown function names are refused", (() => { try { M.fn("alert"); return
   check("ivtcubic changes sign on [0, 1]", M.fn("ivtcubic")(0) < 0 && M.fn("ivtcubic")(1) > 0);
 }
 
+// Unit 140.4: differentiating elementary functions
+check("ln: slope at 2 → 1/2", near(M.secantSlope(M.fn("ln"), 2, 1e-6), 0.5, 1e-5));
+check("atan: slope at 1 → 1/2", near(M.secantSlope(M.fn("atan"), 1, 1e-6), 0.5, 1e-5));
+check("xpowx: slope at 1 → 1", near(M.secantSlope(M.fn("xpowx"), 1, 1e-6), 1, 1e-5));
+check("tan: slope at 0 → 1", near(M.secantSlope(M.fn("tan"), 0, 1e-6), 1, 1e-5));
+check("secant h starts inside a narrow window (span 0.8)", M.secantH(0, 0.8) <= 0.8 && M.secantH(0, 2) === 1.5 && M.secantH(30, 2) < M.secantH(0, 2));
+check("circle tangent slope at (3, 4) is −3/4", near(M.circleSlope(3, 4), -0.75, 1e-12));
+
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");
 if (failures) throw new Error(`${failures} failed`);
