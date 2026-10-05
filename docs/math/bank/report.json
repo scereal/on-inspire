@@ -43,6 +43,43 @@
   "seed": 1,
   "tried": 449
  },
+ "derivative-definition": {
+  "acceptance_rate": 0.7193,
+  "accepted": 310,
+  "framework": "derivative-definition",
+  "levels": {
+   "1": {
+    "accepted": 100,
+    "rejected": {
+     "distinct": 5,
+     "duplicate": 77,
+     "plausible": 8
+    },
+    "target": 100,
+    "tried": 190
+   },
+   "2": {
+    "accepted": 110,
+    "rejected": {
+     "distinct": 24,
+     "duplicate": 3
+    },
+    "target": 110,
+    "tried": 137
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 3,
+     "exists": 1
+    },
+    "target": 100,
+    "tried": 104
+   }
+  },
+  "seed": 1,
+  "tried": 431
+ },
  "ibp": {
   "acceptance_rate": 0.4042,
   "accepted": 310,

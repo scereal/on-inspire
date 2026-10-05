@@ -1,0 +1,14 @@
+id: cooling-coffee
+framework: derivative-definition
+label: a cup of coffee
+visuals: {color: "#b06222", shape: cup, scene: kitchen}
+quantity: temperature
+symbol: T
+unit: "°C"
+time_unit: min
+# Over the first few minutes, T(t) ≈ c − b t + a t² (cooling that slows down)
+coefficients: {a: ["1/2", "1/4", "1"], b: [-8, -6, -5, -4], c: [90, 85, 80]}
+physics: {rate: [-12, 0]}
+levels: [1]
+stories:
+  1: ["A cup of coffee cools on the counter. For the first few minutes its temperature is $T(t) = {f_tex}$ °C, with {t} in minutes."]

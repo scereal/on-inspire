@@ -21,6 +21,24 @@
   "outcome": "Each bounce keeps the same fraction of the height, a geometric sequence, and infinitely many bounces cover a finite distance.",
   "title": "Bouncing ball"
  },
+ "derivative-definition": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Slope as a rate of change"
+   },
+   "2": {
+    "count": 110,
+    "name": "The limit definition"
+   },
+   "3": {
+    "count": 100,
+    "name": "Differentiable versus continuous"
+   }
+  },
+  "outcome": "Understand the derivative as an instantaneous rate and compute it from the limit definition.",
+  "title": "The derivative from its definition"
+ },
  "ibp": {
   "levels": {
    "1": {

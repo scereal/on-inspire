@@ -3,6 +3,7 @@
     python tests/e2e_calculus.py
 """
 import functools
+import re
 import http.server
 import sys
 import threading
@@ -87,6 +88,7 @@ def main():
             map_tests(page, base, c, name)
             entrance_tests(page, base, c, name)
             learn_tests(page, base, c, name)
+            play_all_walkthroughs(page, base, c, name)
             page.close()
         no_speech_test(browser, base, c)
         browser.close()
@@ -160,6 +162,43 @@ def no_speech_test(browser, base, c):
     page.click(".learn-step .choices button:text-is('Right')")
     c.ok(page.is_visible(".learn-narration") and not errors, f"no-speech: walkthrough still works ({errors})")
     ctx.close()
+
+
+
+def play_all_walkthroughs(page, base, c, label):
+    """Play every real walkthrough: a wrong answer then the right one on each step, then finish."""
+    page.goto(f"{base}/calculus/learn/?id=none")
+    walks = page.evaluate("() => window.WALKTHROUGHS")
+    for w in walks:
+        page.goto(f"{base}/calculus/learn/?id={w['id']}")
+        page.wait_for_selector(".learn-problem")
+        for i, step in enumerate(w["steps"]):
+            ask = step["ask"]
+            if ask["format"] == "choice":
+                buttons = page.locator(".learn-step .choices button")
+                wrong = next((j for j, o in enumerate(ask["options"]) if not o.get("correct")), None)
+                right = next(j for j, o in enumerate(ask["options"]) if o.get("correct"))
+                if wrong is not None:
+                    buttons.nth(wrong).click()
+                    c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: {w['id']} step {i + 1} wrong-answer feedback")
+                buttons.nth(right).click()
+            else:
+                page.fill(".learn-step input[type=number]", str(ask["answer"] * 3 + 7))
+                page.click(".learn-step button:text-is('Check')")
+                page.fill(".learn-step input[type=number]", str(ask["answer"]))
+                page.click(".learn-step button:text-is('Check')")
+            ok = page.is_visible(".learn-narration")
+            c.ok(ok, f"{label}: {w['id']} step {i + 1} reveals its narration")
+            if not ok:
+                break
+            if step.get("widget"):
+                c.ok(page.locator(".learn-step .why-widget svg").count() == 1, f"{label}: {w['id']} step {i + 1} widget renders")
+            page.locator(".learn-step button").filter(has_text=re.compile(r"^(Next step|Finish)$")).click()
+        if page.locator("a.practice-this").count():
+            href = page.get_attribute("a.practice-this", "href")
+            c.ok("f=" in href and "level=" in href, f"{label}: {w['id']} finish links to practice")
+        else:
+            c.failures.append(f"{label}: {w['id']} finish screen missing Practice link")
 
 
 if __name__ == "__main__":
