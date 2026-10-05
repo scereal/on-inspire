@@ -92,11 +92,55 @@ class LimitsTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertAlmostEqual(sol.steps[2].answer, 6)
 
+    # Level 5: squeeze ------------------------------------------------------------------
+    def test_level5_limit_is_c_and_loose_bounds_are_wrong(self):
+        for p in [{"family": "zero", "n": 2, "k": 1, "trig": "sin", "c": 0}, {"family": "zero", "n": 1, "k": 3, "trig": "cos", "c": 2},
+                  {"family": "inf", "n": None, "k": 2, "trig": "sin", "c": -3}]:
+            ok, why, sol, _ = validate(FW, p, 5, None)
+            self.assertTrue(ok, why)
+            self.assertAlmostEqual(sol.steps[2].answer, p["c"])
+            self.assertFalse(by_misconception(sol.steps[1], "bounds-dont-meet").correct)
+            f = lim.squeeze_function(p)
+            point = sp.oo if p["family"] == "inf" else 0
+            self.assertEqual(sp.limit(f, x, point), p["c"])
+
+    # Level 6: limits at infinity --------------------------------------------------------
+    def test_level6_degree_cases(self):
+        ok, why, sol, _ = validate(FW, {"case": "equal", "dir": "+", "a": [3, 1, 2], "b": [4, 0, -1]}, 6, None)
+        self.assertTrue(ok, why)
+        self.assertIn("3/4", correct(sol.steps[0]).label.replace("\\frac{3}{4}", "3/4"))
+        ok, why, sol, _ = validate(FW, {"case": "smaller", "dir": "+", "a": [0, 2, 1], "b": [1, 0, 3]}, 6, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(correct(sol.steps[0]).value, "0")
+        self.assertEqual(correct(sol.steps[1]).value, "y=0")
+
+    def test_level6_sign_of_infinity(self):
+        # (2x² + 1)/(x − 3) → −∞ as x → −∞ (odd degree difference)
+        ok, why, sol, _ = validate(FW, {"case": "bigger", "dir": "-", "a": [2, 0, 1], "b": [0, 1, -3]}, 6, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(correct(sol.steps[0]).value, "-oo")
+        self.assertEqual(correct(sol.steps[1]).value, "none")
+
+    # Level 7: vertical asymptotes -------------------------------------------------------
+    def test_level7_hole_is_never_the_asymptote(self):
+        ok, why, sol, _ = validate(FW, {"family": "hole", "k": 1, "r": 1, "a": 2, "m": 1, "b": -1}, 7, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(correct(sol.steps[0]).value, "x=2")
+        self.assertFalse(by_misconception(sol.steps[0], "hole-is-asymptote").correct)
+
+    def test_level7_signs_either_side(self):
+        ok, why, sol, _ = validate(FW, {"family": "single", "k": 1, "r": -1, "a": 2, "m": 1, "b": None}, 7, None)
+        self.assertTrue(ok, why)
+        self.assertEqual((correct(sol.steps[1]).value, correct(sol.steps[2]).value), ("oo", "-oo"))
+        ok, why, sol, _ = validate(FW, {"family": "single", "k": -2, "r": 0, "a": 1, "m": 2, "b": None}, 7, None)
+        self.assertTrue(ok, why)
+        self.assertEqual((correct(sol.steps[1]).value, correct(sol.steps[2]).value), ("-oo", "-oo"))
+
     def test_no_sign_glitches_in_text(self):
         # e.g. "(x - -4)", "+ -3", "(x - 0)", or an empty square root
         import re
         problems, _ = bank.build(FW, seed=1)
-        bad = re.compile(r"- -|\+ -|x - 0\b|\\sqrt\{\\;\}")
+        bad = re.compile(r"- -|\+ -|x - 0\b|\\sqrt\{\\;\}|\$(negative|positive)\$")
         for level, items in problems.items():
             for p in items:
                 texts = [p["story"]] + [t for st in p["steps"] for t in [st["prompt"], st.get("explain", "")] +

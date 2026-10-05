@@ -108,6 +108,18 @@
    "4": {
     "count": 100,
     "name": "Rationalize with the conjugate"
+   },
+   "5": {
+    "count": 100,
+    "name": "The squeeze theorem"
+   },
+   "6": {
+    "count": 100,
+    "name": "Limits at infinity"
+   },
+   "7": {
+    "count": 100,
+    "name": "Vertical asymptotes"
    }
   },
   "outcome": "Find limits from tables and graphs, compute them with algebra, and handle infinity.",
