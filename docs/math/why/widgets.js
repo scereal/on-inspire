@@ -28,6 +28,7 @@
     avgcost: (n) => (5000 + 3 * n) / n,
     asym: (x) => (x + 1) / (x - 2),
     rootdiff: (x) => (Math.sqrt(x + 4) - 2) / x,
+    hole3: (x) => (x * x - 9) / (x - 3),
   };
 
   const WidgetMath = {
@@ -36,6 +37,8 @@
       return FUNCTIONS[name];
     },
     secantSlope: (f, x0, h) => (f(x0 + h) - f(x0)) / h,
+    // Draw a curve point only if it's finite and not far outside the window (clips blow-ups near asymptotes)
+    plottable: (y, ymin, ymax) => Number.isFinite(y) && y >= ymin - 3 * (ymax - ymin) && y <= ymax + 3 * (ymax - ymin),
     // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
     farValues(f, mode, at, t) {
       if (mode === "infinity") {
@@ -167,12 +170,15 @@
     const curve = (f, a = xmin, b = xmax, cls = "w-curve", n = 240) => {
       let d = "";
       let pen = false;
+      let prev = null;
       for (let i = 0; i <= n; i++) {
         const x = a + ((b - a) * i) / n;
         const y = f(x);
-        if (!Number.isFinite(y) || y > ymax * 4 + 10 || y < ymin * 4 - 10) { pen = false; continue; }
+        if (!WidgetMath.plottable(y, ymin, ymax)) { pen = false; continue; }
+        if (pen && Math.abs(y - prev) > (ymax - ymin) / 2) pen = false;   // a jump, not a wall: lift the pen
         d += `${pen ? "L" : "M"}${X(x).toFixed(1)} ${Y(y).toFixed(1)} `;
         pen = true;
+        prev = y;
       }
       return el("path", { d, class: cls }, svg);
     };

@@ -40,31 +40,161 @@ window.CURRICULUM = {
           "id": "140.2.1",
           "title": "Find limits from graphs and tables, including one-sided limits",
           "summary": "See what value a function settles toward, from each side.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.1.table",
+              "title": "Limits from a table of values",
+              "learn": "learn-table",
+              "practice": {
+                "framework": "limits",
+                "level": 1
+              },
+              "builds_on": [
+                "foundation:limit",
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.2.1.one-sided",
+              "title": "One-sided limits",
+              "learn": "learn-one-sided",
+              "practice": {
+                "framework": "limits",
+                "level": 2
+              },
+              "builds_on": [
+                "140.2.1.table"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.2",
           "title": "Compute limits with limit laws, algebra and the squeeze theorem",
           "summary": "Turn 0/0 into an answer by factoring, rationalizing or squeezing.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.2.factor",
+              "title": "Factor and cancel",
+              "learn": "learn-factor",
+              "practice": {
+                "framework": "limits",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.1.table"
+              ]
+            },
+            {
+              "id": "140.2.2.rationalize",
+              "title": "Rationalize with the conjugate",
+              "learn": "learn-rationalize",
+              "practice": {
+                "framework": "limits",
+                "level": 4
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "foundation:conjugate-trick"
+              ]
+            },
+            {
+              "id": "140.2.2.squeeze",
+              "title": "The squeeze theorem",
+              "learn": "learn-squeeze",
+              "practice": {
+                "framework": "limits",
+                "level": 5
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "foundation:unit-circle"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.3",
           "title": "Find limits at infinity and asymptotes",
           "summary": "Describe what a function does far out and near its blow-ups.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.3.infinity",
+              "title": "Limits at infinity and horizontal asymptotes",
+              "learn": "learn-infinity",
+              "practice": {
+                "framework": "limits",
+                "level": 6
+              },
+              "builds_on": [
+                "140.2.2.factor"
+              ]
+            },
+            {
+              "id": "140.2.3.asymptotes",
+              "title": "Vertical asymptotes",
+              "learn": "learn-asymptote",
+              "practice": {
+                "framework": "limits",
+                "level": 7
+              },
+              "builds_on": [
+                "140.2.1.one-sided",
+                "140.2.3.infinity"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.4",
           "title": "Decide continuity and use the Intermediate Value Theorem",
           "summary": "Know when a graph has no breaks, and what that guarantees.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.4.continuity",
+              "title": "What continuity means",
+              "learn": "learn-continuous",
+              "practice": {
+                "framework": "continuity",
+                "level": 1
+              },
+              "builds_on": [
+                "140.2.1.one-sided"
+              ]
+            },
+            {
+              "id": "140.2.4.ivt",
+              "title": "The Intermediate Value Theorem",
+              "learn": "learn-ivt",
+              "practice": {
+                "framework": "continuity",
+                "level": 2
+              },
+              "builds_on": [
+                "140.2.4.continuity"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.5",
           "title": "Use the epsilon–delta definition of a limit",
           "summary": "Say exactly what \"approaches\" means, and prove simple limits.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.5.epsilon-delta",
+              "title": "Finding δ for a given ε",
+              "learn": "learn-epsilon-delta",
+              "practice": {
+                "framework": "continuity",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.1.table",
+                "foundation:limit"
+              ]
+            }
+          ]
         }
       ]
     },

@@ -79,6 +79,11 @@ check("unknown function names are refused", (() => { try { M.fn("alert"); return
   check("parking: 4 dollars per started hour (8 just before 2 h, 12 just after)", M.fn("parking")(1.999) === 8 && M.fn("parking")(2.001) === 12);
   check("jump: 1 on the left of 0, 3 on the right", M.fn("jump")(-0.001) === 1 && M.fn("jump")(0.001) === 3);
   check("line21(1) = 3", M.fn("line21")(1) === 3);
+  check("plots above the axis keep their points (parking: y = 8 in a 6.2–13.8 window)", M.plottable(8, 6.2, 13.8));
+  check("plots below the axis keep their points", M.plottable(-8, -13.8, -6.2));
+  check("runaway values are still clipped", !M.plottable(1e9, 0, 10) && !M.plottable(-1e9, 0, 10) && !M.plottable(NaN, 0, 10));
+  check("hole3 settles on 6 near x = 3", near(M.fn("hole3")(3.0001), 6, 1e-3) && near(M.fn("hole3")(2.9999), 6, 1e-3));
+  check("rootdiff settles on 1/4 near 0", near(M.fn("rootdiff")(1e-6), 0.25, 1e-4));
   check("ivtcubic changes sign on [0, 1]", M.fn("ivtcubic")(0) < 0 && M.fn("ivtcubic")(1) > 0);
 }
 

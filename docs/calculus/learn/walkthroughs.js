@@ -857,5 +857,1024 @@ window.WALKTHROUGHS = [
         "tol": 0.01
       }
     ]
+  },
+  {
+    "id": "learn-table",
+    "subtopic": "140.2.1.table",
+    "title": "What is sin x / x at 0?",
+    "problem": "$f(x) = \\frac{\\sin x}{x}$ can't be evaluated at $x = 0$. What does it do near 0?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Substitute $x = 0$. What do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{0}{0}$, which is undefined",
+              "correct": true
+            },
+            {
+              "label": "$0$",
+              "misconception": "top-is-zero",
+              "feedback": "The top is 0, but so is the bottom. $\\frac{0}{0}$ isn't 0; it isn't anything yet."
+            },
+            {
+              "label": "$\\infty$",
+              "misconception": "divide-by-zero-is-infinity",
+              "feedback": "A number over 0 blows up only when the top isn't 0. Here the top is 0 too."
+            }
+          ]
+        },
+        "narration": "$\\frac{\\sin 0}{0} = \\frac{0}{0}$, which is undefined. That's not the end of the story. A [[limit]] asks where the values head as $x$ gets close to 0, not what happens at 0.",
+        "builds_on": [
+          "foundation:function"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Use a calculator in radians. What is $\\frac{\\sin(0.1)}{0.1}$, to 3 decimal places?",
+          "format": "number",
+          "answer": 0.998,
+          "tolerance": 0.001,
+          "hint": "$\\sin(0.1) \\approx 0.09983$. Divide that by $0.1$."
+        },
+        "narration": "$\\frac{\\sin(0.1)}{0.1} \\approx 0.99833$. Closer in, $\\frac{\\sin(0.01)}{0.01} \\approx 0.99998$ and $\\frac{\\sin(0.001)}{0.001} \\approx 0.9999998$. Negative inputs give exactly the same values, because $\\frac{\\sin(-x)}{-x} = \\frac{\\sin x}{x}$.",
+        "math": [
+          "\\begin{array}{c|c} x & \\frac{\\sin x}{x} \\\\ \\hline \\pm 0.1 & 0.99833 \\\\ \\pm 0.01 & 0.99998 \\\\ \\pm 0.001 & 0.9999998 \\end{array}"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What value are the outputs approaching?",
+          "format": "number",
+          "answer": 1,
+          "tolerance": 0.001,
+          "hint": "Look at the pattern: 0.99833, 0.99998, 0.9999998. Which number are they closing in on?"
+        },
+        "narration": "They settle on 1 from both sides, so $\\lim_{x\\to 0}\\frac{\\sin x}{x} = 1$. On the [[unit-circle|unit circle]], a small angle's height $\\sin x$ and its arc length $x$ are almost the same, so their ratio is almost 1.",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "sinh_over_h",
+          "at": 0,
+          "limit": 1,
+          "prompt": "Zoom in toward 0: the outputs settle on 1, even though there's a hole at 0 itself."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "So does $\\frac{\\sin x}{x}$ have a limit at 0, even though it has no value there?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Yes: the limit is 1",
+              "correct": true
+            },
+            {
+              "label": "No: with no value at 0, there's no limit",
+              "misconception": "limit-needs-value",
+              "feedback": "A limit never uses the value at the point, only the values near it, and those clearly head to 1."
+            },
+            {
+              "label": "Yes: the limit is $\\frac{0}{0}$",
+              "misconception": "zero-over-zero-is-a-value",
+              "feedback": "$\\frac{0}{0}$ isn't a number. The limit is where the values head, and the table shows that."
+            }
+          ]
+        },
+        "narration": "A limit doesn't need a value at the point. This one, $\\frac{\\sin x}{x} \\to 1$, is the key step in finding the derivative of $\\sin$ ([[sin-h-over-h|see why]])."
+      }
+    ],
+    "summary": "A table of values closing in from both sides shows where a function is heading. $\\frac{\\sin x}{x}$ is undefined at 0, yet $\\lim_{x\\to 0}\\frac{\\sin x}{x} = 1$: a limit only cares about the values **near** the point.",
+    "claims": [
+      {
+        "sympy": "limit(sin(x)/x, x, 0)",
+        "equals": "1"
+      },
+      {
+        "sympy": "sin(Rational(1, 10))/Rational(1, 10)",
+        "approx": 0.998334,
+        "tol": 1e-06
+      },
+      {
+        "sympy": "sin(Rational(1, 100))/Rational(1, 100)",
+        "approx": 0.9999833,
+        "tol": 1e-07
+      }
+    ]
+  },
+  {
+    "id": "learn-one-sided",
+    "subtopic": "140.2.1.one-sided",
+    "title": "The parking garage jump",
+    "problem": "A garage charges 4 dollars for every hour or part of an hour. What happens to the cost $C(t)$ as the parking time $t$ approaches 2 hours?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What do you pay for 1 hour 59 minutes?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "8 dollars",
+              "correct": true
+            },
+            {
+              "label": "About 7.93 dollars",
+              "misconception": "prorated",
+              "feedback": "The garage charges whole hours. Any part of the second hour costs the full 4 dollars."
+            },
+            {
+              "label": "4 dollars",
+              "misconception": "rounded-down",
+              "feedback": "1 h 59 min is into the second hour, so you pay for two hours."
+            }
+          ]
+        },
+        "narration": "Any time in the second hour costs $2 \\times 4 = 8$ dollars. As $t$ creeps up to 2 from below (1.9 h, 1.99 h, 1.999 h), the cost stays at 8. That's the [[one-sided-limit|left-hand limit]]: $\\lim_{t\\to 2^-} C(t) = 8$.",
+        "builds_on": [
+          "140.2.1.table"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "And just after 2 hours, at 2 h 01 min?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "12 dollars",
+              "correct": true
+            },
+            {
+              "label": "8 dollars",
+              "misconception": "same-both-sides",
+              "feedback": "One minute past 2 hours, you've started a third hour."
+            },
+            {
+              "label": "10 dollars",
+              "misconception": "average-of-sides",
+              "feedback": "There's no in-between price: one minute past 2 hours starts a whole new hour."
+            }
+          ]
+        },
+        "narration": "Past 2 hours you've started a third hour, so the cost is 12 dollars. As $t$ approaches 2 from above, the cost stays at 12, so $\\lim_{t\\to 2^+} C(t) = 12$.",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "parking",
+          "at": 2,
+          "left": 8,
+          "right": 12,
+          "prompt": "Zoom in on t = 2: the left side stays at 8 and the right side at 12, however close you get."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Does $\\lim_{t\\to 2} C(t)$ exist?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "No: the left and right limits disagree",
+              "correct": true
+            },
+            {
+              "label": "Yes, it's 8, because $C(2) = 8$",
+              "misconception": "limit-is-value",
+              "feedback": "$C(2) = 8$ is the price at exactly 2 hours. The limit asks where the price is heading, and it heads to two different places."
+            },
+            {
+              "label": "Yes, it's 10, halfway between",
+              "misconception": "average-of-sides",
+              "feedback": "Averaging doesn't rescue it. A two-sided limit exists only when both sides agree."
+            }
+          ]
+        },
+        "narration": "The two-sided [[limit]] exists only when both one-sided limits agree. Since $8 \\ne 12$, there's no limit at 2, even though the garage has a price at exactly 2 hours ($C(2) = 8$). A value and a limit answer different questions."
+      }
+    ],
+    "summary": "Approaching from the left, the cost heads to **8 dollars**; from the right, to **12 dollars**. The one-sided limits disagree, so $\\lim_{t\\to 2} C(t)$ doesn't exist, even though $C(2) = 8$ does.",
+    "claims": [
+      {
+        "sympy": "4*ceiling(Rational(199, 100))",
+        "equals": "8"
+      },
+      {
+        "sympy": "4*ceiling(Rational(201, 100))",
+        "equals": "12"
+      },
+      {
+        "sympy": "4*ceiling(2)",
+        "equals": "8"
+      }
+    ]
+  },
+  {
+    "id": "learn-factor",
+    "subtopic": "140.2.2.factor",
+    "title": "Cancelling the zero",
+    "problem": "Find $\\lim_{x\\to 3}\\frac{x^2 - 9}{x - 3}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Substitute $x = 3$. What do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{0}{0}$",
+              "correct": true
+            },
+            {
+              "label": "$0$",
+              "misconception": "zero-over-zero-is-0",
+              "feedback": "The top is 0, but so is the bottom. $\\frac{0}{0}$ isn't 0: it's a sign to simplify."
+            },
+            {
+              "label": "No limit: you can't divide by zero",
+              "misconception": "zero-over-zero-dne",
+              "feedback": "$\\frac{0}{0}$ means the algebra isn't finished, not that there's no limit."
+            }
+          ]
+        },
+        "narration": "$\\frac{9 - 9}{3 - 3} = \\frac{0}{0}$. That's an [[indeterminate-form|indeterminate form]]: a signal to simplify, not an answer.",
+        "builds_on": [
+          "140.2.1.table"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Factor the top. What is $x^2 - 9$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$(x - 3)(x + 3)$",
+              "correct": true
+            },
+            {
+              "label": "$(x - 3)^2$",
+              "misconception": "square-of-difference",
+              "feedback": "$(x - 3)^2 = x^2 - 6x + 9$. You want a difference of squares."
+            },
+            {
+              "label": "$(x - 9)(x + 1)$",
+              "misconception": "factor-slip",
+              "feedback": "Multiply it out: $(x - 9)(x + 1) = x^2 - 8x - 9$, not $x^2 - 9$."
+            }
+          ]
+        },
+        "narration": "It's a difference of squares: $x^2 - 9 = (x - 3)(x + 3)$. Now the top and bottom share the factor $x - 3$."
+      },
+      {
+        "ask": {
+          "prompt": "Cancel the common factor. What's left?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x + 3$",
+              "correct": true
+            },
+            {
+              "label": "$x - 3$",
+              "misconception": "kept-cancelled-factor",
+              "feedback": "$x - 3$ is the factor that cancels. What's left is the other one."
+            },
+            {
+              "label": "$x^2 - 3$",
+              "misconception": "cancelled-terms",
+              "feedback": "You can only cancel factors, not pieces of a sum: $\\frac{x^2 - 9}{x - 3}$ isn't $x^2 - \\frac{9}{3}$."
+            }
+          ]
+        },
+        "narration": "For every $x \\ne 3$, $\\frac{(x - 3)(x + 3)}{x - 3} = x + 3$. Cancelling is allowed because a [[limit]] never looks at $x = 3$ itself, only near it."
+      },
+      {
+        "ask": {
+          "prompt": "Now substitute $x = 3$. What is the limit?",
+          "format": "number",
+          "answer": 6,
+          "tolerance": 0.001
+        },
+        "narration": "$x + 3 \\to 6$. The original function is the line $y = x + 3$ with one point missing: a hole at $(3, 6)$.",
+        "math": [
+          "\\lim_{x\\to 3}\\frac{x^2 - 9}{x - 3} = \\lim_{x\\to 3}(x + 3) = 6"
+        ],
+        "widget": {
+          "type": "limit-zoom",
+          "g": "hole3",
+          "at": 3,
+          "limit": 6,
+          "prompt": "Zoom in at x = 3: the outputs settle on 6, right at the hole."
+        }
+      }
+    ],
+    "summary": "Substituting gave $\\frac{0}{0}$, so we simplified. Factoring and cancelling $x - 3$ left $x + 3$, and $\\lim_{x\\to 3}\\frac{x^2 - 9}{x - 3} = $ **6**.",
+    "claims": [
+      {
+        "sympy": "limit((x**2 - 9)/(x - 3), x, 3)",
+        "equals": "6"
+      },
+      {
+        "sympy": "factor(x**2 - 9)",
+        "equals": "(x - 3)*(x + 3)"
+      },
+      {
+        "sympy": "expand((x - 9)*(x + 1))",
+        "equals": "x**2 - 8*x - 9"
+      }
+    ]
+  },
+  {
+    "id": "learn-rationalize",
+    "subtopic": "140.2.2.rationalize",
+    "title": "A square root in the way",
+    "problem": "Find $\\lim_{x\\to 0}\\frac{\\sqrt{x + 4} - 2}{x}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Substituting gives $\\frac{0}{0}$. Can you factor and cancel as it stands?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "No: there's no common factor while the square root is there",
+              "correct": true
+            },
+            {
+              "label": "Yes: cancel the $x$ on top with the $x$ below",
+              "misconception": "cancelled-inside-root",
+              "feedback": "The $x$ on top is inside the square root. You can only cancel a factor of the whole top."
+            },
+            {
+              "label": "Yes: $\\sqrt{x + 4} - 2 = \\sqrt{x}$",
+              "misconception": "split-root",
+              "feedback": "Square roots don't split over sums. Check $x = 5$: $\\sqrt{9} - 2 = 1$, but $\\sqrt{5} \\approx 2.24$."
+            }
+          ]
+        },
+        "narration": "The top is a square root minus a number, with no visible factor of $x$. We need to get rid of the square root first.",
+        "builds_on": [
+          "140.2.2.factor"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Multiply top and bottom by which expression?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\sqrt{x + 4} + 2$",
+              "correct": true
+            },
+            {
+              "label": "$\\sqrt{x + 4} - 2$",
+              "misconception": "same-not-conjugate",
+              "feedback": "Multiplying by the same expression squares it and keeps the root. Flip the middle sign: $(A - B)(A + B) = A^2 - B^2$."
+            },
+            {
+              "label": "$x$",
+              "misconception": "wrong-factor",
+              "feedback": "That doesn't touch the square root."
+            }
+          ]
+        },
+        "narration": "The [[conjugate-trick|conjugate]] $\\sqrt{x + 4} + 2$ turns the top into a difference of squares: $(\\sqrt{x + 4} - 2)(\\sqrt{x + 4} + 2) = (x + 4) - 4 = x$.",
+        "math": [
+          "\\frac{\\sqrt{x + 4} - 2}{x}\\cdot\\frac{\\sqrt{x + 4} + 2}{\\sqrt{x + 4} + 2} = \\frac{x}{x\\,(\\sqrt{x + 4} + 2)}"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Cancel the $x$. What's left?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{1}{\\sqrt{x + 4} + 2}$",
+              "correct": true
+            },
+            {
+              "label": "$\\sqrt{x + 4} + 2$",
+              "misconception": "flipped",
+              "feedback": "The conjugate ended up on the bottom: you multiplied the bottom by it."
+            },
+            {
+              "label": "$\\frac{1}{\\sqrt{x + 4} - 2}$",
+              "misconception": "sign-slip",
+              "feedback": "The factor you multiplied by has a plus sign, and that's the one that stays."
+            }
+          ]
+        },
+        "narration": "Once the $x$ cancels, nothing is $\\frac{0}{0}$ any more."
+      },
+      {
+        "ask": {
+          "prompt": "Substitute $x = 0$. What is the limit?",
+          "format": "number",
+          "answer": 0.25,
+          "tolerance": 0.002,
+          "hint": "$\\sqrt{4} = 2$, so the bottom is $2 + 2$."
+        },
+        "narration": "$\\frac{1}{\\sqrt{4} + 2} = \\frac{1}{4}$. Zooming in on the original function confirms it.",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "rootdiff",
+          "at": 0,
+          "limit": 0.25,
+          "prompt": "Zoom in at 0: the original function settles on 1/4."
+        }
+      }
+    ],
+    "summary": "The square root hid the common factor. Multiplying by the conjugate $\\sqrt{x + 4} + 2$ exposed it, and the limit is **1/4**.",
+    "claims": [
+      {
+        "sympy": "limit((sqrt(x + 4) - 2)/x, x, 0)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "simplify((sqrt(x + 4) - 2)/x - 1/(sqrt(x + 4) + 2))",
+        "equals": "0"
+      },
+      {
+        "sympy": "expand((sqrt(x + 4) - 2)*(sqrt(x + 4) + 2))",
+        "equals": "x"
+      }
+    ]
+  },
+  {
+    "id": "learn-squeeze",
+    "subtopic": "140.2.2.squeeze",
+    "title": "Trapping a wild function",
+    "problem": "Find $\\lim_{x\\to 0} x^2 \\sin\\left(\\frac{1}{x}\\right)$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Can you use \"the limit of a product is the product of the limits\"?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "No: $\\sin(1/x)$ has no limit at 0",
+              "correct": true
+            },
+            {
+              "label": "Yes: it's $0 \\cdot \\sin(\\infty) = 0$",
+              "misconception": "infinity-as-number",
+              "feedback": "$\\sin(\\infty)$ isn't a number. As $\\frac{1}{x}$ grows, $\\sin(1/x)$ keeps swinging between $-1$ and $1$."
+            },
+            {
+              "label": "No: $x^2$ has no limit at 0",
+              "misconception": "blamed-wrong-factor",
+              "feedback": "$x^2$ behaves perfectly: it goes to 0. The problem is the other factor."
+            }
+          ]
+        },
+        "narration": "As $x \\to 0$, $\\frac{1}{x}$ races off and $\\sin(1/x)$ swings between $-1$ and $1$ faster and faster. It never settles, so the product law can't be used.",
+        "builds_on": [
+          "foundation:unit-circle"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Which pair of bounds traps $x^2 \\sin(1/x)$ and closes in on a single value?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-x^2 \\le x^2\\sin(1/x) \\le x^2$",
+              "correct": true
+            },
+            {
+              "label": "$-1 \\le x^2\\sin(1/x) \\le 1$",
+              "misconception": "bounds-dont-meet",
+              "feedback": "True near 0, but these bounds stay 2 apart. They trap the function without squeezing it."
+            },
+            {
+              "label": "$0 \\le x^2\\sin(1/x) \\le x^2$",
+              "misconception": "lower-bound-too-high",
+              "feedback": "$\\sin(1/x)$ is negative about half the time, so the function dips below 0."
+            }
+          ]
+        },
+        "narration": "Since $-1 \\le \\sin(1/x) \\le 1$, multiplying by $x^2 \\ge 0$ gives $-x^2 \\le x^2\\sin(1/x) \\le x^2$.",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "x2sin",
+          "at": 0,
+          "limit": 0,
+          "bounds": [
+            "square",
+            "negsquare"
+          ],
+          "prompt": "Zoom in: the wiggles never escape the two parabolas, and the parabolas pinch to 0."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Both bounds go to 0 as $x \\to 0$. What is the limit?",
+          "format": "number",
+          "answer": 0,
+          "tolerance": 0.001
+        },
+        "narration": "Trapped between $-x^2$ and $x^2$, both heading to 0, the function has nowhere else to go: the limit is 0. That's the [[squeeze-theorem|squeeze theorem]]."
+      }
+    ],
+    "summary": "$\\sin(1/x)$ has no limit, but it's bounded. Squeezed between $-x^2$ and $x^2$, the product $x^2\\sin(1/x)$ goes to **0**.",
+    "claims": [
+      {
+        "sympy": "limit(x**2*sin(1/x), x, 0)",
+        "equals": "0"
+      },
+      {
+        "sympy": "limit(x**2, x, 0)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "learn-infinity",
+    "subtopic": "140.2.3.infinity",
+    "title": "Where average cost settles",
+    "problem": "A print shop pays 5000 dollars to set up a poster run, plus 3 dollars per poster. For $n$ posters the average cost per poster is $A(n) = \\frac{5000 + 3n}{n}$. What happens to $A(n)$ as $n$ grows?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is the average cost per poster for 1000 posters, in dollars?",
+          "format": "number",
+          "answer": 8,
+          "tolerance": 0.01,
+          "hint": "$\\frac{5000 + 3 \\cdot 1000}{1000}$"
+        },
+        "narration": "$A(1000) = \\frac{8000}{1000} = 8$ dollars a poster. For 10 000 posters it's 3.50 dollars, and for 100 000 it's 3.05 dollars."
+      },
+      {
+        "ask": {
+          "prompt": "Split the fraction. $A(n)$ equals:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{5000}{n} + 3$",
+              "correct": true
+            },
+            {
+              "label": "$5000 + 3$",
+              "misconception": "cancelled-n-wrongly",
+              "feedback": "Divide each term on top by $n$: $\\frac{5000}{n} + \\frac{3n}{n}$."
+            },
+            {
+              "label": "$\\frac{5000}{n} + 3n$",
+              "misconception": "forgot-to-divide",
+              "feedback": "The $3n$ term is divided by $n$ too: $\\frac{3n}{n} = 3$."
+            }
+          ]
+        },
+        "narration": "Divide each term by $n$ to get $\\frac{5000}{n} + 3$. The setup cost is being shared among more and more posters."
+      },
+      {
+        "ask": {
+          "prompt": "As $n \\to \\infty$, what does $A(n)$ approach, in dollars?",
+          "format": "number",
+          "answer": 3,
+          "tolerance": 0.01
+        },
+        "narration": "$\\frac{5000}{n} \\to 0$, so $A(n) \\to 3$. That's a [[limit-at-infinity|limit at infinity]], and $y = 3$ is a horizontal asymptote. The average cost gets as close to the 3 dollar printing cost as you like, but never reaches it.",
+        "widget": {
+          "type": "far-out",
+          "mode": "infinity",
+          "f": "avgcost",
+          "asymptote": 3,
+          "prompt": "Push n further out: the average cost flattens toward 3 dollars."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Which shortcut gives this answer for any fraction of polynomials whose top and bottom have the same degree?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Divide the leading coefficients: $\\frac{3n}{n} \\to 3$",
+              "correct": true
+            },
+            {
+              "label": "Divide the constant terms",
+              "misconception": "constant-terms",
+              "feedback": "Far out, the constants are negligible; the highest powers dominate."
+            },
+            {
+              "label": "The answer is always $\\infty$, because the top grows",
+              "misconception": "top-grows-so-infinity",
+              "feedback": "The bottom grows too, and at the same rate when the degrees match."
+            }
+          ]
+        },
+        "narration": "Far out, only the highest powers matter. When the top and bottom have the same degree, the limit is the ratio of the leading coefficients. A smaller top degree gives 0, and a bigger one means no finite limit."
+      }
+    ],
+    "summary": "Splitting the fraction showed $A(n) = \\frac{5000}{n} + 3$. As $n \\to \\infty$, the average cost approaches **3 dollars**: the horizontal asymptote $y = 3$.",
+    "claims": [
+      {
+        "sympy": "limit((5000 + 3*x)/x, x, oo)",
+        "equals": "3"
+      },
+      {
+        "sympy": "Rational(5000 + 3*1000, 1000)",
+        "equals": "8"
+      },
+      {
+        "sympy": "Rational(5000 + 3*10000, 10000)",
+        "equals": "7/2"
+      },
+      {
+        "sympy": "Rational(5000 + 3*100000, 100000)",
+        "equals": "61/20"
+      }
+    ]
+  },
+  {
+    "id": "learn-asymptote",
+    "subtopic": "140.2.3.asymptotes",
+    "title": "When the bottom hits zero",
+    "problem": "What does $f(x) = \\frac{x + 1}{x - 2}$ do near $x = 2$?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Substitute $x = 2$. What do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{3}{0}$: a nonzero number over zero",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{0}{0}$",
+              "misconception": "assumed-zero-over-zero",
+              "feedback": "The top is $2 + 1 = 3$, not 0."
+            },
+            {
+              "label": "$0$",
+              "misconception": "tiny-bottom-small-answer",
+              "feedback": "Dividing by zero doesn't give zero. The top stays near 3 while the bottom shrinks."
+            }
+          ]
+        },
+        "narration": "$\\frac{3}{0}$ isn't $\\frac{0}{0}$, so there's nothing to cancel. A number near 3 divided by something closer and closer to 0 grows without bound: there's a vertical asymptote at $x = 2$.",
+        "builds_on": [
+          "140.2.1.one-sided"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Just right of 2, say at $x = 2.001$, what is $f(x)$ like?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Large and positive",
+              "correct": true
+            },
+            {
+              "label": "Large and negative",
+              "misconception": "sign-slip",
+              "feedback": "At 2.001 the bottom is $+0.001$ and the top is about 3, so the ratio is positive."
+            },
+            {
+              "label": "Close to 0",
+              "misconception": "tiny-bottom-small-answer",
+              "feedback": "Dividing by a tiny number makes the result huge, not tiny."
+            }
+          ]
+        },
+        "narration": "$f(2.001) = \\frac{3.001}{0.001} = 3001$, and $f(2.0001) = 30\\,001$. So $\\lim_{x\\to 2^+} f(x) = +\\infty$."
+      },
+      {
+        "ask": {
+          "prompt": "And as $x \\to 2$ from the left?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$f(x) \\to -\\infty$",
+              "correct": true
+            },
+            {
+              "label": "$f(x) \\to +\\infty$",
+              "misconception": "same-both-sides",
+              "feedback": "Left of 2 the bottom $x - 2$ is negative, so the ratio is negative."
+            },
+            {
+              "label": "$f(x) \\to 0$",
+              "misconception": "tiny-bottom-small-answer",
+              "feedback": "Dividing by a tiny number makes the result huge, not tiny."
+            }
+          ]
+        },
+        "narration": "$f(1.999) = \\frac{2.999}{-0.001} = -2999$. From the left the outputs plunge: $\\lim_{x\\to 2^-} f(x) = -\\infty$. The two [[one-sided-limit|one-sided limits]] head in opposite directions, the signature of a [[vertical-asymptote|vertical asymptote]].",
+        "widget": {
+          "type": "far-out",
+          "mode": "asymptote",
+          "f": "asym",
+          "at": 2,
+          "prompt": "Close in on x = 2 from both sides: one side shoots up, the other plunges."
+        }
+      }
+    ],
+    "summary": "At $x = 2$ the top is 3 and the bottom is 0, so the outputs blow up: **$+\\infty$ from the right and $-\\infty$ from the left**. The line $x = 2$ is a vertical asymptote.",
+    "claims": [
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '+')",
+        "equals": "oo"
+      },
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '-')",
+        "equals": "-oo"
+      },
+      {
+        "sympy": "((x + 1)/(x - 2)).subs(x, Rational(2001, 1000))",
+        "equals": "3001"
+      },
+      {
+        "sympy": "((x + 1)/(x - 2)).subs(x, Rational(1999, 1000))",
+        "equals": "-2999"
+      }
+    ]
+  },
+  {
+    "id": "learn-continuous",
+    "subtopic": "140.2.4.continuity",
+    "title": "Gluing two pieces together",
+    "problem": "For which $k$ is $f(x) = \\begin{cases} kx + 1 & x < 2 \\\\ x^2 & x \\ge 2 \\end{cases}$ continuous at $x = 2$?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What does continuity at $x = 2$ require?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\lim_{x\\to 2} f(x)$ exists and equals $f(2)$",
+              "correct": true
+            },
+            {
+              "label": "The slopes on each side match",
+              "misconception": "slopes-must-match",
+              "feedback": "Matching slopes is the extra condition for a derivative. Continuity only needs the graph to meet itself with no gap."
+            },
+            {
+              "label": "$f(2)$ is defined",
+              "misconception": "defined-is-enough",
+              "feedback": "Being defined isn't enough: $f(2)$ must equal the value the graph is heading toward."
+            }
+          ]
+        },
+        "narration": "Continuity means no gap: the [[limit]] from each side must equal the value. Here $f(2) = 2^2 = 4$, from the right piece. ([[continuity|More on continuity]].)",
+        "builds_on": [
+          "140.2.1.one-sided"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What does the right piece approach as $x \\to 2^+$?",
+          "format": "number",
+          "answer": 4,
+          "tolerance": 0.001
+        },
+        "narration": "$x^2 \\to 4$, which equals $f(2)$. So the left piece must also approach 4."
+      },
+      {
+        "ask": {
+          "prompt": "What does the left piece approach as $x \\to 2^-$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2k + 1$",
+              "correct": true
+            },
+            {
+              "label": "$k + 1$",
+              "misconception": "forgot-to-substitute",
+              "feedback": "Substitute $x = 2$ into $kx + 1$: $k \\cdot 2 + 1$."
+            },
+            {
+              "label": "$4$",
+              "misconception": "assumed-the-goal",
+              "feedback": "That's what it needs to approach. First work out what it does approach, in terms of $k$."
+            }
+          ]
+        },
+        "narration": "$kx + 1 \\to 2k + 1$ as $x \\to 2$."
+      },
+      {
+        "ask": {
+          "prompt": "Solve $2k + 1 = 4$. What is $k$?",
+          "format": "number",
+          "answer": 1.5,
+          "tolerance": 0.001
+        },
+        "narration": "$k = \\frac{3}{2}$. With that slope, the line arrives exactly where the parabola starts, at $(2, 4)$, so the graph has no gap. The slopes don't match ($\\frac{3}{2}$ on the left, 4 on the right), so there's a corner, but a corner is still continuous."
+      }
+    ],
+    "summary": "Continuity at 2 needs both sides to meet $f(2) = 4$. The left piece approaches $2k + 1$, so $k = $ **3/2**. The result has a corner, not a gap.",
+    "claims": [
+      {
+        "sympy": "solve(2*a + 1 - 4, a)",
+        "equals": "[Rational(3, 2)]"
+      },
+      {
+        "sympy": "limit(x**2, x, 2)",
+        "equals": "4"
+      },
+      {
+        "sympy": "diff(x**2, x).subs(x, 2)",
+        "equals": "4"
+      }
+    ]
+  },
+  {
+    "id": "learn-ivt",
+    "subtopic": "140.2.4.ivt",
+    "title": "Is there a root between 0 and 1?",
+    "problem": "Does $x^3 + x - 1 = 0$ have a solution between 0 and 1?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Let $f(x) = x^3 + x - 1$. What is $f(0)$?",
+          "format": "number",
+          "answer": -1,
+          "tolerance": 0.001
+        },
+        "narration": "$f(0) = -1$, which is below zero.",
+        "builds_on": [
+          "140.2.4.continuity"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "And what is $f(1)$?",
+          "format": "number",
+          "answer": 1,
+          "tolerance": 0.001
+        },
+        "narration": "$f(1) = 1 + 1 - 1 = 1$, which is above zero."
+      },
+      {
+        "ask": {
+          "prompt": "What can you conclude?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "There's a root somewhere in $(0, 1)$",
+              "correct": true
+            },
+            {
+              "label": "The root is at $x = 0.5$, halfway",
+              "misconception": "ivt-gives-location",
+              "feedback": "$f(0.5) = -0.375$, not 0. The theorem says a root exists, not where it is."
+            },
+            {
+              "label": "Nothing: the theorem needs $f(0)$ or $f(1)$ to be 0",
+              "misconception": "misread-ivt",
+              "feedback": "The theorem needs the target value, 0, to lie between $f(0)$ and $f(1)$. It does: $-1 < 0 < 1$."
+            }
+          ]
+        },
+        "narration": "$f$ is a polynomial, so it's [[continuity|continuous]]. It goes from $-1$ to $1$ without breaks, so it must cross 0 somewhere in between. That's the [[intermediate-value-theorem|Intermediate Value Theorem]]. (The root is about 0.682.)",
+        "widget": {
+          "type": "secant",
+          "mode": "trace",
+          "f": "ivtcubic",
+          "x0": 0.5,
+          "span": 1,
+          "prompt": "Drag from x = 0 to x = 1: the output goes from −1 to 1, so it has to pass through 0."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Now take $g(x) = (x - 0.5)^2 - 0.01$. Both $g(0)$ and $g(1)$ equal $0.24$. What does the theorem say about roots of $g$ in $[0, 1]$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Nothing: it gives no guarantee either way",
+              "correct": true
+            },
+            {
+              "label": "$g$ has no roots in $[0, 1]$",
+              "misconception": "ivt-converse",
+              "feedback": "In fact $g$ has roots at 0.4 and 0.6. Ends with the same sign don't rule roots out."
+            },
+            {
+              "label": "$g$ has exactly one root",
+              "misconception": "ivt-counts",
+              "feedback": "The theorem never counts roots, and here the end values don't even straddle 0."
+            }
+          ]
+        },
+        "narration": "The theorem only works one way. Ends on opposite sides of 0 guarantee a root; ends on the same side guarantee nothing. $g$ hides two roots, at 0.4 and 0.6, between ends of the same sign."
+      }
+    ],
+    "summary": "$f(0) = -1$ and $f(1) = 1$, and polynomials are continuous, so $x^3 + x - 1 = 0$ **has a solution in $(0, 1)$**. The theorem can't tell you where, how many, or anything at all when the ends share a sign.",
+    "claims": [
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 0)",
+        "equals": "-1"
+      },
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 1)",
+        "equals": "1"
+      },
+      {
+        "sympy": "(x**3 + x - 1).subs(x, Rational(1, 2))",
+        "equals": "-3/8"
+      },
+      {
+        "sympy": "nsolve(x**3 + x - 1, x, 0.5)",
+        "approx": 0.6823,
+        "tol": 0.0001
+      },
+      {
+        "sympy": "((x - Rational(1, 2))**2 - Rational(1, 100)).subs(x, 0)",
+        "equals": "6/25"
+      },
+      {
+        "sympy": "solve((x - Rational(1, 2))**2 - Rational(1, 100), x)",
+        "equals": "[Rational(2, 5), Rational(3, 5)]"
+      }
+    ]
+  },
+  {
+    "id": "learn-epsilon-delta",
+    "subtopic": "140.2.5.epsilon-delta",
+    "title": "How close is close enough?",
+    "problem": "Show that $\\lim_{x\\to 1}(2x + 1) = 3$ the precise way: for any tolerance $\\varepsilon > 0$, find how close $x$ must be to 1 to land within $\\varepsilon$ of 3.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "We want $|(2x + 1) - 3| < \\varepsilon$. Simplify $|(2x + 1) - 3|$.",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2|x - 1|$",
+              "correct": true
+            },
+            {
+              "label": "$|x - 1|$",
+              "misconception": "forgot-slope",
+              "feedback": "$(2x + 1) - 3 = 2x - 2 = 2(x - 1)$. The 2 stays."
+            },
+            {
+              "label": "$|2x + 1|$",
+              "misconception": "forgot-to-subtract-L",
+              "feedback": "The gap is between $f(x)$ and the limit 3: start from $|f(x) - 3|$."
+            }
+          ]
+        },
+        "narration": "$|(2x + 1) - 3| = |2x - 2| = 2|x - 1|$. The output's distance from 3 is always twice the input's distance from 1.",
+        "builds_on": [
+          "140.2.1.table"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "So $2|x - 1| < \\varepsilon$ exactly when:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$|x - 1| < \\frac{\\varepsilon}{2}$",
+              "correct": true
+            },
+            {
+              "label": "$|x - 1| < 2\\varepsilon$",
+              "misconception": "multiplied-instead",
+              "feedback": "Divide both sides by 2; don't multiply."
+            },
+            {
+              "label": "$|x - 1| < \\varepsilon$",
+              "misconception": "forgot-slope",
+              "feedback": "That ignores the factor of 2: an input $\\varepsilon$ away from 1 lands $2\\varepsilon$ away from 3."
+            }
+          ]
+        },
+        "narration": "Dividing by 2 gives $|x - 1| < \\frac{\\varepsilon}{2}$. So $\\delta = \\frac{\\varepsilon}{2}$ works, for every $\\varepsilon$ at once."
+      },
+      {
+        "ask": {
+          "prompt": "For $\\varepsilon = 0.1$, what is $\\delta$?",
+          "format": "number",
+          "answer": 0.05,
+          "tolerance": 0.0005
+        },
+        "narration": "$\\delta = 0.05$: every $x$ between 0.95 and 1.05 gives $2x + 1$ between 2.9 and 3.1. Shrink $\\varepsilon$ and $\\delta$ shrinks with it, but there's always a $\\delta$. That promise is exactly what a [[limit]] means ([[epsilon-delta|more on ε and δ]]).",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "line21",
+          "at": 1,
+          "limit": 3,
+          "epsilon": true,
+          "prompt": "Shrink ε: the δ-window (dashed lines) shrinks with it, always half as wide."
+        }
+      }
+    ],
+    "summary": "$|(2x + 1) - 3| = 2|x - 1|$, so choosing $\\delta = \\frac{\\varepsilon}{2}$ keeps every output within $\\varepsilon$ of 3. For $\\varepsilon = 0.1$, **δ = 0.05**.",
+    "claims": [
+      {
+        "sympy": "expand((2*x + 1) - 3 - 2*(x - 1))",
+        "equals": "0"
+      },
+      {
+        "sympy": "2*Rational(95, 100) + 1",
+        "equals": "29/10"
+      },
+      {
+        "sympy": "2*Rational(105, 100) + 1",
+        "equals": "31/10"
+      }
+    ]
   }
 ];
