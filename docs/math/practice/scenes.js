@@ -13,7 +13,7 @@
   // Integral: the problem itself is the scene ------------------------------------
   function integral(box, problem) {
     const s = problem.scene;
-    box.innerHTML = `<div class="integral-scene">$$${s.tex}$$</div><p class="rule">The rule: $${s.rule}$</p>`;
+    box.innerHTML = `<div class="integral-scene">$$${s.tex}$$</div>` + (s.rule ? `<p class="rule">The rule: $${s.rule}$</p>` : "");
     return {};
   }
 
@@ -159,13 +159,14 @@
     const X = (x) => PAD + ((x - s.xmin) / (s.xmax - s.xmin)) * (W - 2 * PAD);
     const Y = (y) => H - PAD - ((y - s.ymin) / (s.ymax - s.ymin)) * (H - 2 * PAD);
     const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": s.label || "Graph of f" });
-    const tickStyle = "font-size: 20px";
+    const tickStyle = "font-size: 17px";
+    const span = s.ymax - s.ymin, every = span <= 7 ? 1 : span <= 14 ? 2 : 5;
     for (let gx = Math.ceil(s.xmin); gx <= s.xmax; gx++) {
       svg.append(svgEl("line", { x1: X(gx), x2: X(gx), y1: PAD, y2: H - PAD, stroke: "rgba(243, 234, 214, 0.08)" }));
     }
     for (let gy = Math.ceil(s.ymin); gy <= s.ymax; gy++) {
       svg.append(svgEl("line", { x1: PAD, x2: W - PAD, y1: Y(gy), y2: Y(gy), stroke: "rgba(243, 234, 214, 0.08)" }));
-      if (gy !== 0 && (s.ymax - s.ymin <= 12 || gy % 2 === 0)) {
+      if (gy !== 0 && gy % every === 0) {
         const t = svgEl("text", { x: X(0) - 8, y: Y(gy) + 7, class: "tick", "text-anchor": "end", style: tickStyle });
         t.textContent = gy;
         svg.append(t);

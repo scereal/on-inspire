@@ -91,6 +91,28 @@
   "outcome": "Choose u so the integral gets simpler, know when repeated parts ends, and handle the loop.",
   "title": "Integration by parts"
  },
+ "limits": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Limits from a table"
+   },
+   "2": {
+    "count": 100,
+    "name": "One-sided limits"
+   },
+   "3": {
+    "count": 100,
+    "name": "Factor and cancel"
+   },
+   "4": {
+    "count": 100,
+    "name": "Rationalize with the conjugate"
+   }
+  },
+  "outcome": "Find limits from tables and graphs, compute them with algebra, and handle infinity.",
+  "title": "Limits"
+ },
  "mixing": {
   "levels": {
    "1": {

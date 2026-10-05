@@ -192,6 +192,51 @@
   "seed": 1,
   "tried": 767
  },
+ "limits": {
+  "acceptance_rate": 0.813,
+  "accepted": 400,
+  "framework": "limits",
+  "levels": {
+   "1": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 18
+    },
+    "target": 100,
+    "tried": 118
+   },
+   "2": {
+    "accepted": 100,
+    "rejected": {
+     "distinct": 1,
+     "duplicate": 1,
+     "exists": 8
+    },
+    "target": 100,
+    "tried": 110
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "distinct": 6,
+     "duplicate": 6,
+     "exists": 23
+    },
+    "target": 100,
+    "tried": 135
+   },
+   "4": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 29
+    },
+    "target": 100,
+    "tried": 129
+   }
+  },
+  "seed": 1,
+  "tried": 492
+ },
  "mixing": {
   "acceptance_rate": 0.2129,
   "accepted": 310,
