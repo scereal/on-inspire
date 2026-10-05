@@ -88,6 +88,11 @@ class ContinuityTest(unittest.TestCase):
         self.assertAlmostEqual(sol.steps[2].answer, 0.025)
         self.assertIn("4", correct(sol.steps[1]).label)
 
+    def test_level3_rejects_a_zero_limit(self):
+        # L = 0 makes |f(x) − L| = |f(x)|, so the "forgot to subtract L" option would be correct too
+        ok, why, _, _ = validate(FW, {"m": 4, "b": -4, "a": 1, "eps": "0.1"}, 3, None)
+        self.assertFalse(ok)
+
     def test_no_sign_glitches_in_text(self):
         problems, _ = bank.build(FW, seed=1)
         bad = re.compile(r"- -|\+ -|x - 0\b|\$(negative|positive)\$")

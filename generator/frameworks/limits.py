@@ -416,7 +416,7 @@ class Limits(Framework):
                 Option(f"${tame}$ has no limit as $x \\to {where}$", misconception="blamed-wrong-factor", value="tame",
                        feedback=f"${tame}$ behaves perfectly: it goes to 0. The problem is the other piece."),
                 Option(f"Nothing stops you: ${wild}$ settles to 0", misconception="oscillation-has-limit", value="settles",
-                       feedback=f"${wild}$ swings between $-1$ and $1$ forever, faster and faster. It never settles."),
+                       feedback=f"${wild}$ swings between $-1$ and $1$ forever{', faster and faster' if p['family'] == 'zero' else ''}. It never settles."),
             ]),
             Step("Which pair of bounds squeezes $f(x)$ to a limit?", "choice", "tight", options=[
                 Option(f"${lo} \\le f(x) \\le {hi}$", correct=True, value="tight"),
@@ -515,12 +515,13 @@ class Limits(Framework):
                                 feedback=f"The bottom is zero where ${sp.latex(x - a)} = 0$, at $x = {a}$."))
         side = lambda v, **kw: Option(f"${show_limit(v)}$", value=value_key(v), **kw)
         top_sign = "positive" if k * (a - r) > 0 else "negative"     # the surviving top, k(x − r), near x = a
+        lead = f"after cancelling ${factor(b)}$, " if b is not None else ""   # signs refer to the cancelled form
         sided = []
         for s_name, v in (("+", right), ("-", left)):
             bottom_sign = "positive" if (s_name == "+" or m % 2 == 0) else "negative"
             sided.append([side(v, correct=True),
                           side(-v, misconception="sign-slip",
-                               feedback=f"Check the signs just {'right' if s_name == '+' else 'left'} of ${a}$: the top is {top_sign} and the bottom is a tiny {bottom_sign} number."),
+                               feedback=f"Check the signs just {'right' if s_name == '+' else 'left'} of ${a}$: {lead}the top ${sp.latex(k * (x - r))}$ is {top_sign} and the bottom ${sp.latex((x - a) ** m)}$ is a tiny {bottom_sign} number."),
                           Option("$0$", misconception="tiny-bottom-small-answer", value="0",
                                  feedback="Dividing by a tiny number makes the result huge, not tiny.")])
         steps = [

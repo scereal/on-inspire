@@ -78,6 +78,7 @@ check("unknown function names are refused", (() => { try { M.fn("alert"); return
   check("negsquare is −x²", M.fn("negsquare")(3) === -9);
   check("parking: 4 dollars per started hour (8 just before 2 h, 12 just after)", M.fn("parking")(1.999) === 8 && M.fn("parking")(2.001) === 12);
   check("jump: 1 on the left of 0, 3 on the right", M.fn("jump")(-0.001) === 1 && M.fn("jump")(0.001) === 3);
+  check("far-out labels whole x values without stripping zeros", M.farLabel(10) === "10" && M.farLabel(100) === "100" && M.farLabel(1e6) === "1e+6");
   check("line21(1) = 3", M.fn("line21")(1) === 3);
   check("plots above the axis keep their points (parking: y = 8 in a 6.2–13.8 window)", M.plottable(8, 6.2, 13.8));
   check("plots below the axis keep their points", M.plottable(-8, -13.8, -6.2));

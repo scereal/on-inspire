@@ -237,6 +237,8 @@ class Continuity(Framework):
         eps = sp.Rational(p["eps"])
         f = m * x + b
         L = sp.Integer(m * a + b)
+        if L == 0:
+            raise NoSolution("L = 0 makes |f(x) − L| the same as |f(x)|, so a distractor would be correct")
         delta = eps / abs(m)
         gap = f"|{sp.latex(x - a)}|"
         opts = [Option(f"${abs(m)}{gap}$", correct=True, value="right"),

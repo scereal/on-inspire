@@ -1845,7 +1845,7 @@ window.WALKTHROUGHS = [
       },
       {
         "ask": {
-          "prompt": "For $\\varepsilon = 0.1$, what is $\\delta$?",
+          "prompt": "For $\\varepsilon = 0.1$, what is the largest $\\delta$ that works?",
           "format": "number",
           "answer": 0.05,
           "tolerance": 0.0005

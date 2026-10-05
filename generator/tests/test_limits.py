@@ -136,6 +136,17 @@ class LimitsTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertEqual((correct(sol.steps[1]).value, correct(sol.steps[2]).value), ("-oo", "-oo"))
 
+    def test_level7_hole_feedback_describes_the_cancelled_form(self):
+        ok, why, sol, _ = validate(FW, {"family": "hole", "k": 3, "r": 1, "a": -2, "m": 1, "b": 0}, 7, None)
+        self.assertTrue(ok, why)
+        fb = by_misconception(sol.steps[1], "sign-slip").feedback
+        self.assertIn("after cancelling", fb)
+
+    def test_level5_infinity_oscillation_isnt_faster_and_faster(self):
+        ok, why, sol, _ = validate(FW, {"family": "inf", "n": None, "k": 2, "trig": "sin", "c": 1}, 5, None)
+        self.assertTrue(ok, why)
+        self.assertNotIn("faster", by_misconception(sol.steps[0], "oscillation-has-limit").feedback)
+
     def test_no_sign_glitches_in_text(self):
         # e.g. "(x - -4)", "+ -3", "(x - 0)", or an empty square root
         import re

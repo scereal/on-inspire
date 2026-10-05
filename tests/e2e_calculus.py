@@ -4,6 +4,7 @@
 """
 import functools
 import re
+from fractions import Fraction
 import http.server
 import sys
 import threading
@@ -204,7 +205,10 @@ def play_all_walkthroughs(page, base, c, label):
                 page.click(".learn-step button:text-is('Check')")
                 c.ok("$" not in page.inner_text(".learn-step .feedback"), f"{label}: {w['id']} step {i + 1} hint renders its math")
                 # a phone keyboard may type the typographic minus
-                field.fill(str(ask["answer"]).replace("-", "\u2212"))
+                # exact answers can be typed as fractions (3/2), and a phone may type the typographic minus
+                frac = Fraction(ask["answer"]).limit_denominator(1000)
+                typed = str(ask["answer"]) if frac.denominator == 1 else f"{frac.numerator}/{frac.denominator}"
+                field.fill(typed.replace("-", "\u2212"))
                 page.click(".learn-step button:text-is('Check')")
             ok = page.is_visible(".learn-narration")
             c.ok(ok, f"{label}: {w['id']} step {i + 1} reveals its narration")

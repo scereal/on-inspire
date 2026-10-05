@@ -38,6 +38,7 @@
     },
     secantSlope: (f, x0, h) => (f(x0 + h) - f(x0)) / h,
     // Draw a curve point only if it's finite and not far outside the window (clips blow-ups near asymptotes)
+    farLabel: (X) => (X >= 1e4 ? X.toExponential(0) : String(Math.round(X))),
     plottable: (y, ymin, ymax) => Number.isFinite(y) && y >= ymin - 3 * (ymax - ymin) && y <= ymax + 3 * (ymax - ymin),
     // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
     farValues(f, mode, at, t) {
@@ -891,7 +892,7 @@
         el("line", { x1: P.L, x2: P.R, y1: P.Y(A), y2: P.Y(A), class: "w-delta" }, ui.svg);
         P.curve(f, X / 20, X);
         el("circle", { cx: P.X(X), cy: P.Y(f(X)), r: 5, class: "w-point" }, ui.svg);
-        ui.readout.textContent = `x = ${X >= 1e4 ? X.toExponential(0) : fmt(X, 0)}:  f(x) = ${fmt(f(X), 5)},  asymptote y = ${fmt(A, 3)}`;
+        ui.readout.textContent = `x = ${WidgetMath.farLabel(X)}:  f(x) = ${fmt(f(X), 5)},  asymptote y = ${fmt(A, 3)}`;
         return;
       }
       const [[xl, yl], [xr, yr]] = pts;

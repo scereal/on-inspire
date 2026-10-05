@@ -44,7 +44,7 @@
   "tried": 449
  },
  "continuity": {
-  "acceptance_rate": 0.9836,
+  "acceptance_rate": 0.9772,
   "accepted": 300,
   "framework": "continuity",
   "levels": {
@@ -67,14 +67,15 @@
    "3": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 3
+     "duplicate": 3,
+     "exists": 2
     },
     "target": 100,
-    "tried": 103
+    "tried": 105
    }
   },
   "seed": 1,
-  "tried": 305
+  "tried": 307
  },
  "derivative-definition": {
   "acceptance_rate": 0.6366,

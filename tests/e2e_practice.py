@@ -60,7 +60,9 @@ def play(page, base, fw, level, failures):
             page.click("form.row button[type=submit]")
             if "bad" not in (page.get_attribute(".task .feedback", "class") or ""):
                 failures.append(f"{where}: no feedback after a wrong number")
-            page.fill("#answer", str(step["answer"]))
+            frac = Fraction(step["answer"]).limit_denominator(100)
+            exact = abs(float(frac) - step["answer"]) < 1e-9 and frac.denominator not in (1, 10, 100)
+            page.fill("#answer", f"{frac.numerator}/{frac.denominator}" if exact else str(step["answer"]))
             page.click("form.row button[type=submit]")
         elif fmt == "slider":
             set_value = "(e, v) => { e.value = v; e.dispatchEvent(new Event('input')); }"

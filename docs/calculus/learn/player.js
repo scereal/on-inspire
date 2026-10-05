@@ -27,7 +27,12 @@
   const bold = (text) => text.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
   const paragraphs = (text) => text.split(/\n\n+/).map((p) => `<p>${bold(terms(p))}</p>`).join("");
   // Phone keyboards may type a typographic minus; type="text" keeps the minus key on iOS.
-  const readNumber = (raw) => { const t = raw.trim().replace(/[\u2212\u2013]/g, "-"); return t === "" ? NaN : Number(t); };
+  const readNumber = (raw) => {
+    const t = raw.trim().replace(/[\u2212\u2013]/g, "-").replace(/\s+/g, "");
+    const frac = t.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);   // exact answers may be typed as fractions, e.g. 3/2
+    if (frac) return Number(frac[2]) === 0 ? NaN : Number(frac[1]) / Number(frac[2]);
+    return t === "" ? NaN : Number(t);
+  };
   // Speak what a reader sees: drop KaTeX's hidden MathML copy so each formula is read once.
   const speakable = (node) => { const c = node.cloneNode(true); c.querySelectorAll(".katex-mathml").forEach((m) => m.remove()); return c.textContent.replace(/\s+/g, " ").trim(); };
   const chip = (target) => {

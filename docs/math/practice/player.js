@@ -182,8 +182,9 @@
       const form = h("form", { className: "row" }, h("label", { htmlFor: "answer", className: "sr-only", textContent: "Your answer" }), input, h("span", { textContent: step.unit || "" }), check);
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        const raw = input.value.trim().replace(/[\u2212\u2013]/g, "-");
-        const v = raw === "" ? NaN : Number(raw);
+        const raw = input.value.trim().replace(/[\u2212\u2013]/g, "-").replace(/\s+/g, "");
+        const frac = raw.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);   // exact answers may be typed as fractions, e.g. 26/3
+        const v = frac ? (Number(frac[2]) === 0 ? NaN : Number(frac[1]) / Number(frac[2])) : raw === "" ? NaN : Number(raw);
         if (Number.isNaN(v)) return say(fb, "bad", "Type a number first.");
         if (Math.abs(v - step.answer) <= step.tolerance) { check.disabled = input.disabled = true; correct(fb, step); }
         else wrong(fb, `${v > step.answer ? "Too big" : "Too small"}. Work through it one step at a time and check each one.`);
