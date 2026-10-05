@@ -87,6 +87,28 @@
   "outcome": "Differentiate using the sum, constant-multiple, power, product, quotient and chain rules.",
   "title": "Differentiation rules"
  },
+ "elementary-derivatives": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Trig functions"
+   },
+   "2": {
+    "count": 100,
+    "name": "Exponentials and logarithms"
+   },
+   "3": {
+    "count": 100,
+    "name": "Inverse functions"
+   },
+   "4": {
+    "count": 100,
+    "name": "Inverse trig"
+   }
+  },
+  "outcome": "Differentiate trig, exponential, logarithmic and inverse functions, implicitly defined curves, and higher derivatives.",
+  "title": "Derivatives of elementary functions"
+ },
  "ibp": {
   "levels": {
    "1": {
