@@ -134,6 +134,7 @@ FEEDBACK = {
     "implicit-sign-slip": "Moving the $x$-terms to the other side flips their sign.",
     "implicit-swapped": "Solve for $y'$: it's the $x$-derivative over the $y$-derivative, with a minus sign, not the other way up.",
     "exponent-not-down": "The point of the log is that it brings the exponent down: $\\ln(x^{p}) = p\\ln x$.",
+    "log-of-exponent": "The log brings the exponent down as a factor: $\\ln(x^{p}) = p\\ln x$, not $\\ln p\\cdot\\ln x$.",
     "logs-multiply": "Logs turn products into sums, not products of logs: $\\ln(AB) = \\ln A + \\ln B$.",
     "forgot-y": "That's $\\frac{y'}{y}$. Multiply both sides by $y$ to get $y'$ itself.",
     "power-rule-on-variable-exponent": "The power rule needs a fixed exponent. Here the exponent changes with $x$, which is why you take logs.",
@@ -388,13 +389,14 @@ class ElementaryDerivatives(Framework):
             if sp.degree(q, x) < 1:
                 raise NoSolution("a constant exponent needs only the power rule")
             ln_y = q * sp.log(x)
-            ln_cands = [("exponent-not-down", sp.log(x) ** q)]
+            ln_cands = [("exponent-not-down", sp.log(x) ** q), ("log-of-exponent", sp.log(q) * sp.log(x))]
             ratio = sp.diff(ln_y, x)
             d_cands = [("forgot-y", ratio), ("power-rule-on-variable-exponent", q * x ** (q - 1))]
         else:
             sign = 1 if fam == "product" else -1
             ln_y = a * sp.log(x) + b * sp.log(x + 1) + sign * c * sp.log(x + 3)
-            ln_cands = [("logs-multiply", a * sp.log(x) * b * sp.log(x + 1) * (c * sp.log(x + 3)) ** sign)]
+            ln_cands = [("logs-multiply", a * sp.log(x) * b * sp.log(x + 1) * (c * sp.log(x + 3)) ** sign),
+                        ("exponent-not-down", sp.log(x) ** a + sp.log(x + 1) ** b + sign * sp.log(x + 3) ** c)]
             ratio = sp.diff(ln_y, x)
             each = a * x ** (a - 1) * b * (x + 1) ** (b - 1) * (c * (x + 3) ** (c - 1)) ** sign
             d_cands = [("forgot-y", ratio), ("differentiated-each-factor", each)]
@@ -402,7 +404,7 @@ class ElementaryDerivatives(Framework):
         value = sp.nsimplify(right.subs(x, 1))
         if same(ratio.subs(x, 1), value) and fam != "power":
             raise NoSolution("y(1) = 1 hides the forgot-y mistake in the number step")
-        lw = pick(ln_y, ln_cands, n=1)
+        lw = pick(ln_y, ln_cands)
         dw = pick(right, d_cands)
         steps = [
             Step("Take the natural log of both sides. $\\ln y = $", "choice", tex(ln_y),

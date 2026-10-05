@@ -335,25 +335,118 @@ window.CURRICULUM = {
           "id": "140.4.1",
           "title": "Differentiate trig, exponential and logarithmic functions",
           "summary": "Why sin′ = cos, (eˣ)′ = eˣ and (ln x)′ = 1/x.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.1.trig",
+              "title": "Derivatives of sin, cos and tan",
+              "learn": "learn-trig-derivs",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 1
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "foundation:unit-circle"
+              ]
+            },
+            {
+              "id": "140.4.1.exp-log",
+              "title": "Derivatives of exponentials and logarithms",
+              "learn": "learn-exp-log",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 2
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "140.4.2.inverse"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.2",
           "title": "Differentiate inverse functions and inverse trig",
           "summary": "Flip the graph, flip the slope.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.2.inverse",
+              "title": "The derivative of an inverse function",
+              "learn": "learn-inverse",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 3
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "140.1.1"
+              ]
+            },
+            {
+              "id": "140.4.2.inverse-trig",
+              "title": "Derivatives of inverse trig functions",
+              "learn": "learn-inverse-trig",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 4
+              },
+              "builds_on": [
+                "140.4.2.inverse",
+                "140.4.1.trig"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.3",
           "title": "Use implicit and logarithmic differentiation",
           "summary": "Differentiate curves that aren't written as y = f(x), and tame products of powers.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.3.implicit",
+              "title": "Implicit differentiation",
+              "learn": "learn-implicit",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 5
+              },
+              "builds_on": [
+                "140.3.2.chain"
+              ]
+            },
+            {
+              "id": "140.4.3.log-diff",
+              "title": "Logarithmic differentiation",
+              "learn": "learn-log-diff",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 6
+              },
+              "builds_on": [
+                "140.4.1.exp-log",
+                "140.4.3.implicit"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.4",
           "title": "Find and interpret higher derivatives",
           "summary": "Acceleration, concavity and beyond.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.4.higher",
+              "title": "Second derivatives: acceleration and concavity",
+              "learn": "learn-higher",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 7
+              },
+              "builds_on": [
+                "140.3.2.power"
+              ]
+            }
+          ]
         }
       ]
     },

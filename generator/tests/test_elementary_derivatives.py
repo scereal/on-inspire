@@ -127,6 +127,12 @@ class ElementaryDerivativesTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertEqual(len(sol.steps[0].options), 3)
 
+    def test_level6_take_logs_offers_two_wrong_options(self):
+        for p in [{"family": "product", "a": 2, "b": 1, "c": 1}, {"family": "power", "a": 1, "b": 2, "c": 0}]:
+            ok, why, sol, _ = validate(FW, p, 6, None)
+            self.assertTrue(ok, why)
+            self.assertEqual(len(sol.steps[0].options), 3, p)
+
     def test_no_sign_glitches_in_text(self):
         problems, _ = bank.build(FW, seed=1)
         # also: write ln (not log), arctan (not atan), and tan's derivative as sec², matching its distractors

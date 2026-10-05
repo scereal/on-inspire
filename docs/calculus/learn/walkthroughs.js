@@ -1876,5 +1876,730 @@ window.WALKTHROUGHS = [
         "equals": "31/10"
       }
     ]
+  },
+  {
+    "id": "learn-trig-derivs",
+    "subtopic": "140.4.1.trig",
+    "title": "Why the derivative of sin is cos",
+    "problem": "Show that $(\\sin x)' = \\cos x$ from the definition of the derivative, then differentiate $f(x) = \\sin(3x)$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "$(\\sin x)' = \\lim_{h\\to 0}\\frac{\\sin(x + h) - \\sin x}{h}$. First, expand $\\sin(x + h)$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\sin x\\cos h + \\cos x\\sin h$",
+              "correct": true
+            },
+            {
+              "label": "$\\sin x + \\sin h$",
+              "misconception": "split-function",
+              "feedback": "$\\sin$ doesn't split over sums: $\\sin(\\frac{\\pi}{2} + \\frac{\\pi}{2}) = 0$, but $1 + 1 = 2$."
+            },
+            {
+              "label": "$\\sin x\\cos h - \\cos x\\sin h$",
+              "misconception": "sign-slip",
+              "feedback": "That's $\\sin(x - h)$. For $x + h$ both terms are added."
+            }
+          ]
+        },
+        "narration": "[[angle-addition|Angle addition]] gives $\\sin(x + h) = \\sin x\\cos h + \\cos x\\sin h$. Regrouping the difference quotient: $\\sin x\\cdot\\frac{\\cos h - 1}{h} + \\cos x\\cdot\\frac{\\sin h}{h}$.",
+        "builds_on": [
+          "foundation:unit-circle"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "As $h \\to 0$, $\\frac{\\sin h}{h} \\to 1$ and $\\frac{\\cos h - 1}{h} \\to 0$. So $(\\sin x)'$ is:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\cos x$",
+              "correct": true
+            },
+            {
+              "label": "$-\\cos x$",
+              "misconception": "sign-slip",
+              "feedback": "Both limits are non-negative here: $\\sin x \\cdot 0 + \\cos x \\cdot 1$."
+            },
+            {
+              "label": "$\\sin x$",
+              "misconception": "unchanged",
+              "feedback": "The $\\sin x$ term is multiplied by $\\frac{\\cos h - 1}{h}$, which goes to 0."
+            }
+          ]
+        },
+        "narration": "$\\sin x \\cdot 0 + \\cos x \\cdot 1 = \\cos x$. The two key limits are [[sin-h-over-h|sin h / h → 1]] and [[cos-h-minus-1-over-h|(cos h − 1)/h → 0]]. The same method gives $(\\cos x)' = -\\sin x$.",
+        "widget": {
+          "type": "secant",
+          "f": "sin",
+          "x0": 1,
+          "prompt": "Shrink h at x = 1: the slope settles on cos 1 ≈ 0.540."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Now $f(x) = \\sin(3x)$. What is $f'(x)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$3\\cos(3x)$",
+              "correct": true
+            },
+            {
+              "label": "$\\cos(3x)$",
+              "misconception": "dropped-inner",
+              "feedback": "The [[chain-rule|chain rule]] multiplies by the derivative of the inside, $3x$, which is 3."
+            },
+            {
+              "label": "$3\\cos x$",
+              "misconception": "chain-on-outside",
+              "feedback": "The inside stays inside: $\\cos(3x)$, then times 3."
+            }
+          ]
+        },
+        "narration": "The [[chain-rule]] multiplies by the inside's derivative, 3: $f'(x) = 3\\cos(3x)$. Squeezing the sine wave 3 times horizontally makes it 3 times as steep.",
+        "builds_on": [
+          "140.3.2.chain"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is $f'(0)$?",
+          "format": "number",
+          "answer": 3,
+          "tolerance": 0.001
+        },
+        "narration": "$f'(0) = 3\\cos 0 = 3$: at the origin, $\\sin(3x)$ rises three times as steeply as $\\sin x$."
+      }
+    ],
+    "summary": "Angle addition and two key limits give $(\\sin x)' = \\cos x$. With the chain rule, $(\\sin 3x)' = 3\\cos 3x$, so the slope at 0 is **3**.",
+    "claims": [
+      {
+        "sympy": "diff(sin(x), x)",
+        "equals": "cos(x)"
+      },
+      {
+        "sympy": "diff(sin(3*x), x)",
+        "equals": "3*cos(3*x)"
+      },
+      {
+        "sympy": "expand(sin(x + h), trig=True)",
+        "equals": "sin(x)*cos(h) + sin(h)*cos(x)"
+      },
+      {
+        "sympy": "limit(sin(h)/h, h, 0)",
+        "equals": "1"
+      },
+      {
+        "sympy": "limit((cos(h) - 1)/h, h, 0)",
+        "equals": "0"
+      },
+      {
+        "sympy": "cos(1)",
+        "approx": 0.5403,
+        "tol": 0.0001
+      }
+    ]
+  },
+  {
+    "id": "learn-exp-log",
+    "subtopic": "140.4.1.exp-log",
+    "title": "Growth in proportion to size",
+    "problem": "A bacteria culture has $P(t) = 100e^{0.5t}$ cells after $t$ hours. How fast is it growing? And why is the derivative of $\\ln x$ equal to $\\frac{1}{x}$?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is $P'(t)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$50e^{0.5t}$",
+              "correct": true
+            },
+            {
+              "label": "$100e^{0.5t}$",
+              "misconception": "exp-dropped-inner",
+              "feedback": "$e^{0.5t}$ needs the chain rule: its derivative is $0.5e^{0.5t}$."
+            },
+            {
+              "label": "$50t\\,e^{0.5t - 1}$",
+              "misconception": "power-rule-on-exp",
+              "feedback": "The power rule is for a fixed exponent. Here the exponent changes: $(e^{u})' = e^{u}u'$."
+            }
+          ]
+        },
+        "narration": "$(e^{0.5t})' = 0.5e^{0.5t}$, so $P'(t) = 50e^{0.5t} = 0.5\\,P(t)$. The culture grows at a rate proportional to its size, which is what exponential growth means ([[derivative-of-exp|why $e^x$ is its own derivative]]).",
+        "builds_on": [
+          "140.3.2.chain"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "How fast is the culture growing at $t = 0$, in cells per hour?",
+          "format": "number",
+          "answer": 50,
+          "tolerance": 0.01
+        },
+        "narration": "$P'(0) = 50$ cells per hour, half the population of 100. Two hours later there are $100e \\approx 272$ cells, growing at about 136 per hour."
+      },
+      {
+        "ask": {
+          "prompt": "Now $y = \\ln x$, which means $e^y = x$. Differentiate both sides with respect to $x$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$e^y\\,y' = 1$",
+              "correct": true
+            },
+            {
+              "label": "$e^y = 1$",
+              "misconception": "forgot-chain-on-y",
+              "feedback": "$y$ depends on $x$, so $(e^y)' = e^y\\,y'$ by the chain rule."
+            },
+            {
+              "label": "$y\\,e^{y - 1}\\,y' = 1$",
+              "misconception": "power-rule-on-exp",
+              "feedback": "$e^y$ isn't a power of $y$; its derivative is $e^y$ (times $y'$)."
+            }
+          ]
+        },
+        "narration": "$y$ depends on $x$, so the chain rule gives $e^y\\,y'$ on the left. The right side, $x$, has derivative 1."
+      },
+      {
+        "ask": {
+          "prompt": "Solve for $y'$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$y' = \\frac{1}{x}$",
+              "correct": true
+            },
+            {
+              "label": "$y' = e^x$",
+              "misconception": "confused-inverse",
+              "feedback": "$y' = \\frac{1}{e^y}$, and $e^y$ is $x$, not $e^x$."
+            },
+            {
+              "label": "$y' = \\ln x$",
+              "misconception": "derivative-is-itself",
+              "feedback": "Only $e^x$ is its own derivative. Solve $e^y\\,y' = 1$ for $y'$."
+            }
+          ]
+        },
+        "narration": "$y' = \\frac{1}{e^y} = \\frac{1}{x}$. That's the [[derivative-of-ln|derivative of ln]], and it comes from the [[inverse-function-derivative|inverse-function rule]]: $\\ln$ undoes $e^x$, so its slopes are reciprocals."
+      }
+    ],
+    "summary": "$P'(t) = 50e^{0.5t} = 0.5P$: growth in proportion to size, **50 cells per hour** at the start. Differentiating $e^y = x$ gives $(\\ln x)' = \\frac{1}{x}$.",
+    "claims": [
+      {
+        "sympy": "diff(100*exp(t/2), t)",
+        "equals": "50*exp(t/2)"
+      },
+      {
+        "sympy": "diff(100*exp(t/2), t).subs(t, 0)",
+        "equals": "50"
+      },
+      {
+        "sympy": "100*exp(1)",
+        "approx": 271.83,
+        "tol": 0.01
+      },
+      {
+        "sympy": "diff(log(x), x)",
+        "equals": "1/x"
+      }
+    ]
+  },
+  {
+    "id": "learn-inverse",
+    "subtopic": "140.4.2.inverse",
+    "title": "The slope of an inverse",
+    "problem": "$f(x) = x^3 + x$ is always increasing, so it has an inverse. Find $(f^{-1})'(2)$ without finding a formula for $f^{-1}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Which input does $f$ send to 2?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x = 1$",
+              "correct": true
+            },
+            {
+              "label": "$x = 2$",
+              "misconception": "used-b",
+              "feedback": "2 is the output. You need the input that $f$ sends to 2."
+            },
+            {
+              "label": "$x = \\sqrt[3]{2}$",
+              "misconception": "dropped-term",
+              "feedback": "$\\sqrt[3]{2}$ solves $x^3 = 2$, but $f$ also has the $+x$: $f(\\sqrt[3]{2}) \\approx 3.26$."
+            }
+          ]
+        },
+        "narration": "$f(1) = 1 + 1 = 2$, so $f^{-1}(2) = 1$.",
+        "builds_on": [
+          "140.1.1"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is $f'(1)$?",
+          "format": "number",
+          "answer": 4,
+          "tolerance": 0.001
+        },
+        "narration": "$f'(x) = 3x^2 + 1$, so $f'(1) = 4$. Near $x = 1$, $f$ stretches small distances by a factor of 4."
+      },
+      {
+        "ask": {
+          "prompt": "So what is $(f^{-1})'(2)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{1}{4}$",
+              "correct": true
+            },
+            {
+              "label": "$4$",
+              "misconception": "forgot-to-flip",
+              "feedback": "The inverse undoes the stretch, so its slope is the reciprocal: mirroring across $y = x$ swaps rise and run."
+            },
+            {
+              "label": "$\\frac{1}{13}$",
+              "misconception": "wrong-point",
+              "feedback": "That's $\\frac{1}{f'(2)}$. Evaluate $f'$ at the input 1, not at the output 2."
+            }
+          ]
+        },
+        "narration": "The inverse shrinks distances back by 4: $(f^{-1})'(2) = \\frac{1}{f'(1)} = \\frac{1}{4}$. That's the [[inverse-function-derivative|inverse-function rule]], from differentiating $f(f^{-1}(x)) = x$ with the [[chain-rule]].",
+        "widget": {
+          "type": "secant",
+          "f": "sqrt",
+          "x0": 4,
+          "prompt": "The same idea for √x, which undoes x²: at x = 4 its slope settles on 1/(2·2) = 1/4."
+        },
+        "builds_on": [
+          "140.3.2.chain"
+        ]
+      }
+    ],
+    "summary": "$f(1) = 2$ and $f'(1) = 4$, so $(f^{-1})'(2) = \\frac{1}{f'(1)} = $ **1/4**. Evaluate $f'$ at the input, then flip.",
+    "claims": [
+      {
+        "sympy": "(x**3 + x).subs(x, 1)",
+        "equals": "2"
+      },
+      {
+        "sympy": "1/diff(x**3 + x, x).subs(x, 1)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "1/diff(x**3 + x, x).subs(x, 2)",
+        "equals": "1/13"
+      },
+      {
+        "sympy": "(x**3 + x).subs(x, 2**Rational(1, 3))",
+        "approx": 3.26,
+        "tol": 0.01
+      }
+    ]
+  },
+  {
+    "id": "learn-inverse-trig",
+    "subtopic": "140.4.2.inverse-trig",
+    "title": "The derivative of arctan",
+    "problem": "Find $(\\arctan x)'$, and the slope of $\\arctan$ at $x = 1$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "$y = \\arctan x$ means $\\tan y = x$. Differentiate both sides with respect to $x$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\sec^2 y \\cdot y' = 1$",
+              "correct": true
+            },
+            {
+              "label": "$\\sec^2 y = 1$",
+              "misconception": "forgot-chain-on-y",
+              "feedback": "$y$ depends on $x$, so the chain rule adds a factor $y'$."
+            },
+            {
+              "label": "$\\sec y \\cdot y' = 1$",
+              "misconception": "sec-not-squared",
+              "feedback": "$(\\tan y)' = \\sec^2 y$, from the quotient rule on $\\frac{\\sin y}{\\cos y}$."
+            }
+          ]
+        },
+        "narration": "[[implicit-differentiation|Differentiating implicitly]] gives $\\sec^2 y\\cdot y' = 1$, so $y' = \\frac{1}{\\sec^2 y}$.",
+        "builds_on": [
+          "140.4.2.inverse"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Use $1 + \\tan^2 y = \\sec^2 y$. In terms of $x$, $y'$ is:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{1}{1 + x^2}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{1}{1 - x^2}$",
+              "misconception": "sign-slip",
+              "feedback": "$\\sec^2 y = 1 + \\tan^2 y = 1 + x^2$: a plus sign."
+            },
+            {
+              "label": "$\\frac{1}{\\sqrt{1 - x^2}}$",
+              "misconception": "arcsin-confused",
+              "feedback": "That's the derivative of arcsin. Here $\\sec^2 y = 1 + x^2$."
+            }
+          ]
+        },
+        "narration": "$\\sec^2 y = 1 + \\tan^2 y = 1 + x^2$, so $(\\arctan x)' = \\frac{1}{1 + x^2}$ ([[derivative-of-arctan|more on arctan]]).",
+        "builds_on": [
+          "foundation:unit-circle"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is the slope of $\\arctan$ at $x = 1$?",
+          "format": "number",
+          "answer": 0.5,
+          "tolerance": 0.002
+        },
+        "narration": "$\\frac{1}{1 + 1} = \\frac{1}{2}$. At the origin the slope is 1, and far out it flattens toward 0, as the graph levels off at $\\pm\\frac{\\pi}{2}$.",
+        "widget": {
+          "type": "secant",
+          "f": "atan",
+          "x0": 1,
+          "prompt": "Shrink h at x = 1: the slope settles on 1/2."
+        }
+      }
+    ],
+    "summary": "From $\\tan y = x$: $\\sec^2 y \\cdot y' = 1$, and $\\sec^2 y = 1 + x^2$, so $(\\arctan x)' = \\frac{1}{1 + x^2}$, which is **1/2** at $x = 1$.",
+    "claims": [
+      {
+        "sympy": "diff(atan(x), x)",
+        "equals": "1/(x**2 + 1)"
+      },
+      {
+        "sympy": "diff(atan(x), x).subs(x, 1)",
+        "equals": "1/2"
+      },
+      {
+        "sympy": "simplify(1 + tan(x)**2 - sec(x)**2)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "learn-implicit",
+    "subtopic": "140.4.3.implicit",
+    "title": "The slope of a circle",
+    "problem": "The circle $x^2 + y^2 = 25$ passes through $(3, 4)$. What is the slope of its tangent there?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Differentiate both sides with respect to $x$. The left side becomes:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2x + 2y\\,y'$",
+              "correct": true
+            },
+            {
+              "label": "$2x + 2y$",
+              "misconception": "forgot-chain-on-y",
+              "feedback": "$y$ depends on $x$, so $(y^2)' = 2y\\,y'$ by the chain rule."
+            },
+            {
+              "label": "$2x + 2y'$",
+              "misconception": "chain-dropped-outer",
+              "feedback": "The chain rule keeps the outer derivative: $(y^2)' = 2y\\cdot y'$."
+            }
+          ]
+        },
+        "narration": "$y$ is a function of $x$, so $y^2$ needs the [[chain-rule]]: $2y\\,y'$. The right side, 25, is a constant, so its derivative is 0.",
+        "builds_on": [
+          "140.3.2.chain"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Solve $2x + 2y\\,y' = 0$ for $y'$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$y' = -\\frac{x}{y}$",
+              "correct": true
+            },
+            {
+              "label": "$y' = \\frac{x}{y}$",
+              "misconception": "implicit-sign-slip",
+              "feedback": "Moving $2x$ to the other side makes it $-2x$."
+            },
+            {
+              "label": "$y' = -\\frac{y}{x}$",
+              "misconception": "implicit-swapped",
+              "feedback": "Divide by $2y$, the coefficient of $y'$: $y' = \\frac{-2x}{2y}$."
+            }
+          ]
+        },
+        "narration": "$y' = -\\frac{x}{y}$. That's [[implicit-differentiation|implicit differentiation]]: no need to solve for $y$ first."
+      },
+      {
+        "ask": {
+          "prompt": "What is the slope at $(3, 4)$?",
+          "format": "number",
+          "answer": -0.75,
+          "tolerance": 0.002
+        },
+        "narration": "$-\\frac{3}{4}$. The radius to $(3, 4)$ has slope $\\frac{4}{3}$, and $-\\frac{3}{4}\\cdot\\frac{4}{3} = -1$: the tangent is perpendicular to the radius, just as geometry says.",
+        "widget": {
+          "type": "circle-tangent",
+          "r": 5,
+          "deg": 53.13,
+          "prompt": "Move the point around the circle: the tangent's slope is always −x/y."
+        }
+      }
+    ],
+    "summary": "Differentiating $x^2 + y^2 = 25$ gives $2x + 2y\\,y' = 0$, so $y' = -\\frac{x}{y}$, which is **−3/4** at $(3, 4)$.",
+    "claims": [
+      {
+        "sympy": "idiff(x**2 + y**2 - 25, y, x)",
+        "equals": "-x/y"
+      },
+      {
+        "sympy": "(-x/y).subs({x: 3, y: 4})",
+        "equals": "-3/4"
+      },
+      {
+        "sympy": "Rational(-3, 4)*Rational(4, 3)",
+        "equals": "-1"
+      }
+    ]
+  },
+  {
+    "id": "learn-log-diff",
+    "subtopic": "140.4.3.log-diff",
+    "title": "Differentiating x to the x",
+    "problem": "Find the derivative of $y = x^x$, and its value at $x = 1$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Which rule differentiates $x^x$ directly?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Neither: both the base and the exponent change",
+              "correct": true
+            },
+            {
+              "label": "The power rule: $x\\cdot x^{x - 1}$",
+              "misconception": "power-rule-on-variable-exponent",
+              "feedback": "The power rule needs a fixed exponent. Here the exponent is $x$ too."
+            },
+            {
+              "label": "The exponential rule: $x^x \\ln x$",
+              "misconception": "exp-rule-fixed-base",
+              "feedback": "That rule needs a fixed base, like $2^x$. Here the base changes too."
+            }
+          ]
+        },
+        "narration": "The power rule needs a fixed exponent and the exponential rule needs a fixed base. $x^x$ has neither, so take logs.",
+        "builds_on": [
+          "140.4.1.exp-log"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Take the natural log of both sides. $\\ln y = $",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x\\ln x$",
+              "correct": true
+            },
+            {
+              "label": "$(\\ln x)^x$",
+              "misconception": "exponent-not-down",
+              "feedback": "The point of the log is that it brings the exponent down: $\\ln(x^x) = x\\ln x$."
+            },
+            {
+              "label": "$2\\ln x$",
+              "misconception": "logs-of-power-add",
+              "feedback": "$x^x$ is $x$ multiplied by itself $x$ times, so $\\ln(x^x) = x\\ln x$, not $\\ln x + \\ln x$."
+            }
+          ]
+        },
+        "narration": "Logs bring exponents down: $\\ln y = x\\ln x$."
+      },
+      {
+        "ask": {
+          "prompt": "Differentiate both sides. The left side becomes $\\frac{y'}{y}$. The right side is:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\ln x + 1$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{1}{x}$",
+              "misconception": "forgot-product-rule",
+              "feedback": "$x\\ln x$ is a product: $1\\cdot\\ln x + x\\cdot\\frac{1}{x}$."
+            },
+            {
+              "label": "$\\ln x$",
+              "misconception": "dropped-term",
+              "feedback": "The product rule has two terms; the second is $x\\cdot\\frac{1}{x} = 1$."
+            }
+          ]
+        },
+        "narration": "The product rule and the [[derivative-of-ln|derivative of ln]] give $(x\\ln x)' = \\ln x + 1$. On the left, $(\\ln y)' = \\frac{y'}{y}$ by [[implicit-differentiation|implicit differentiation]].",
+        "builds_on": [
+          "140.4.3.implicit"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Multiply back by $y = x^x$. What is $y'$ at $x = 1$?",
+          "format": "number",
+          "answer": 1,
+          "tolerance": 0.001
+        },
+        "narration": "$y' = x^x(\\ln x + 1)$, and at $x = 1$ that's $1\\cdot(0 + 1) = 1$. The step people forget is multiplying back by $y$ ([[logarithmic-differentiation|more on logarithmic differentiation]]).",
+        "widget": {
+          "type": "secant",
+          "f": "xpowx",
+          "x0": 1,
+          "span": 0.8,
+          "prompt": "Shrink h at x = 1: the slope of xˣ settles on 1."
+        }
+      }
+    ],
+    "summary": "$\\ln y = x\\ln x$, so $\\frac{y'}{y} = \\ln x + 1$ and $y' = x^x(\\ln x + 1)$, which is **1** at $x = 1$.",
+    "claims": [
+      {
+        "sympy": "diff(x**x, x).subs(x, 1)",
+        "equals": "1"
+      },
+      {
+        "sympy": "simplify(diff(x*log(x), x) - (log(x) + 1))",
+        "equals": "0"
+      },
+      {
+        "sympy": "simplify(diff(x**x, x) - x**x*(log(x) + 1))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "learn-higher",
+    "subtopic": "140.4.4.higher",
+    "title": "A ball thrown upward",
+    "problem": "A ball is thrown straight up at 20 m/s. Its height after $t$ seconds is $h(t) = 20t - 4.9t^2$ metres. Find its velocity, its acceleration, and the shape of its graph.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is the velocity $v(t) = h'(t)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$20 - 9.8t$",
+              "correct": true
+            },
+            {
+              "label": "$20 - 4.9t$",
+              "misconception": "dropped-coefficient",
+              "feedback": "The power rule brings the exponent down: $(4.9t^2)' = 9.8t$."
+            },
+            {
+              "label": "$20t - 9.8t^2$",
+              "misconception": "exponent-unchanged",
+              "feedback": "The power rule also lowers each exponent by one."
+            }
+          ]
+        },
+        "narration": "$v(t) = 20 - 9.8t$: it starts at 20 m/s and drops by 9.8 m/s every second.",
+        "builds_on": [
+          "140.3.2.power"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is the velocity at $t = 1$, in m/s?",
+          "format": "number",
+          "answer": 10.2,
+          "tolerance": 0.01
+        },
+        "narration": "$v(1) = 20 - 9.8 = 10.2$ m/s: still rising, but more slowly than at the start."
+      },
+      {
+        "ask": {
+          "prompt": "What is the acceleration $a(t) = h''(t)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-9.8$",
+              "correct": true
+            },
+            {
+              "label": "$20 - 9.8t$",
+              "misconception": "acceleration-is-velocity",
+              "feedback": "That's the velocity. Acceleration is the derivative of velocity: differentiate once more."
+            },
+            {
+              "label": "$0$",
+              "misconception": "constant-velocity",
+              "feedback": "Differentiating $20 - 9.8t$: the 20 disappears, but $-9.8t$ leaves $-9.8$."
+            }
+          ]
+        },
+        "narration": "$a(t) = -9.8$ m/s² at every moment. That's gravity ([[second-derivative|the second derivative]])."
+      },
+      {
+        "ask": {
+          "prompt": "Is the graph of $h$ concave up or concave down?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Concave down",
+              "correct": true
+            },
+            {
+              "label": "Concave up",
+              "misconception": "concavity-from-f-prime",
+              "feedback": "$h'(1) = 10.2$ is positive, but concavity comes from $h''$, which is $-9.8$: negative."
+            }
+          ]
+        },
+        "narration": "$h'' < 0$ everywhere, so the graph bends downward everywhere: an upside-down parabola, with its peak where $v = 0$ at $t \\approx 2.04$ s."
+      }
+    ],
+    "summary": "$v(t) = 20 - 9.8t$, so **v(1) = 10.2 m/s**. $a(t) = -9.8$ m/s² everywhere, so the graph is concave down.",
+    "claims": [
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t)",
+        "equals": "20 - 49*t/5"
+      },
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t).subs(t, 1)",
+        "equals": "51/5"
+      },
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t, 2)",
+        "equals": "-49/5"
+      },
+      {
+        "sympy": "Rational(20, 1)/Rational(98, 10)",
+        "approx": 2.041,
+        "tol": 0.001
+      }
+    ]
   }
 ];
