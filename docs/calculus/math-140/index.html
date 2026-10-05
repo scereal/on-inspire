@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculus 1 (MATH 140)</title>
+  <meta name="description" content="Every learning outcome in McGill's MATH 140 Calculus 1, with a guided Learn walkthrough and endless verified practice.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../math/math.css">
+  <link rel="stylesheet" href="../../math/why/why.css">
+  <link rel="stylesheet" href="../calculus.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+</head>
+<body>
+  <main class="page wide">
+    <nav class="crumbs"><a href="../../">on inspire</a> / <a href="../../math/">Cool math problems</a> / Calculus 1</nav>
+    <h1 id="title">Calculus 1</h1>
+    <figure class="official">
+      <blockquote id="official"></blockquote>
+      <figcaption>McGill's official course description for <a id="source" href="#"></a>. The breakdown into outcomes below is ours.</figcaption>
+    </figure>
+    <p class="lede">Tap an outcome to see what's inside it. <b>Learn</b> walks you through one problem, with every idea explained down to the basics. <b>Practice</b> gives you endless, checked problems. <b>Builds on</b> shows where an idea's foundations live.</p>
+    <div id="units"></div>
+  </main>
+
+  <script src="../curriculum.js"></script>
+  <script src="../../math/why/concepts.js"></script>
+  <script src="../../math/why/widgets.js"></script>
+  <script src="../../math/why/why.js"></script>
+  <script>
+    (function () {
+      const C = window.CURRICULUM;
+      const concepts = Object.fromEntries((window.CONCEPTS || []).map((c) => [c.id, c]));
+      const titles = {}, outcomeOf = {};
+      for (const u of C.units) for (const o of u.outcomes) {
+        titles[o.id] = o.title;
+        outcomeOf[o.id] = o.id;
+        for (const s of o.subtopics) { titles[s.id] = s.title; outcomeOf[s.id] = o.id; }
+      }
+      const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+      document.getElementById("title").textContent = `${C.title} (${C.code})`;
+      document.getElementById("official").textContent = `“${C.official}”`;
+      const src = document.getElementById("source");
+      src.href = C.source;
+      src.textContent = C.code;
+
+      const practiceHref = (p) => `../../math/practice/?f=${encodeURIComponent(p.framework)}&level=${p.level}`;
+      const chip = (target) => {
+        if (target.startsWith("foundation:")) {
+          const id = target.slice(11);
+          return `<button type="button" class="chip foundation" data-concept="${esc(id)}">${esc(concepts[id] ? concepts[id].title : id)}</button>`;
+        }
+        return `<a class="chip" href="#${esc(target)}" data-target="${esc(target)}"><span class="chip-id">${esc(target.split(".").slice(0, 3).join("."))}</span> ${esc(titles[target] || target)}</a>`;
+      };
+      const action = (label, href) => href
+        ? `<a class="action" href="${href}">${label}</a>`
+        : `<span class="action soon" aria-disabled="true">${label}: coming soon</span>`;
+
+      const root = document.getElementById("units");
+      for (const u of C.units) {
+        const built = u.outcomes.some((o) => o.subtopics.some((s) => s.learn || s.practice));
+        const sec = document.createElement("section");
+        sec.className = "unit";
+        sec.dataset.unit = u.id;
+        sec.innerHTML = `<h2><span class="unit-id">${esc(u.id)}</span> ${esc(u.title)}${built ? "" : ' <span class="badge">coming soon</span>'}</h2>`;
+        for (const o of u.outcomes) {
+          const div = document.createElement("div");
+          div.className = "outcome";
+          div.dataset.outcome = o.id;
+          const panelId = `panel-${o.id.replace(/\./g, "-")}`;
+          const subs = o.subtopics.map((s) => `
+            <div class="subtopic" data-subtopic="${esc(s.id)}" data-why-host>
+              <div class="sub-head"><span class="sub-title">${esc(s.title)}</span>
+                <span class="actions">${action("Learn", s.learn ? `../learn/?id=${encodeURIComponent(s.learn)}` : null)}${action("Practice", s.practice ? practiceHref(s.practice) : null)}</span></div>
+              ${s.builds_on && s.builds_on.length ? `<div class="builds-on"><span>Builds on</span>${s.builds_on.map(chip).join("")}</div>` : ""}
+            </div>`).join("");
+          div.innerHTML = `
+            <button type="button" class="outcome-toggle" aria-expanded="false" aria-controls="${panelId}">
+              <span class="outcome-id">${esc(o.id)}</span><span class="outcome-title">${esc(o.title)}</span></button>
+            <div class="outcome-panel" id="${panelId}" hidden>
+              <p class="summary">${esc(o.summary)}</p>
+              ${o.practice ? `<p>${action("Mixed practice for this outcome", practiceHref(o.practice))}</p>` : ""}
+              ${subs || '<p class="soon-note">Subtopics, Learn and Practice for this outcome are coming soon.</p>'}
+            </div>`;
+          sec.append(div);
+        }
+        root.append(sec);
+      }
+
+      const setOpen = (oid, open) => {
+        const div = document.querySelector(`[data-outcome="${oid}"]`);
+        if (!div) return null;
+        div.querySelector(".outcome-toggle").setAttribute("aria-expanded", String(open));
+        div.querySelector(".outcome-panel").hidden = !open;
+        return div;
+      };
+      const reveal = (id) => {
+        const oid = outcomeOf[id];
+        if (!oid) return false;
+        const div = setOpen(oid, true);
+        document.querySelectorAll(".subtopic.highlight").forEach((x) => x.classList.remove("highlight"));
+        const target = id === oid ? div : document.querySelector(`[data-subtopic="${id}"]`);
+        if (id !== oid && target) target.classList.add("highlight");
+        target.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        return true;
+      };
+
+      root.addEventListener("click", (e) => {
+        const toggle = e.target.closest(".outcome-toggle");
+        if (toggle) {
+          const oid = toggle.parentElement.dataset.outcome;
+          setOpen(oid, toggle.getAttribute("aria-expanded") !== "true");
+          return;
+        }
+        const a = e.target.closest("a[data-target]");
+        if (a) {
+          e.preventDefault();
+          if (reveal(a.dataset.target)) history.replaceState(null, "", `#${a.dataset.target}`);
+          return;
+        }
+        const f = e.target.closest("button[data-concept]");
+        if (f && window.Why) Why.open(f.dataset.concept, {}, f);
+      });
+
+      const fromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) reveal(id); };
+      addEventListener("hashchange", fromHash);
+      fromHash();
+    })();
+  </script>
+</body>
+</html>

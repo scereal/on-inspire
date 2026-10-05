@@ -70,7 +70,7 @@
       font-size: 18px;
       font-weight: 500;
       text-anchor: middle;
-      pointer-events: none;
+      pointer-events: auto;  /* labels are part of the tap target */
     }
     .label.inspire { font-size: 28px; font-style: italic; }
     .label.leaf { font-size: 14px; fill: var(--muted); font-family: Figtree, system-ui, sans-serif; }
@@ -140,6 +140,7 @@
           { label: "Build a square wave", href: "math/square-wave/" },
           { label: "Two cups of tea", href: "math/two-cups/" },
           { label: "Integration by parts", href: "math/integration-by-parts/" },
+          { label: "Calculus 1 (MATH 140)", href: "calculus/math-140/" },
           { label: "All math problems", href: "math/" },
         ],
       },
@@ -310,6 +311,11 @@
         nodes.append(g);
       }
       world.append(nodes);
+      // An invisible box behind each label, so tapping anywhere on the words works (text alone only catches the glyphs)
+      nodes.querySelectorAll(".label").forEach((label) => {
+        const bb = label.getBBox();
+        label.before(el("rect", { class: "hit", x: bb.x - 4, y: bb.y - 3, width: bb.width + 8, height: bb.height + 6 }));
+      });
     };
 
     const select = (n) => {

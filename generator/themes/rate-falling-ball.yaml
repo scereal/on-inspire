@@ -1,0 +1,14 @@
+id: falling-ball
+framework: derivative-definition
+label: a dropped ball
+visuals: {color: "#d4b06a", shape: ball, scene: fall}
+quantity: distance fallen
+symbol: s
+unit: m
+time_unit: s
+# s(t) = a t² + b t + c with a = 4.9 (gravity), dropped from rest
+coefficients: {a: ["49/10"], b: [0], c: [0]}
+physics: {rate: [0, 60]}
+levels: [1]
+stories:
+  1: ["A ball is dropped from a tall building. After {t} seconds it has fallen $s(t) = {f_tex}$ metres."]

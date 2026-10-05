@@ -48,7 +48,7 @@ def used_by(concepts):
     return out
 
 
-def problems(concepts, attach, require_reachable=True):
+def problems(concepts, attach, require_reachable=True, roots=()):
     found = []
     ids = [c.get("id") for c in concepts]
     for i in sorted({i for i in ids if ids.count(i) > 1}):
@@ -114,7 +114,8 @@ def problems(concepts, attach, require_reachable=True):
     # Every concept is reachable from an entry
     entries = [cid for cid, c in by_id.items() if c.get("entry")]
     if entries and require_reachable:
-        seen, stack = set(entries), list(entries)
+        starts = entries + [r for r in roots if r in by_id]   # e.g. concepts linked from Learn walkthroughs
+        seen, stack = set(starts), list(starts)
         while stack:
             c = by_id.get(stack.pop(), {})
             for link in c.get("deeper", []) + c.get("related", []):
@@ -156,7 +157,13 @@ def verify_claims(concepts):
 def main():
     concepts = load()
     calls = attach_calls(PAGES)
-    found = problems(concepts, calls) + verify_claims(concepts)
+    walks_path = ROOT / "docs/calculus/learn/walkthroughs.js"
+    roots = set()
+    if walks_path.exists():
+        text = walks_path.read_text(encoding="utf-8")
+        walks = json.loads(re.search(r"=\s*(\[.*\])\s*;?\s*$", text, re.S).group(1))
+        roots = {t for w in walks for step in w.get("steps", []) for t in TERM.findall(step.get("narration", ""))}
+    found = problems(concepts, calls, roots=roots) + verify_claims(concepts)
     for page in PAGES:
         if not attach_calls([page]):
             found.append(f"{page.parent.name}: page attaches no 'Why?' entries")

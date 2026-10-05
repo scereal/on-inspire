@@ -21,6 +21,54 @@
   "outcome": "Each bounce keeps the same fraction of the height, a geometric sequence, and infinitely many bounces cover a finite distance.",
   "title": "Bouncing ball"
  },
+ "derivative-definition": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Slope as a rate of change"
+   },
+   "2": {
+    "count": 110,
+    "name": "The limit definition"
+   },
+   "3": {
+    "count": 100,
+    "name": "Differentiable versus continuous"
+   }
+  },
+  "outcome": "Understand the derivative as an instantaneous rate and compute it from the limit definition.",
+  "title": "The derivative from its definition"
+ },
+ "derivative-rules": {
+  "levels": {
+   "1": {
+    "count": 50,
+    "name": "Sum and constant-multiple rules"
+   },
+   "2": {
+    "count": 50,
+    "name": "The power rule"
+   },
+   "3": {
+    "count": 50,
+    "name": "The product rule"
+   },
+   "4": {
+    "count": 50,
+    "name": "The quotient rule"
+   },
+   "5": {
+    "count": 50,
+    "name": "The chain rule"
+   },
+   "6": {
+    "count": 60,
+    "name": "Mixed: which rule first?"
+   }
+  },
+  "outcome": "Differentiate using the sum, constant-multiple, power, product, quotient and chain rules.",
+  "title": "Differentiation rules"
+ },
  "ibp": {
   "levels": {
    "1": {

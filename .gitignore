@@ -5,3 +5,6 @@ knowledge/
 # Local-only script that contains a hard-coded API key
 apps/transcriber/supadata_transcribe_code.py
 __pycache__/
+
+# Third-party reference material (kept in the private knowledge repo instead)
+inputs/

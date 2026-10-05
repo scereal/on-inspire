@@ -1,0 +1,13 @@
+id: growing-town
+framework: derivative-definition
+label: a growing town
+visuals: {color: "#4ea8a0", shape: town, scene: map}
+quantity: population
+symbol: P
+unit: people
+time_unit: year
+coefficients: {a: [2, 3, 5], b: [20, 40, 60], c: [500, 1000, 2000]}
+physics: {rate: [0, 200]}
+levels: [1]
+stories:
+  1: ["A small town is growing. {t} years after its founding, its population is $P(t) = {f_tex}$ people."]

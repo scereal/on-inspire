@@ -123,6 +123,35 @@
     return {};
   }
 
+  // Rate: the graph of the quantity, with the secant over [t1, t2] ----------------
+  function rate(box, problem) {
+    const s = problem.scene;
+    const W = 640, H = 280, PAD = 34;
+    const color = problem.theme?.visuals?.color || "#d4b06a";
+    const ts = s.curve.map((p) => p[0]), ys = s.curve.map((p) => p[1]);
+    const tMax = Math.max(...ts), yMax = Math.max(...ys);
+    // Start the axis at 0 unless that would flatten the curve (a town of 1000+ people growing by a few hundred).
+    const lo = Math.min(...ys), yMin = lo >= 0 && lo < 0.5 * yMax ? 0 : lo - 0.1 * (yMax - lo);
+    const X = (t) => PAD + (t / tMax) * (W - 2 * PAD);
+    const Y = (y) => H - PAD - ((y - yMin) / (yMax - yMin || 1)) * (H - 2 * PAD);
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Graph of ${s.symbol}(t) with the secant from t = ${s.t1} to t = ${s.t2}` });
+    const base = H - PAD;
+    svg.append(svgEl("line", { x1: PAD, x2: W - PAD, y1: base, y2: base, class: "ground" }));
+    svg.append(svgEl("path", { d: s.curve.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" "), class: "arc", stroke: color }));
+    // The two readings are part of the answer, so the secant is drawn but its endpoints stay unlabeled.
+    svg.append(svgEl("line", { x1: X(s.t1), y1: Y(s.y1), x2: X(s.t2), y2: Y(s.y2), class: "arc secant", stroke: "var(--gold)", "stroke-dasharray": "8 6" }));
+    for (const [t, y] of [[s.t1, s.y1], [s.t2, s.y2]]) {
+      svg.append(svgEl("line", { x1: X(t), x2: X(t), y1: Y(y), y2: base, class: "ground", "stroke-dasharray": "3 5" }));
+      svg.append(svgEl("circle", { cx: X(t), cy: Y(y), r: 7, fill: "var(--gold)" }));
+      const label = svgEl("text", { x: X(t), y: base + 26, class: "tick", "text-anchor": "middle", style: "font-size: 22px" });
+      label.textContent = `t = ${fmt(t)}`;
+      svg.append(label);
+    }
+    box.replaceChildren(svg);
+    box.append(Object.assign(document.createElement("p"), { className: "rule", textContent: `$${s.symbol}(t) = ${s.tex}$` }));
+    return {};
+  }
+
   // Mixing: two marked cups the learner pours between ------------------------------
   const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
   const frac = (n, d) => { const g = gcd(n, d) || 1; return { n: n / g, d: d / g }; };
@@ -228,5 +257,5 @@
     };
   }
 
-  window.Scenes = { integral, projectile, bounce, mixing };
+  window.Scenes = { integral, projectile, bounce, mixing, rate };
 })();

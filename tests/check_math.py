@@ -85,6 +85,24 @@ check("concept network and claims", result.returncode == 0)
 result = subprocess.run([sys.executable, "-m", "unittest", "tests.test_check_concepts", "tests.test_concept_content"], cwd=ROOT, capture_output=True, text=True)
 check("concept checker tests", result.returncode == 0)
 
+# Calculus explorer ------------------------------------------------------------------
+print("Calculus explorer")
+result = subprocess.run([sys.executable, "tests/check_curriculum.py"], cwd=ROOT, capture_output=True, text=True)
+print("  " + (result.stdout.strip().splitlines() or [""])[-1])
+if result.returncode:
+    print(result.stdout + result.stderr)
+check("curriculum, walkthroughs and claims", result.returncode == 0)
+result = subprocess.run([sys.executable, "-m", "unittest", "tests.test_check_curriculum"], cwd=ROOT, capture_output=True, text=True)
+check("curriculum checker tests", result.returncode == 0)
+
+# Practice scenes ----------------------------------------------------------------
+print("Practice scenes")
+scenes_js = (ROOT / "docs/math/practice/scenes.js").read_text()
+renderers = set(re.search(r"window\.Scenes\s*=\s*\{([^}]*)\}", scenes_js).group(1).replace(" ", "").split(","))
+for path in sorted((ROOT / "docs/math/bank").glob("*-[0-9]*.json")):
+    types = {p["scene"]["type"] for p in json.loads(path.read_text())["problems"]}
+    check(f"{path.name}: every scene type has a renderer", types <= renderers, f"missing {sorted(types - renderers)}")
+
 # Problem generator --------------------------------------------------------------
 print("Problem generator")
 try:
