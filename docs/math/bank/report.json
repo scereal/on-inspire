@@ -80,6 +80,73 @@
   "seed": 1,
   "tried": 431
  },
+ "derivative-rules": {
+  "acceptance_rate": 0.4928,
+  "accepted": 310,
+  "framework": "derivative-rules",
+  "levels": {
+   "1": {
+    "accepted": 50,
+    "rejected": {},
+    "target": 50,
+    "tried": 50
+   },
+   "2": {
+    "accepted": 50,
+    "rejected": {
+     "clean": 62,
+     "duplicate": 22
+    },
+    "target": 50,
+    "tried": 134
+   },
+   "3": {
+    "accepted": 50,
+    "rejected": {
+     "clean": 16,
+     "duplicate": 7,
+     "unique": 31
+    },
+    "target": 50,
+    "tried": 104
+   },
+   "4": {
+    "accepted": 50,
+    "rejected": {
+     "clean": 18,
+     "distinct": 1,
+     "duplicate": 3,
+     "exists": 10
+    },
+    "target": 50,
+    "tried": 82
+   },
+   "5": {
+    "accepted": 50,
+    "rejected": {
+     "clean": 49,
+     "distinct": 15,
+     "duplicate": 1,
+     "exists": 32
+    },
+    "target": 50,
+    "tried": 147
+   },
+   "6": {
+    "accepted": 60,
+    "rejected": {
+     "clean": 13,
+     "distinct": 18,
+     "duplicate": 6,
+     "exists": 15
+    },
+    "target": 60,
+    "tried": 112
+   }
+  },
+  "seed": 1,
+  "tried": 629
+ },
  "ibp": {
   "acceptance_rate": 0.4042,
   "accepted": 310,

@@ -127,8 +127,11 @@ window.CURRICULUM = {
             {
               "id": "140.3.2.sum",
               "title": "Sum and constant-multiple rules",
-              "learn": null,
-              "practice": null,
+              "learn": "learn-sum",
+              "practice": {
+                "framework": "derivative-rules",
+                "level": 1
+              },
               "builds_on": [
                 "140.3.1.definition"
               ]
@@ -136,8 +139,11 @@ window.CURRICULUM = {
             {
               "id": "140.3.2.power",
               "title": "The power rule, including roots and reciprocals",
-              "learn": null,
-              "practice": null,
+              "learn": "learn-power",
+              "practice": {
+                "framework": "derivative-rules",
+                "level": 2
+              },
               "builds_on": [
                 "140.3.1.definition",
                 "140.1.3"
@@ -146,8 +152,11 @@ window.CURRICULUM = {
             {
               "id": "140.3.2.product",
               "title": "The product rule",
-              "learn": null,
-              "practice": null,
+              "learn": "learn-product",
+              "practice": {
+                "framework": "derivative-rules",
+                "level": 3
+              },
               "builds_on": [
                 "140.3.1.definition",
                 "foundation:area-shapes"
@@ -156,8 +165,11 @@ window.CURRICULUM = {
             {
               "id": "140.3.2.quotient",
               "title": "The quotient rule",
-              "learn": null,
-              "practice": null,
+              "learn": "learn-quotient",
+              "practice": {
+                "framework": "derivative-rules",
+                "level": 4
+              },
               "builds_on": [
                 "140.3.2.product",
                 "140.3.2.chain",
@@ -167,14 +179,21 @@ window.CURRICULUM = {
             {
               "id": "140.3.2.chain",
               "title": "The chain rule",
-              "learn": null,
-              "practice": null,
+              "learn": "learn-chain",
+              "practice": {
+                "framework": "derivative-rules",
+                "level": 5
+              },
               "builds_on": [
                 "140.3.2.power",
                 "140.1.1"
               ]
             }
-          ]
+          ],
+          "practice": {
+            "framework": "derivative-rules",
+            "level": 6
+          }
         }
       ]
     },

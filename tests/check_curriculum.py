@@ -107,6 +107,8 @@ def walkthrough_problems(walks, concept_ids, known_ids):
             found.append(f"{wid}: unknown subtopic '{w.get('subtopic')}'")
         if not w.get("steps"):
             found.append(f"{wid}: has no steps")
+        if "\\$" in json.dumps(w):   # an escaped dollar sign: KaTeX would read it as a math delimiter
+            found.append(f"{wid}: uses an escaped dollar sign; write amounts as '100 dollars'")
         for i, step in enumerate(w.get("steps", []), 1):
             where = f"{wid} step {i}"
             if not step.get("narration"):

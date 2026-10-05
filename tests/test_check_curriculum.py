@@ -108,6 +108,10 @@ class CheckWalkthroughsTest(unittest.TestCase):
     def test_unknown_subtopic(self):
         self.assertReports(self.broken(lambda w: w.update(subtopic="140.9.9.x")), "unknown subtopic '140.9.9.x'")
 
+    def test_escaped_dollar_sign_rejected(self):
+        # KaTeX's auto-render treats "\\$" as a math delimiter and garbles the sentence
+        self.assertReports(self.broken(lambda w: w.update(problem="It costs \\$100.")), "dollar sign")
+
     def test_false_claim(self):
         w = copy.deepcopy(WALK)
         w["claims"] = [{"sympy": "diff(x**2, x)", "equals": "3*x"}]
