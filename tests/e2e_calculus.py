@@ -89,6 +89,7 @@ def main():
             entrance_tests(page, base, c, name)
             learn_tests(page, base, c, name)
             play_all_walkthroughs(page, base, c, name)
+            practice_tests(page, base, c, name)
             page.close()
         no_speech_test(browser, base, c)
         browser.close()
@@ -199,6 +200,27 @@ def play_all_walkthroughs(page, base, c, label):
             c.ok("f=" in href and "level=" in href, f"{label}: {w['id']} finish links to practice")
         else:
             c.failures.append(f"{label}: {w['id']} finish screen missing Practice link")
+
+
+
+def practice_tests(page, base, c, label):
+    """Practice opened from the map shows its outcome and tags; old links still work without them."""
+    sys.path.insert(0, str(ROOT / "tests"))
+    import e2e_practice
+    page.goto(f"{base}/calculus/math-140/#140.3.2.chain")
+    page.wait_for_selector("[data-subtopic='140.3.2.chain'] a.action")
+    page.locator("[data-subtopic='140.3.2.chain'] a.action").filter(has_text="Practice").click()
+    page.wait_for_selector("#stage[data-problem]")
+    c.ok(page.locator(".practice-meta a[href*='math-140/#140.3.2.chain']").count() == 1, f"{label}: practice links back to its outcome")
+    c.ok(page.locator(".practice-meta .chip").count() >= 2, f"{label}: practice shows Builds-on chips")
+    failures = []
+    e2e_practice.play(page, f"{base}/math/practice/", "derivative-rules", 5, failures)
+    c.ok(not failures, f"{label}: a derivative-rules problem plays through ({failures})")
+    keys = page.evaluate("() => { try { return Object.keys(localStorage); } catch (e) { return []; } }")
+    c.ok("streak:140.3.2.chain" in keys, f"{label}: per-subtopic streak recorded ({[k for k in keys if 'streak' in k]})")
+    page.goto(f"{base}/math/practice/?f=ibp&level=1")
+    page.wait_for_selector("#stage[data-problem]")
+    c.ok(page.locator(".practice-meta").count() == 0 or page.inner_text(".practice-meta").strip() == "", f"{label}: practice outside the curriculum shows no tags")
 
 
 if __name__ == "__main__":

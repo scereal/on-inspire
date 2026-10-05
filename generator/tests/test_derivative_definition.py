@@ -19,6 +19,26 @@ class DerivativeDefinitionTest(unittest.TestCase):
         self.assertAlmostEqual(sol.answers["instant"], 19.6)
         self.assertAlmostEqual(sol.answers["average"], 29.4)
 
+    def test_level1_scene_carries_a_drawable_curve(self):
+        # the page can't evaluate SymPy strings, so the scene ships the formula as TeX and sampled points
+        _, _, sol, _ = validate(FW, {"a": "49/10", "b": 0, "c": 0, "t1": 2, "t2": 4}, 1, THEMES["falling-ball"])
+        scene = sol.scene
+        self.assertEqual(scene["type"], "rate")
+        self.assertIn("tex", scene)
+        ts = [pt[0] for pt in scene["curve"]]
+        self.assertLessEqual(min(ts), 0)
+        self.assertGreaterEqual(max(ts), 4)
+        for t_val, y in scene["curve"]:
+            self.assertAlmostEqual(y, 4.9 * t_val ** 2, places=6)
+        self.assertAlmostEqual(scene["y1"], 19.6)
+        self.assertAlmostEqual(scene["y2"], 78.4)
+
+    def test_level1_quantity_never_turns_around_on_the_graph(self):
+        # T = t²/2 − 4t + 85 bottoms out at t = 4: over [4, 6] the coffee would warm up by itself
+        ok, why, _, _ = validate(FW, {"a": "1/2", "b": -4, "c": 85, "t1": 4, "t2": 6}, 1, THEMES["cooling-coffee"])
+        self.assertFalse(ok)
+        self.assertIn("rate", why)
+
     def test_level1_one_unit_interval_rejected(self):
         # over [2, 3] the change (24.5 m) equals the rate (24.5 m/s): the change-not-rate mistake is invisible
         ok, why, _, _ = validate(FW, {"a": "49/10", "b": 0, "c": 0, "t1": 2, "t2": 3}, 1, THEMES["falling-ball"])

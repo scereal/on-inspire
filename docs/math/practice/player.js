@@ -22,6 +22,48 @@
   };
   const say = (box, kind, html) => { box.className = `feedback ${kind}`; box.innerHTML = html; math(box); };
 
+  // Where this level sits in the course outline, if it's part of one --------------
+  function placement() {
+    const cur = window.CURRICULUM;
+    if (!cur) return null;
+    const titles = {};
+    let found = null;
+    const matches = (n) => n.practice && n.practice.framework === fwId && n.practice.level === level;
+    for (const unit of cur.units) {
+      for (const o of unit.outcomes) {
+        titles[o.id] = o.title;
+        for (const s of o.subtopics) titles[s.id] = s.title;
+        if (found) continue;
+        const s = o.subtopics.find(matches);
+        if (s) found = { id: s.id, title: s.title, builds_on: s.builds_on || [] };
+        else if (matches(o)) found = { id: o.id, title: o.title, builds_on: o.subtopics.map((t) => t.id) };
+      }
+    }
+    if (found) found.titles = titles;
+    return found;
+  }
+
+  function showPlacement(place) {
+    const box = $("meta");
+    const map = "../../calculus/math-140/";
+    const concepts = Object.fromEntries((window.CONCEPTS || []).map((c) => [c.id, c]));
+    const chip = (target) => {
+      if (target.startsWith("foundation:")) {
+        const id = target.slice("foundation:".length);
+        const b = h("button", { type: "button", className: "chip foundation", textContent: concepts[id] ? concepts[id].title : id });
+        b.dataset.concept = id;
+        b.addEventListener("click", () => { if (window.Why) window.Why.open(id, {}, b); });
+        return b;
+      }
+      return h("a", { className: "chip", href: `${map}#${target}`, textContent: place.titles[target] || target });
+    };
+    box.replaceChildren(
+      h("a", { className: "outcome-link", href: `${map}#${place.id}`, textContent: `MATH 140: ${place.title}` }),
+      ...(place.builds_on.length ? [h("span", { textContent: "Builds on" }), ...place.builds_on.map(chip)] : []),
+    );
+    box.hidden = false;
+  }
+
   // Picker: no framework chosen ---------------------------------------------------
   async function picker() {
     $("title").textContent = "Practice";
@@ -42,7 +84,7 @@
   }
 
   // One problem --------------------------------------------------------------------
-  let bank, problem, scene, current, firstTry;
+  let bank, problem, scene, current, firstTry, place;
 
   async function start() {
     const res = await fetch(`../bank/${fwId}-${level}.json`).catch(() => null);
@@ -56,6 +98,8 @@
     document.title = `${bank.title}: Practice`;
     $("title").textContent = bank.title;
     $("crumb-topic").textContent = `${bank.title}, level ${level}`;
+    place = placement();
+    if (place) showPlacement(place);
     next();
   }
 
@@ -183,6 +227,7 @@
     const key = `streak:${fwId}-${level}`;
     const streak = firstTry ? store.get(key, 0) + 1 : 0;
     store.set(key, streak);
+    if (place) store.set(`streak:${place.id}`, streak);
     const nextLevel = `?f=${fwId}&level=${level + 1}`;
     const another = h("button", { type: "button", className: "primary", textContent: "Another one like this" });
     another.addEventListener("click", next);

@@ -124,7 +124,10 @@ class DerivativeDefinition(Framework):
         if level != 1:
             return []
         f = sp.Rational(p["a"]) * t**2 + p["b"] * t + p["c"]
-        return [("rate", float(sp.diff(f, t).subs(t, p["t1"])))]
+        # The rate is linear in t, so checking both ends of the drawn window [0, t2 + 1] covers all of it:
+        # the quantity never turns around on the graph (coffee warming up by itself, say).
+        rate = sp.diff(f, t)
+        return [("rate", float(rate.subs(t, at))) for at in (0, p["t1"], p["t2"] + 1)]
 
     def checks(self, p, level, theme, solution):
         return solution.answers.get("_checks", [])
@@ -165,7 +168,10 @@ class DerivativeDefinition(Framework):
         ]
         checks = [("clean", clean(avg) and clean(inst), "rates aren't clean numbers"),
                   ("distinct", abs(val(avg) - val(inst)) > 1e-9, "average equals instantaneous: the lesson needs them to differ")]
-        scene = {"type": "rate", "f": sp.sstr(f), "t1": t1, "t2": t2, "symbol": sym}
+        span = t2 + 1
+        curve = [[k * span / 40, float(f.subs(t, sp.Rational(k * span, 40)))] for k in range(41)]
+        scene = {"type": "rate", "f": sp.sstr(f), "tex": sp.latex(f), "t1": t1, "t2": t2, "y1": val(f1), "y2": val(f2),
+                 "symbol": sym, "unit": unit, "time_unit": tu, "curve": curve}
         return Solution(steps, story, scene, ["average-rate", "shrink-interval", "units"],
                         {"average": val(avg), "instant": val(inst), "_checks": checks})
 

@@ -44,41 +44,41 @@
   "tried": 449
  },
  "derivative-definition": {
-  "acceptance_rate": 0.7193,
+  "acceptance_rate": 0.6366,
   "accepted": 310,
   "framework": "derivative-definition",
   "levels": {
    "1": {
     "accepted": 100,
     "rejected": {
-     "distinct": 5,
-     "duplicate": 77,
-     "plausible": 8
+     "distinct": 12,
+     "duplicate": 67,
+     "plausible": 65
     },
     "target": 100,
-    "tried": 190
+    "tried": 244
    },
    "2": {
     "accepted": 110,
     "rejected": {
-     "distinct": 24,
-     "duplicate": 3
+     "distinct": 28,
+     "duplicate": 1
     },
     "target": 110,
-    "tried": 137
+    "tried": 139
    },
    "3": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 3,
-     "exists": 1
+     "duplicate": 2,
+     "exists": 2
     },
     "target": 100,
     "tried": 104
    }
   },
   "seed": 1,
-  "tried": 431
+  "tried": 487
  },
  "derivative-rules": {
   "acceptance_rate": 0.4928,
