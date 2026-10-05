@@ -104,6 +104,18 @@
    "4": {
     "count": 100,
     "name": "Inverse trig"
+   },
+   "5": {
+    "count": 100,
+    "name": "Implicit differentiation"
+   },
+   "6": {
+    "count": 100,
+    "name": "Logarithmic differentiation"
+   },
+   "7": {
+    "count": 100,
+    "name": "Higher derivatives"
    }
   },
   "outcome": "Differentiate trig, exponential, logarithmic and inverse functions, implicitly defined curves, and higher derivatives.",

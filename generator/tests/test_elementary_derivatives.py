@@ -75,6 +75,58 @@ class ElementaryDerivativesTest(unittest.TestCase):
             f, point = ed.inverse_trig(p)
             self.assertAlmostEqual(sol.steps[1].answer, float(sp.diff(f, x).subs(x, point)))
 
+    # Level 5: implicit differentiation -------------------------------------------------
+    def test_level5_point_on_curve_and_slope_matches_idiff(self):
+        y = sp.Symbol("y")
+        for p in [{"family": "circle", "r": 5, "px": 3, "py": 4}, {"family": "hyperbola", "c": 6, "px": 2, "py": 3},
+                  {"family": "mixed", "px": 1, "py": 2}]:
+            ok, why, sol, _ = validate(FW, p, 5, None)
+            self.assertTrue(ok, why)
+            curve = ed.implicit_curve(p)
+            self.assertEqual(curve.subs({x: p["px"], y: p["py"]}), 0)
+            slope = sp.idiff(curve, y, x).subs({x: p["px"], y: p["py"]})
+            self.assertAlmostEqual(sol.steps[2].answer, float(slope))
+            self.assertFalse(by_misconception(sol.steps[0], "forgot-chain-on-y").correct)
+
+    def test_level5_rejects_points_off_the_curve(self):
+        ok, _, _, _ = validate(FW, {"family": "circle", "r": 5, "px": 3, "py": 3}, 5, None)
+        self.assertFalse(ok)
+
+    # Level 6: logarithmic differentiation ----------------------------------------------
+    def test_level6_power_family_value(self):
+        ok, why, sol, _ = validate(FW, {"family": "power", "a": 1, "b": 2, "c": 0}, 6, None)   # y = x^(x² + 2x)
+        self.assertTrue(ok, why)
+        self.assertAlmostEqual(sol.steps[2].answer, 3)
+        self.assertFalse(by_misconception(sol.steps[1], "forgot-y").correct)
+
+    def test_level6_product_family_matches_sympy(self):
+        p = {"family": "quotient", "a": 2, "b": 1, "c": 1}
+        ok, why, sol, _ = validate(FW, p, 6, None)
+        self.assertTrue(ok, why)
+        f = ed.log_diff_function(p)
+        self.assertAlmostEqual(sol.steps[2].answer, float(sp.diff(f, x).subs(x, 1)))
+
+    # Level 7: higher derivatives -------------------------------------------------------
+    def test_level7_concavity_follows_the_second_derivative(self):
+        ok, why, sol, _ = validate(FW, {"a": 1, "b": -6, "c": 2, "d": 1, "t0": 1}, 7, None)   # s'' = 6t − 12 → −6 at t = 1
+        self.assertTrue(ok, why)
+        self.assertAlmostEqual(sol.steps[2].answer, -6)
+        self.assertIn("down", correct(sol.steps[3]).label)
+
+    def test_level7_rejects_an_inflection_point(self):
+        ok, _, _, _ = validate(FW, {"a": 1, "b": -6, "c": 2, "d": 1, "t0": 2}, 7, None)        # s''(2) = 0
+        self.assertFalse(ok)
+
+    def test_level7_acceleration_written_like_its_distractors(self):
+        ok, why, sol, _ = validate(FW, {"a": 1, "b": -1, "c": 5, "d": 0, "t0": 4}, 7, None)
+        self.assertTrue(ok, why)
+        self.assertNotIn("left(", correct(sol.steps[1]).label)
+
+    def test_level5_circle_offers_two_wrong_options(self):
+        ok, why, sol, _ = validate(FW, {"family": "circle", "r": 5, "px": 3, "py": 4}, 5, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(len(sol.steps[0].options), 3)
+
     def test_no_sign_glitches_in_text(self):
         problems, _ = bank.build(FW, seed=1)
         # also: write ln (not log), arctan (not atan), and tan's derivative as sec², matching its distractors

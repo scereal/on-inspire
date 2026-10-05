@@ -182,8 +182,8 @@
   "tried": 629
  },
  "elementary-derivatives": {
-  "acceptance_rate": 0.5979,
-  "accepted": 400,
+  "acceptance_rate": 0.556,
+  "accepted": 700,
   "framework": "elementary-derivatives",
   "levels": {
    "1": {
@@ -219,10 +219,37 @@
     },
     "target": 100,
     "tried": 292
+   },
+   "5": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 183,
+     "exists": 7
+    },
+    "target": 100,
+    "tried": 290
+   },
+   "6": {
+    "accepted": 100,
+    "rejected": {
+     "clean": 6,
+     "duplicate": 74,
+     "exists": 16
+    },
+    "target": 100,
+    "tried": 196
+   },
+   "7": {
+    "accepted": 100,
+    "rejected": {
+     "exists": 4
+    },
+    "target": 100,
+    "tried": 104
    }
   },
   "seed": 1,
-  "tried": 669
+  "tried": 1259
  },
  "ibp": {
   "acceptance_rate": 0.4042,

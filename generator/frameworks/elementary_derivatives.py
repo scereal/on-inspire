@@ -4,12 +4,16 @@ Level 1: sin, cos and tan, with the chain rule.
 Level 2: exponentials and logarithms.
 Level 3: the derivative of an inverse function.
 Level 4: inverse trig.
+Level 5: implicit differentiation.
+Level 6: logarithmic differentiation.
+Level 7: higher derivatives (velocity, acceleration, concavity).
 """
 import sympy as sp
 
 from generator.core.framework import Framework, Level, NoSolution, Option, Solution, Step
 
-x = sp.Symbol("x")
+x, y, t = sp.symbols("x y t")
+yp = sp.Symbol("y'")
 MAX_DEN = 20
 
 
@@ -76,6 +80,31 @@ def inverse_trig(p):
     return f, point
 
 
+# Level 5 ----------------------------------------------------------------------------
+
+LATTICE = {5: [(3, 4), (4, 3)], 10: [(6, 8), (8, 6)], 13: [(5, 12), (12, 5)]}
+
+
+def implicit_curve(p):
+    """F(x, y) with the curve F = 0."""
+    if p["family"] == "circle":
+        return x**2 + y**2 - p["r"] ** 2
+    if p["family"] == "hyperbola":
+        return x * y - p["c"]
+    return x**2 + x * y + y**2 - (p["px"] ** 2 + p["px"] * p["py"] + p["py"] ** 2)
+
+
+# Level 6 ----------------------------------------------------------------------------
+
+def log_diff_function(p):
+    a, b, c = p["a"], p["b"], p["c"]
+    if p["family"] == "power":
+        return x ** (a * x**2 + b * x + c)
+    if p["family"] == "product":
+        return x**a * (x + 1) ** b * (x + 3) ** c
+    return x**a * (x + 1) ** b / (x + 3) ** c
+
+
 FEEDBACK = {
     "cos-sign": "The derivative of $\\cos$ is $-\\sin$: cosine starts by falling as $x$ grows past 0.",
     "dropped-inner": "The chain rule multiplies by the derivative of the inside, $kx$, which is $k$.",
@@ -99,6 +128,22 @@ FEEDBACK = {
     "arctan-confused": "That's the shape of the arctan derivative. arcsin gives $\\frac{1}{\\sqrt{1 - u^2}}$.",
     "sign-slip": "Check the sign inside: it comes from $1 + \\tan^2 = \\sec^2$ for arctan and $1 - \\sin^2 = \\cos^2$ for arcsin.",
     "arcsin-no-chain": "The chain rule multiplies by the derivative of the inside, $mx$, and the inside is squared under the root.",
+    "forgot-chain-on-y": "$y$ depends on $x$, so the chain rule applies: $(y^2)' = 2y\\,y'$, not $2y$.",
+    "chain-dropped-outer": "The chain rule keeps the outer derivative too: $(y^2)' = 2y\\cdot y'$, not just $2y'$.",
+    "forgot-product-rule": "$xy$ is a product of two things that change with $x$: $(xy)' = y + x\\,y'$.",
+    "implicit-sign-slip": "Moving the $x$-terms to the other side flips their sign.",
+    "implicit-swapped": "Solve for $y'$: it's the $x$-derivative over the $y$-derivative, with a minus sign, not the other way up.",
+    "exponent-not-down": "The point of the log is that it brings the exponent down: $\\ln(x^{p}) = p\\ln x$.",
+    "logs-multiply": "Logs turn products into sums, not products of logs: $\\ln(AB) = \\ln A + \\ln B$.",
+    "forgot-y": "That's $\\frac{y'}{y}$. Multiply both sides by $y$ to get $y'$ itself.",
+    "power-rule-on-variable-exponent": "The power rule needs a fixed exponent. Here the exponent changes with $x$, which is why you take logs.",
+    "differentiated-each-factor": "You can't differentiate a product factor by factor. Logs turn it into a sum first.",
+    "constant-not-zero": "The constant term's derivative is 0.",
+    "exponent-unchanged": "The power rule lowers each exponent by one.",
+    "dropped-coefficient": "The power rule brings the exponent down as a coefficient: $(t^3)' = 3t^2$.",
+    "acceleration-is-velocity": "That's the velocity again. Acceleration is the derivative of velocity: differentiate once more.",
+    "forgot-to-double": "$(t^2)'' = 2$: differentiate $2bt$ to get $2b$.",
+    "concavity-from-f-prime": "Concavity comes from the sign of the second derivative, not the first.",
 }
 
 
@@ -111,9 +156,12 @@ class ElementaryDerivatives(Framework):
         2: Level("Exponentials and logarithms", {"differentiate": 1, "evaluate": 1}),
         3: Level("Inverse functions", {"find-input": 1, "slope": 1, "reciprocal": 1}),
         4: Level("Inverse trig", {"differentiate": 1, "evaluate": 1}),
+        5: Level("Implicit differentiation", {"differentiate-both-sides": 1, "solve-for-y'": 1, "evaluate": 1}),
+        6: Level("Logarithmic differentiation", {"take-logs": 1, "differentiate": 1, "evaluate": 1}),
+        7: Level("Higher derivatives", {"velocity": 1, "acceleration": 1, "evaluate": 1, "concavity": 1}),
     }
     misconceptions = {k: v.replace("$", "") for k, v in FEEDBACK.items()}
-    targets = {1: 100, 2: 100, 3: 100, 4: 100}
+    targets = {1: 100, 2: 100, 3: 100, 4: 100, 5: 100, 6: 100, 7: 100}
 
     def themes_for(self, level):
         return []
@@ -133,8 +181,25 @@ class ElementaryDerivatives(Framework):
             return {"family": family, "a": nz(-3, 5)}
         if level == 3:
             return {"p": rng.randint(1, 5), "q": rng.randint(-5, 5), "a": nz(-3, 3)}
-        family = rng.choice(["atan", "atan", "asin"])
-        return {"family": family, "k": nz(-3, 4), "m": rng.randint(1, 5), "at": "zero" if family == "asin" else rng.choice(["zero", "one"])}
+        if level == 4:
+            family = rng.choice(["atan", "atan", "asin"])
+            return {"family": family, "k": nz(-3, 4), "m": rng.randint(1, 5), "at": "zero" if family == "asin" else rng.choice(["zero", "one"])}
+        if level == 5:
+            family = rng.choice(["circle", "circle", "hyperbola", "mixed"])
+            if family == "circle":
+                r = rng.choice(list(LATTICE))
+                px, py = rng.choice(LATTICE[r])
+                return {"family": family, "r": r, "px": px * rng.choice([1, -1]), "py": py * rng.choice([1, -1])}
+            if family == "hyperbola":
+                px, py = nz(-4, 4), nz(-4, 4)
+                return {"family": family, "c": px * py, "px": px, "py": py}
+            return {"family": family, "px": nz(-3, 3), "py": nz(-3, 3)}
+        if level == 6:
+            family = rng.choice(["power", "power", "product", "quotient"])
+            if family == "power":
+                return {"family": family, "a": rng.randint(-2, 2), "b": rng.randint(-3, 3), "c": rng.randint(-3, 3)}
+            return {"family": family, "a": rng.randint(1, 3), "b": rng.randint(1, 3), "c": rng.randint(1, 2) if family == "product" else 1}
+        return {"a": nz(-2, 2), "b": rng.randint(-6, 6), "c": rng.randint(-5, 5), "d": rng.randint(-5, 5), "t0": rng.randint(0, 4)}
 
     def canonical(self, p, level):
         return f"{level}:" + ",".join(f"{k}={p[k]}" for k in sorted(p))
@@ -143,7 +208,8 @@ class ElementaryDerivatives(Framework):
         return solution.answers.get("_checks", [])
 
     def solve(self, p, level, theme):
-        return [None, self._trig, self._exp_log, self._inverse, self._inverse_trig][level](p)
+        return [None, self._trig, self._exp_log, self._inverse, self._inverse_trig,
+                self._implicit, self._log_diff, self._higher][level](p)
 
     # Shared: a "which derivative" step from the right answer and named mistakes
     def _derivative_step(self, prompt, right, candidates):
@@ -268,6 +334,119 @@ class ElementaryDerivatives(Framework):
         scene = {"type": "integral", "tex": f"\\frac{{d}}{{dx}}\\left[{L(f)}\\right]", "rule": "(\\arctan u)' = \\frac{u'}{1 + u^2}, \\quad (\\arcsin u)' = \\frac{u'}{\\sqrt{1 - u^2}}"}
         checks = [("clean", clean(value), "value isn't clean")]
         return Solution(steps, story, scene, ["differentiate", "evaluate"], {"value": float(value), "_checks": checks})
+
+
+    # Level 5 ----------------------------------------------------------------------------
+    def _implicit(self, p):
+        F, px, py = implicit_curve(p), p["px"], p["py"]
+        point = {x: px, y: py}
+        if F.subs(point) != 0:
+            raise NoSolution("the point isn't on the curve")
+        Fx, Fy = sp.diff(F, x), sp.diff(F, y)
+        if Fy.subs(point) == 0:
+            raise NoSolution("vertical tangent at the point")
+        left = sp.expand(Fx + Fy * yp)                       # d/dx of F(x, y(x))
+        rhs = sp.Integer(0)
+        slope_expr = -Fx / Fy
+        slope = slope_expr.subs(point)
+        if p["family"] == "circle":
+            show = x**2 + y**2
+            cands = [("forgot-chain-on-y", 2 * x + 2 * y), ("chain-dropped-outer", 2 * x + 2 * yp)]
+            rhs = sp.Integer(p["r"] ** 2)
+        elif p["family"] == "hyperbola":
+            show = x * y
+            cands = [("forgot-product-rule", x * yp), ("forgot-chain-on-y", y + x)]
+            rhs = sp.Integer(p["c"])
+        else:
+            show = x**2 + x * y + y**2
+            cands = [("forgot-product-rule", 2 * x + x * yp + 2 * y * yp), ("forgot-chain-on-y", 2 * x + y + x + 2 * y),
+                     ("chain-dropped-outer", 2 * x + y + x * yp + 2 * yp)]
+            rhs = show.subs(point)
+        lw = pick(left, cands)
+        d_step = Step("Differentiate both sides with respect to $x$. The left side becomes:", "choice", tex(left),
+                      options=[Option(tex(left), correct=True, value=key(left))] +
+                      [Option(tex(e), misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in lw])
+        sw = pick(slope_expr, [("implicit-sign-slip", Fx / Fy), ("implicit-swapped", -Fy / Fx)])
+        s_step = Step("Solve for $y'$.", "choice", f"$y' = {L(slope_expr)}$",
+                      options=[Option(f"$y' = {L(slope_expr)}$", correct=True, value=key(slope_expr))] +
+                      [Option(f"$y' = {L(e)}$", misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in sw])
+        steps = [d_step, s_step,
+                 Step(f"What is the slope at $({px}, {py})$?", "number", float(slope), tolerance=0.01,
+                      explain=f"$y' = {L(slope_expr.subs(point))}$ at $({px}, {py})$.")]
+        checks = [("exists", sp.idiff(F, y, x).subs(point) == slope, "idiff disagrees"),
+                  ("clean", clean(slope), "slope isn't clean")]
+        story = f"The curve ${L(show)} = {rhs}$ passes through $({px}, {py})$. Find the slope of its tangent there."
+        scene = {"type": "integral", "tex": f"{L(show)} = {rhs}", "rule": "\\frac{d}{dx}\\left[y^2\\right] = 2y\\,y'"}
+        return Solution(steps, story, scene, ["differentiate-both-sides", "solve-for-y'", "evaluate"], {"slope": float(slope), "_checks": checks})
+
+    # Level 6 ----------------------------------------------------------------------------
+    def _log_diff(self, p):
+        f, fam = log_diff_function(p), p["family"]
+        a, b, c = p["a"], p["b"], p["c"]
+        if fam == "power":
+            q = a * x**2 + b * x + c
+            if sp.degree(q, x) < 1:
+                raise NoSolution("a constant exponent needs only the power rule")
+            ln_y = q * sp.log(x)
+            ln_cands = [("exponent-not-down", sp.log(x) ** q)]
+            ratio = sp.diff(ln_y, x)
+            d_cands = [("forgot-y", ratio), ("power-rule-on-variable-exponent", q * x ** (q - 1))]
+        else:
+            sign = 1 if fam == "product" else -1
+            ln_y = a * sp.log(x) + b * sp.log(x + 1) + sign * c * sp.log(x + 3)
+            ln_cands = [("logs-multiply", a * sp.log(x) * b * sp.log(x + 1) * (c * sp.log(x + 3)) ** sign)]
+            ratio = sp.diff(ln_y, x)
+            each = a * x ** (a - 1) * b * (x + 1) ** (b - 1) * (c * (x + 3) ** (c - 1)) ** sign
+            d_cands = [("forgot-y", ratio), ("differentiated-each-factor", each)]
+        right = f * ratio
+        value = sp.nsimplify(right.subs(x, 1))
+        if same(ratio.subs(x, 1), value) and fam != "power":
+            raise NoSolution("y(1) = 1 hides the forgot-y mistake in the number step")
+        lw = pick(ln_y, ln_cands, n=1)
+        dw = pick(right, d_cands)
+        steps = [
+            Step("Take the natural log of both sides. $\\ln y = $", "choice", tex(ln_y),
+                 options=[Option(tex(ln_y), correct=True, value=key(ln_y))] +
+                 [Option(tex(e), misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in lw]),
+            Step("Differentiate both sides and solve for $y'$.", "choice", f"$y' = {L(right)}$",
+                 options=[Option(f"$y' = {L(right)}$", correct=True, value=key(right))] +
+                 [Option(f"$y' = {L(e)}$", misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in dw]),
+            Step("Evaluate $y'(1)$.", "number", float(value), tolerance=0.01, explain=f"$y'(1) = {L(value)}$"),
+        ]
+        checks = [("exists", sp.simplify(sp.diff(f, x) - right) == 0, "log-derivative disagrees with diff"),
+                  ("clean", clean(value), "value isn't clean")]
+        story = f"Let $y = {L(f)}$."
+        scene = {"type": "integral", "tex": f"y = {L(f)}", "rule": "\\ln y \\implies \\frac{y'}{y}"}
+        return Solution(steps, story, scene, ["take-logs", "differentiate", "evaluate"], {"value": float(value), "_checks": checks})
+
+    # Level 7 ----------------------------------------------------------------------------
+    def _higher(self, p):
+        a, b, c, d, t0 = p["a"], p["b"], p["c"], p["d"], p["t0"]
+        s_ = a * t**3 + b * t**2 + c * t + d
+        v, acc = sp.expand(sp.diff(s_, t)), sp.expand(sp.diff(s_, t, 2))   # expanded, like the distractors
+        at = acc.subs(t, t0)
+        if at == 0:
+            raise NoSolution("inflection point: concavity is undefined there")
+        vw = pick(v, [("constant-not-zero", v + d), ("exponent-unchanged", 3 * a * t**3 + 2 * b * t**2 + c * t),
+                      ("dropped-coefficient", a * t**2 + b * t + c)])
+        aw = pick(acc, [("acceleration-is-velocity", v), ("forgot-to-double", 6 * a * t + b)])
+        up = at > 0
+        steps = [
+            Step("What is the velocity $v(t) = s'(t)$?", "choice", tex(v),
+                 options=[Option(tex(v), correct=True, value=key(v))] + [Option(tex(e), misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in vw]),
+            Step("What is the acceleration $a(t) = s''(t)$?", "choice", tex(acc),
+                 options=[Option(tex(acc), correct=True, value=key(acc))] + [Option(tex(e), misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in aw]),
+            Step(f"What is the acceleration at $t = {t0}$, in m/s²?", "number", float(at), tolerance=0.01,
+                 explain=f"$a({t0}) = {at}$ m/s²."),
+            Step(f"At $t = {t0}$, is the graph of $s(t)$ concave up or concave down?", "choice", "up" if up else "down", options=[
+                Option("Concave up" if up else "Concave down", correct=True, value="up" if up else "down"),
+                Option("Concave down" if up else "Concave up", misconception="concavity-from-f-prime", value="down" if up else "up",
+                       feedback=f"$s''({t0}) = {at}$ is {'positive' if up else 'negative'}, so the graph bends {'upward' if up else 'downward'}. Concavity follows the sign of $s''$."),
+            ]),
+        ]
+        story = f"A particle moves along a line. Its position after $t$ seconds is $s(t) = {L(s_)}$ metres."
+        scene = {"type": "integral", "tex": f"s(t) = {L(s_)}", "rule": "v = s', \\quad a = s''"}
+        return Solution(steps, story, scene, ["velocity", "acceleration", "evaluate", "concavity"], {"acc": float(at), "_checks": []})
 
 
 FRAMEWORK = ElementaryDerivatives()
