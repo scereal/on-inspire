@@ -18,6 +18,16 @@
     abs: Math.abs,
     sqrt: (x) => (x >= 0 ? Math.sqrt(x) : NaN),
     recip: (x) => 1 / x,
+    // Unit 140.2: limits and continuity
+    jump: (x) => (x < 0 ? 1 : 3),
+    parking: (t) => 4 * Math.ceil(t),
+    x2sin: (x) => (x === 0 ? 0 : x * x * Math.sin(1 / x)),
+    negsquare: (x) => -x * x,
+    line21: (x) => 2 * x + 1,
+    ivtcubic: (x) => x * x * x + x - 1,
+    avgcost: (n) => (5000 + 3 * n) / n,
+    asym: (x) => (x + 1) / (x - 2),
+    rootdiff: (x) => (Math.sqrt(x + 4) - 2) / x,
   };
 
   const WidgetMath = {
@@ -26,6 +36,15 @@
       return FUNCTIONS[name];
     },
     secantSlope: (f, x0, h) => (f(x0 + h) - f(x0)) / h,
+    // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
+    farValues(f, mode, at, t) {
+      if (mode === "infinity") {
+        const X = Math.pow(10, 1 + 6 * t);
+        return [X / 100, X / 10, X].map((x) => [x, f(x)]);
+      }
+      const d = Math.pow(10, -4 * t);
+      return [at - d, at + d].map((x) => [x, f(x)]);
+    },
     riemann(f, a, b, n, rule = "mid") {
       const dx = (b - a) / n;
       let sum = 0;
@@ -220,21 +239,27 @@
   W["limit-zoom"] = function (box, cfg) {
     const g = WidgetMath.fn(cfg.g || "sinh_over_h");
     const at = cfg.at ?? 0;
-    const L = cfg.limit ?? g(at + 1e-7);
+    const sided = cfg.left !== undefined && cfg.right !== undefined;
+    const L = sided ? (cfg.left + cfg.right) / 2 : cfg.limit ?? g(at + 1e-7);
     const ui = shell(box, cfg.prompt || "Zoom in toward the point and watch the values settle.");
     let state;
     const draw = () => {
       ui.svg.innerHTML = "";
       const w = Math.pow(10, -state.z / 25);
-      const yr = cfg.epsilon ? Math.max(state.eps * 2.5, 1e-4) : Math.max(w * 2, 1e-4);
+      const yr = cfg.epsilon ? Math.max(state.eps * 2.5, 1e-4) : sided ? Math.abs(cfg.right - cfg.left) * 0.9 + 0.2 : Math.max(w * 2, 1e-4);
       const P = plotArea(ui.svg, at - w, at + w, L - yr, L + yr);
       if (cfg.epsilon) {
         el("rect", { x: P.L, width: P.R - P.L, y: P.Y(L + state.eps), height: Math.max(1, P.Y(L - state.eps) - P.Y(L + state.eps)), class: "w-band" }, ui.svg);
       }
+      for (const b of cfg.bounds || []) P.curve(WidgetMath.fn(b), at - w, at + w, "w-curve alt");
       P.curve(g, at - w, at - w * 1e-3);
       P.curve(g, at + w * 1e-3, at + w);
-      el("circle", { cx: P.X(at), cy: P.Y(L), r: 5, class: "w-hole" }, ui.svg);
+      for (const y of sided ? [cfg.left, cfg.right] : [L]) el("circle", { cx: P.X(at), cy: P.Y(y), r: 5, class: "w-hole" }, ui.svg);
       let text = `window ±${fmt(w, 4)}:  g(${fmt(at + w / 2, 4)}) = ${fmt(g(at + w / 2), 6)},  approaching ${fmt(L, 4)}`;
+      if (sided) {
+        const d = w / 2;
+        text = `from the left: g(${fmt(at - d, 4)}) = ${fmt(g(at - d), 4)} → ${fmt(cfg.left, 4)};  from the right: g(${fmt(at + d, 4)}) = ${fmt(g(at + d), 4)} → ${fmt(cfg.right, 4)}`;
+      }
       if (cfg.epsilon) {
         let delta = w;
         for (let i = 1; i <= 400; i++) {
@@ -838,6 +863,44 @@
     const init = () => { state = { a: 1 }; ai.value = 1; draw(); };
     const ai = slider(ui.controls, "Height a", 0, 2.4, 0.005, 1, (v) => { state.a = v; draw(); });
     ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Far out: x → ∞ (the window grows) or x → a vertical asymptote (both sides close in)
+  W["far-out"] = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "avgcost");
+    const at = cfg.at ?? 0;
+    const infinity = cfg.mode === "infinity";
+    const ui = shell(box, cfg.prompt || (infinity ? "Push x further out and watch the curve flatten toward its asymptote." : "Close in on the asymptote from both sides."));
+    let t = 0;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const pts = WidgetMath.farValues(f, infinity ? "infinity" : "asymptote", at, t);
+      if (infinity) {
+        const X = pts[pts.length - 1][0], A = cfg.asymptote ?? pts[pts.length - 1][1];
+        let lo = A, hi = A;
+        for (let i = 0; i <= 120; i++) { const y = f(X / 20 + ((X - X / 20) * i) / 120); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+        const pad = (hi - lo) * 0.15 || 1;
+        const P = plotArea(ui.svg, 0, X, lo - pad, hi + pad);
+        el("line", { x1: P.L, x2: P.R, y1: P.Y(A), y2: P.Y(A), class: "w-delta" }, ui.svg);
+        P.curve(f, X / 20, X);
+        el("circle", { cx: P.X(X), cy: P.Y(f(X)), r: 5, class: "w-point" }, ui.svg);
+        ui.readout.textContent = `x = ${X >= 1e4 ? X.toExponential(0) : fmt(X, 0)}:  f(x) = ${fmt(f(X), 5)},  asymptote y = ${fmt(A, 3)}`;
+        return;
+      }
+      const [[xl, yl], [xr, yr]] = pts;
+      const Y = Math.min(Math.max(5, Math.abs(yl), Math.abs(yr)) * 1.15, 1e6);
+      const P = plotArea(ui.svg, at - 1.5, at + 1.5, -Y, Y);
+      el("line", { x1: P.X(at), x2: P.X(at), y1: P.T, y2: P.B, class: "w-delta" }, ui.svg);
+      P.curve(f, at - 1.5, xl, "w-curve", 600);
+      P.curve(f, xr, at + 1.5, "w-curve", 600);
+      for (const [x, y] of pts) el("circle", { cx: P.X(x), cy: P.Y(Math.max(-Y, Math.min(Y, y))), r: 5, class: "w-point" }, ui.svg);
+      ui.readout.textContent = `f(${fmt(xl, 5)}) = ${fmt(yl, 1)},  f(${fmt(xr, 5)}) = ${fmt(yr, 1)}`;
+    };
+    const input = slider(ui.controls, infinity ? "Push x out" : "Close in", 0, 100, 1, 0, (v) => { t = v / 100; draw(); });
+    const init = () => { t = 0; input.value = 0; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
     return { reset: init };
   };
 

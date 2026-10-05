@@ -152,6 +152,43 @@
     return {};
   }
 
+  // Graph: pieces of a function with open/closed dots, for reading limits off a graph --
+  function graph(box, problem) {
+    const s = problem.scene;
+    const W = 640, H = 340, PAD = 38;
+    const X = (x) => PAD + ((x - s.xmin) / (s.xmax - s.xmin)) * (W - 2 * PAD);
+    const Y = (y) => H - PAD - ((y - s.ymin) / (s.ymax - s.ymin)) * (H - 2 * PAD);
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": s.label || "Graph of f" });
+    const tickStyle = "font-size: 20px";
+    for (let gx = Math.ceil(s.xmin); gx <= s.xmax; gx++) {
+      svg.append(svgEl("line", { x1: X(gx), x2: X(gx), y1: PAD, y2: H - PAD, stroke: "rgba(243, 234, 214, 0.08)" }));
+    }
+    for (let gy = Math.ceil(s.ymin); gy <= s.ymax; gy++) {
+      svg.append(svgEl("line", { x1: PAD, x2: W - PAD, y1: Y(gy), y2: Y(gy), stroke: "rgba(243, 234, 214, 0.08)" }));
+      if (gy !== 0 && (s.ymax - s.ymin <= 12 || gy % 2 === 0)) {
+        const t = svgEl("text", { x: X(0) - 8, y: Y(gy) + 7, class: "tick", "text-anchor": "end", style: tickStyle });
+        t.textContent = gy;
+        svg.append(t);
+      }
+    }
+    svg.append(svgEl("line", { x1: PAD, x2: W - PAD, y1: Y(0), y2: Y(0), class: "ground" }));
+    svg.append(svgEl("line", { x1: X(0), x2: X(0), y1: PAD, y2: H - PAD, class: "ground" }));
+    if (s.mark !== undefined) {
+      svg.append(svgEl("line", { x1: X(s.mark), x2: X(s.mark), y1: PAD, y2: H - PAD, class: "ground", "stroke-dasharray": "4 6" }));
+      const t = svgEl("text", { x: X(s.mark), y: H - PAD + 26, class: "tick", "text-anchor": "middle", style: tickStyle });
+      t.textContent = `x = ${s.mark}`;
+      svg.append(t);
+    }
+    for (const piece of s.pieces) {
+      svg.append(svgEl("path", { d: piece.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" "), class: "arc", stroke: "var(--aurora)" }));
+    }
+    for (const d of s.dots || []) {
+      svg.append(svgEl("circle", { cx: X(d.x), cy: Y(d.y), r: 7, fill: d.open ? "var(--void, #0b1416)" : "var(--gold)", stroke: "var(--gold)", "stroke-width": 2.5 }));
+    }
+    box.replaceChildren(svg);
+    return {};
+  }
+
   // Mixing: two marked cups the learner pours between ------------------------------
   const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
   const frac = (n, d) => { const g = gcd(n, d) || 1; return { n: n / g, d: d / g }; };
@@ -257,5 +294,5 @@
     };
   }
 
-  window.Scenes = { integral, projectile, bounce, mixing, rate };
+  window.Scenes = { integral, projectile, bounce, mixing, rate, graph };
 })();

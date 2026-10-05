@@ -44,7 +44,13 @@ window.CONCEPTS = [
     },
     "deeper": [],
     "related": [
-      "function"
+      "function",
+      "one-sided-limit",
+      "indeterminate-form",
+      "squeeze-theorem",
+      "limit-at-infinity",
+      "continuity",
+      "epsilon-delta"
     ],
     "foundation": true,
     "claims": [
@@ -1648,7 +1654,9 @@ window.CONCEPTS = [
       "derivative",
       "limit"
     ],
-    "related": [],
+    "related": [
+      "continuity"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -1745,6 +1753,299 @@ window.CONCEPTS = [
     "claims": [
       {
         "sympy": "simplify(diff((x**2 + 1)/(x - 1), x) - ((2*x)*(x - 1) - (x**2 + 1)*1)/(x - 1)**2)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "one-sided-limit",
+    "title": "A limit from one side",
+    "body": "Sometimes a function heads toward one value from the left and a different value from the right. A parking garage that charges 4 dollars per started hour costs 8 dollars at 1 h 59 min and 12 dollars at 2 h 01 min. As $t$ approaches 2 from the left, the cost approaches 8. From the right, it approaches 12.\n\nWe write $\\lim_{t\\to 2^-}$ for the left-hand limit and $\\lim_{t\\to 2^+}$ for the right-hand one. The ordinary two-sided [[limit]] exists exactly when both one-sided limits exist and agree. Here they don't, so the cost has no limit at 2, even though it has a value there.",
+    "math": [
+      "\\lim_{x\\to a} f(x) = L \\iff \\lim_{x\\to a^-} f(x) = L = \\lim_{x\\to a^+} f(x)"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "jump",
+      "at": 0,
+      "left": 1,
+      "right": 3,
+      "prompt": "Zoom in on the jump. The left side keeps heading to 1 and the right side to 3, however close you get."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(Abs(x)/x, x, 0, '+')",
+        "equals": "1"
+      },
+      {
+        "sympy": "limit(Abs(x)/x, x, 0, '-')",
+        "equals": "-1"
+      }
+    ]
+  },
+  {
+    "id": "indeterminate-form",
+    "title": "0/0 means \"simplify first\", not zero",
+    "body": "Substitute $x = 3$ into $\\frac{x^2 - 9}{x - 3}$ and you get $\\frac{0}{0}$. That isn't an answer. It's a sign that the top and bottom are both shrinking, and the [[limit]] depends on how fast each one shrinks: $\\frac{x}{x} \\to 1$, $\\frac{x^2}{x} \\to 0$, and $\\frac{x}{x^2}$ blows up, all from the same 0/0.\n\nSo simplify while $x$ is near 3 but not equal to it. Factor the top as $(x - 3)(x + 3)$ and cancel the common $x - 3$. That's allowed because a limit never looks at $x = 3$ itself. What's left, $x + 3$, approaches 6. When a square root causes the 0/0, the [[conjugate-trick|conjugate trick]] does the same job.",
+    "math": [
+      "\\frac{x^2 - 9}{x - 3} = \\frac{(x - 3)(x + 3)}{x - 3} = x + 3 \\to 6"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "hole",
+      "at": 1,
+      "limit": 2,
+      "prompt": "The formula is 0/0 at x = 1, but zoom in: the outputs settle on 2."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [
+      "conjugate-trick"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(x**2/x, x, 0)",
+        "equals": "0"
+      },
+      {
+        "sympy": "limit((x**2 - 9)/(x - 3), x, 3)",
+        "equals": "6"
+      },
+      {
+        "sympy": "limit(x/x**2, x, 0, '+')",
+        "equals": "oo"
+      }
+    ]
+  },
+  {
+    "id": "conjugate-trick",
+    "title": "Multiplying by the conjugate clears a square root",
+    "body": "$(a - b)(a + b) = a^2 - b^2$: the middle terms cancel. Apply it to a square root and the root disappears. $(\\sqrt{x + 4} - 2)(\\sqrt{x + 4} + 2) = (x + 4) - 4 = x$.\n\nThat's the trick for limits like $\\frac{\\sqrt{x+4} - 2}{x}$ at 0, which is 0/0. Multiply top and bottom by the conjugate $\\sqrt{x+4} + 2$. The top becomes $x$, which cancels with the bottom, leaving $\\frac{1}{\\sqrt{x+4} + 2}$. At $x = 0$ that's $\\frac{1}{4}$. Multiplying by $\\frac{\\sqrt{x+4} + 2}{\\sqrt{x+4} + 2}$ is multiplying by 1, so nothing about the function changes except how it's written.",
+    "math": [
+      "(\\sqrt{x+4} - 2)(\\sqrt{x+4} + 2) = x",
+      "\\lim_{x\\to 0}\\frac{\\sqrt{x+4} - 2}{x} = \\frac{1}{4}"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "rootdiff",
+      "at": 0,
+      "limit": 0.25,
+      "prompt": "Zoom in at 0: the outputs settle on 1/4, the value the conjugate trick predicts."
+    },
+    "deeper": [],
+    "related": [],
+    "foundation": true,
+    "claims": [
+      {
+        "sympy": "expand((sqrt(x + 4) - 2)*(sqrt(x + 4) + 2))",
+        "equals": "x"
+      },
+      {
+        "sympy": "limit((sqrt(x + 4) - 2)/x, x, 0)",
+        "equals": "1/4"
+      }
+    ]
+  },
+  {
+    "id": "squeeze-theorem",
+    "title": "The squeeze theorem",
+    "body": "If $g(x) \\le f(x) \\le h(x)$ near $a$, and both $g$ and $h$ approach the same [[limit]] $L$, then $f$ is trapped and must approach $L$ too.\n\nTake $x^2 \\sin(1/x)$ at 0. You can't use \"the limit of a product is the product of the limits\": $\\sin(1/x)$ swings between $-1$ and $1$ faster and faster and has no limit. But those swings are bounded, so $-x^2 \\le x^2\\sin(1/x) \\le x^2$. Both bounds go to 0, so the function goes to 0. The bounds have to meet: $-1 \\le \\sin(1/x) \\le 1$ alone squeezes nothing.",
+    "math": [
+      "-x^2 \\le x^2\\sin\\frac{1}{x} \\le x^2",
+      "\\lim_{x\\to 0} x^2\\sin\\frac{1}{x} = 0"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "x2sin",
+      "at": 0,
+      "limit": 0,
+      "bounds": [
+        "square",
+        "negsquare"
+      ],
+      "prompt": "Zoom in: the wiggles never escape the two parabolas, and the parabolas pinch to 0."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(x**2*sin(1/x), x, 0)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "limit-at-infinity",
+    "title": "Limits at infinity",
+    "body": "A [[limit]] can also describe where a function settles as $x$ grows without bound. A print shop pays 5000 dollars for setup, then 3 dollars per poster. The average cost per poster is $\\frac{5000 + 3n}{n} = \\frac{5000}{n} + 3$. As $n$ grows, $\\frac{5000}{n}$ shrinks to nothing and the average cost approaches 3 dollars. The line $y = 3$ is a horizontal asymptote.\n\nFor a fraction of polynomials, divide the top and bottom by the highest power in the bottom. Only the leading terms survive. Equal degrees give the ratio of the leading coefficients, a smaller top gives 0, and a bigger top means no finite limit. A [[vertical-asymptote|vertical asymptote]] is the sideways cousin: the output blows up instead of the input.",
+    "math": [
+      "\\lim_{n\\to\\infty}\\frac{5000 + 3n}{n} = 3",
+      "\\lim_{x\\to\\infty}\\frac{2x^2 + 1}{5x^2 - x} = \\frac{2}{5}"
+    ],
+    "widget": {
+      "type": "far-out",
+      "mode": "infinity",
+      "f": "avgcost",
+      "asymptote": 3,
+      "prompt": "Push n further out: the average cost flattens toward 3 dollars."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [
+      "vertical-asymptote"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((5000 + 3*x)/x, x, oo)",
+        "equals": "3"
+      },
+      {
+        "sympy": "limit((2*x**2 + 1)/(5*x**2 - x), x, oo)",
+        "equals": "2/5"
+      }
+    ]
+  },
+  {
+    "id": "vertical-asymptote",
+    "title": "Vertical asymptotes: when the output blows up",
+    "body": "At $x = 2$, $\\frac{x + 1}{x - 2}$ has top 3 and bottom 0. A nonzero number divided by something tiny is huge, so the outputs blow up. Read the sign from each [[one-sided-limit|side]]. Just right of 2, the bottom is a tiny positive number, so the output heads to $+\\infty$. Just left, the bottom is tiny and negative, so the output heads to $-\\infty$.\n\nCompare 0/0. If the top is also 0 at that point, the factor may cancel and leave a hole instead of an asymptote: $\\frac{(x - 1)(x + 1)}{x - 1}$ has no asymptote at 1. Writing the [[limit]] as $\\infty$ is shorthand for \"grows without bound\", not a number it reaches. See also [[limit-at-infinity|limits at infinity]].",
+    "math": [
+      "\\lim_{x\\to 2^+}\\frac{x + 1}{x - 2} = +\\infty, \\qquad \\lim_{x\\to 2^-}\\frac{x + 1}{x - 2} = -\\infty"
+    ],
+    "widget": {
+      "type": "far-out",
+      "mode": "asymptote",
+      "f": "asym",
+      "at": 2,
+      "prompt": "Close in on x = 2 from both sides: one side shoots up, the other plunges."
+    },
+    "deeper": [
+      "limit",
+      "one-sided-limit"
+    ],
+    "related": [
+      "limit-at-infinity"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '+')",
+        "equals": "oo"
+      },
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '-')",
+        "equals": "-oo"
+      }
+    ]
+  },
+  {
+    "id": "continuity",
+    "title": "Continuous means the limit equals the value",
+    "body": "A function is continuous at $a$ when three things hold: $f(a)$ is defined, the [[limit]] as $x \\to a$ exists, and the two are equal. Informally, you can draw the graph through $a$ without lifting your pen.\n\nIt fails in three ways:\n- a **hole**, where the limit exists but the value is missing or somewhere else;\n- a **jump**, where the [[one-sided-limit|one-sided limits]] disagree;\n- a **blow-up**, where there's a vertical asymptote.\n\nPolynomials, $\\sin$, $\\cos$ and $e^x$ are continuous everywhere, which is why you can find their limits just by substituting. Continuity is what makes the [[intermediate-value-theorem|Intermediate Value Theorem]] work.",
+    "math": [
+      "f \\text{ continuous at } a \\iff \\lim_{x\\to a} f(x) = f(a)"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "jump",
+      "at": 0,
+      "left": 1,
+      "right": 3,
+      "prompt": "A jump: the sides head to different values, so no single value can make this continuous."
+    },
+    "deeper": [
+      "limit",
+      "one-sided-limit"
+    ],
+    "related": [
+      "intermediate-value-theorem"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((x**2 - 1)/(x - 1), x, 1)",
+        "equals": "2"
+      },
+      {
+        "sympy": "limit(x**3 - 2*x, x, 2)",
+        "equals": "4"
+      }
+    ]
+  },
+  {
+    "id": "intermediate-value-theorem",
+    "title": "The Intermediate Value Theorem",
+    "body": "If $f$ is [[continuity|continuous]] on $[a, b]$, it takes every value between $f(a)$ and $f(b)$ somewhere in between. An unbroken graph can't get from below a line to above it without crossing.\n\nTake $f(x) = x^3 + x - 1$. $f(0) = -1$ and $f(1) = 1$, so somewhere in $(0, 1)$ it equals 0. The theorem says a root exists, not where it is or how many there are. The converse fails: $(x - 0.5)^2 - 0.01$ is positive at both 0 and 1 but still has two roots in between. And continuity matters: $\\frac{1}{x}$ goes from $-1$ to $1$ on $[-1, 1]$ without ever being 0, because it breaks at 0.",
+    "math": [
+      "f(0) = -1 < 0 < 1 = f(1) \\implies \\text{some } c \\in (0, 1) \\text{ has } f(c) = 0"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "ivtcubic",
+      "x0": 0.5,
+      "span": 1,
+      "prompt": "Drag from x = 0 to x = 1: the output goes from −1 to 1, so it has to pass through 0."
+    },
+    "deeper": [
+      "continuity"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 0)",
+        "equals": "-1"
+      },
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 1)",
+        "equals": "1"
+      },
+      {
+        "sympy": "((x - Rational(1, 2))**2 - Rational(1, 100)).subs(x, 0)",
+        "equals": "6/25"
+      },
+      {
+        "sympy": "solve((x - Rational(1, 2))**2 - Rational(1, 100), x)",
+        "equals": "[Rational(2, 5), Rational(3, 5)]"
+      }
+    ]
+  },
+  {
+    "id": "epsilon-delta",
+    "title": "ε and δ: what \"approaches\" means exactly",
+    "body": "$\\lim_{x\\to 1}(2x + 1) = 3$ is a promise: name any tolerance $\\varepsilon > 0$, and I can find a distance $\\delta > 0$ so that every $x$ within $\\delta$ of 1 gives an output within $\\varepsilon$ of 3.\n\nFind $\\delta$ by working backwards. $|(2x + 1) - 3| = |2x - 2| = 2|x - 1|$. That's less than $\\varepsilon$ exactly when $|x - 1| < \\frac{\\varepsilon}{2}$. So $\\delta = \\frac{\\varepsilon}{2}$ works for every $\\varepsilon$: for $\\varepsilon = 0.1$, any $x$ within 0.05 of 1 lands within 0.1 of 3. This is the precise meaning behind every [[limit]].",
+    "math": [
+      "|(2x + 1) - 3| = 2|x - 1| < \\varepsilon \\iff |x - 1| < \\frac{\\varepsilon}{2}"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "line21",
+      "at": 1,
+      "limit": 3,
+      "epsilon": true,
+      "prompt": "Shrink ε: the δ-window (dashed lines) shrinks with it, always half as wide."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(((2*x + 1) - 3) - 2*(x - 1))",
         "equals": "0"
       }
     ]

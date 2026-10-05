@@ -64,5 +64,23 @@ check("|x| left-hand slope at 0 is −1", near(M.secantSlope(M.fn("abs"), 0, -1e
 check("√x slope at 4 → 1/4", near(M.secantSlope(M.fn("sqrt"), 4, 1e-6), 0.25, 1e-5));
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
+// Unit 140.2: limits and continuity
+{
+  const far = M.farValues(M.fn("avgcost"), "infinity", 0, 1);
+  check("far-out: average cost settles toward 3 as n grows", near(far[far.length - 1][1], 3, 0.01), JSON.stringify(far));
+  const [[xl, yl], [xr, yr]] = M.farValues(M.fn("asym"), "asymptote", 2, 1);
+  check("far-out: (x + 1)/(x − 2) blows up with opposite signs either side of 2", xl < 2 && xr > 2 && yl < -1000 && yr > 1000, `${yl}, ${yr}`);
+  check("far-out: asymptote samples move toward the line as t grows",
+    Math.abs(M.farValues(M.fn("asym"), "asymptote", 2, 0.8)[1][0] - 2) < Math.abs(M.farValues(M.fn("asym"), "asymptote", 2, 0.2)[1][0] - 2));
+  let squeezed = true;
+  for (let i = 1; i <= 200; i++) { const x = (i - 100.5) / 400; const y = M.fn("x2sin")(x); if (y > x * x + 1e-12 || y < -x * x - 1e-12) squeezed = false; }
+  check("x² sin(1/x) stays between −x² and x²", squeezed);
+  check("negsquare is −x²", M.fn("negsquare")(3) === -9);
+  check("parking: 4 dollars per started hour (8 just before 2 h, 12 just after)", M.fn("parking")(1.999) === 8 && M.fn("parking")(2.001) === 12);
+  check("jump: 1 on the left of 0, 3 on the right", M.fn("jump")(-0.001) === 1 && M.fn("jump")(0.001) === 3);
+  check("line21(1) = 3", M.fn("line21")(1) === 3);
+  check("ivtcubic changes sign on [0, 1]", M.fn("ivtcubic")(0) < 0 && M.fn("ivtcubic")(1) > 0);
+}
+
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");
 if (failures) throw new Error(`${failures} failed`);
