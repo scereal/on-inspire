@@ -86,12 +86,80 @@ def main():
             page.on("pageerror", lambda e: errors.append(str(e)))
             map_tests(page, base, c, name)
             entrance_tests(page, base, c, name)
+            learn_tests(page, base, c, name)
             page.close()
+        no_speech_test(browser, base, c)
         browser.close()
     for line in c.failures + [f"page error: {e}" for e in errors]:
         print("FAIL", line)
     print("ok: calculus explorer" if not (c.failures or errors) else f"FAILED: {len(c.failures) + len(errors)} problem(s)")
     sys.exit(1 if c.failures or errors else 0)
+
+
+
+# --- Learn player (Task 2), with a fixture walkthrough -----------------------------------
+import json as _json
+
+FIXTURE_WALK = [{
+    "id": "learn-fixture", "subtopic": "140.3.1.rate", "title": "Fixture walkthrough",
+    "problem": "A ball falls. How fast at $t = 2$?",
+    "steps": [
+        {"ask": {"prompt": "First question?", "format": "choice", "answer": "Right",
+                 "options": [{"label": "Right", "correct": True}, {"label": "Wrong", "misconception": "m", "feedback": "Not that one."}]},
+         "narration": "Because of the [[limit]].", "builds_on": ["140.2.1"]},
+        {"ask": {"prompt": "Type 4", "format": "number", "answer": 4, "tolerance": 0.01}, "narration": "Four it is."},
+    ],
+    "summary": "Done.", "practice": {"framework": "ibp", "level": 1},
+}]
+
+
+def learn_tests(page, base, c, label):
+    page.route("**/learn/walkthroughs.js", lambda r: r.fulfill(
+        content_type="text/javascript", body="window.WALKTHROUGHS = " + _json.dumps(FIXTURE_WALK) + ";"))
+    page.goto(f"{base}/calculus/learn/?id=learn-fixture")
+    page.wait_for_selector(".learn-problem")
+    c.ok("ball falls" in page.inner_text(".learn-problem"), f"{label}: learn shows the problem")
+    c.ok(page.locator(".learn-head a[data-target], .learn-head .chip").count() >= 1, f"{label}: learn shows Builds-on chips")
+    c.ok(page.is_visible(".read-aloud"), f"{label}: Read aloud shown when speech exists")
+    c.ok(page.is_hidden(".learn-narration"), f"{label}: narration hidden before answering")
+    page.click(".learn-step .choices button:text-is('Wrong')")
+    c.ok("Not that one" in page.inner_text(".learn-step .feedback"), f"{label}: wrong answer gets its feedback")
+    page.click(".learn-step .choices button:text-is('Right')")
+    c.ok(page.is_visible(".learn-narration"), f"{label}: narration revealed after the right answer")
+    page.click(".learn-narration .why-term")
+    c.ok(page.is_visible(".why-panel"), f"{label}: a term opens the Why? panel")
+    page.click(".why-close")
+    page.click("button:text-is('Next step')")
+    page.fill(".learn-step input[type=number]", "5")
+    page.click(".learn-step button:text-is('Check')")
+    c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: wrong number gets feedback")
+    page.fill(".learn-step input[type=number]", "4")
+    page.click(".learn-step button:text-is('Check')")
+    page.click("button:text-is('Finish')")
+    href = page.get_attribute("a.practice-this", "href") or ""
+    c.ok("f=ibp" in href and "level=1" in href, f"{label}: finish links to practice ({href})")
+    page.unroute("**/learn/walkthroughs.js")
+    page.goto(f"{base}/calculus/learn/?id=learn-ghost")
+    page.wait_for_selector("text=isn't available yet")
+    c.ok(page.locator("a[href='../math-140/']").count() >= 1, f"{label}: unknown walkthrough links back to the map")
+    width = page.evaluate("document.documentElement.scrollWidth")
+    c.ok(width <= page.viewport_size["width"], f"{label}: learn page has no sideways scroll")
+
+
+def no_speech_test(browser, base, c):
+    ctx = browser.new_context()
+    ctx.add_init_script("Object.defineProperty(window, 'speechSynthesis', { get() { throw new Error('no speech'); } });")
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.route("**/learn/walkthroughs.js", lambda r: r.fulfill(
+        content_type="text/javascript", body="window.WALKTHROUGHS = " + _json.dumps(FIXTURE_WALK) + ";"))
+    page.goto(f"{base}/calculus/learn/?id=learn-fixture")
+    page.wait_for_selector(".learn-problem")
+    c.ok(page.locator(".read-aloud:visible").count() == 0, "no-speech: Read aloud is hidden")
+    page.click(".learn-step .choices button:text-is('Right')")
+    c.ok(page.is_visible(".learn-narration") and not errors, f"no-speech: walkthrough still works ({errors})")
+    ctx.close()
 
 
 if __name__ == "__main__":

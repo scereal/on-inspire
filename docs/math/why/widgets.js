@@ -14,6 +14,9 @@
     sinh_over_h: (h) => Math.sin(h) / h,
     cosh_minus_1_over_h: (h) => (Math.cos(h) - 1) / h,
     exph_minus_1_over_h: (h) => (Math.exp(h) - 1) / h,
+    abs: Math.abs,
+    sqrt: (x) => (x >= 0 ? Math.sqrt(x) : NaN),
+    recip: (x) => 1 / x,
   };
 
   const WidgetMath = {
@@ -172,8 +175,10 @@
     const P = plotArea(ui.svg, xs[0], xs[1], ys[0] - pad, ys[1] + pad);
     P.curve(f);
     const line = el("line", { class: "w-secant" }, ui.svg);
+    const lineL = cfg.sides === "both" ? el("line", { class: "w-secant left" }, ui.svg) : null;
     const p0 = el("circle", { r: 5, class: "w-point" }, ui.svg);
     const p1 = el("circle", { r: 5, class: "w-point alt" }, ui.svg);
+    const pL = cfg.sides === "both" ? el("circle", { r: 5, class: "w-point alt" }, ui.svg) : null;
     let state;
     const draw = () => {
       if (cfg.mode === "trace") {
@@ -191,6 +196,14 @@
       line.setAttribute("x2", P.X(x0 + ext)); line.setAttribute("y2", P.Y(f(x0) + m * ext));
       p0.setAttribute("cx", P.X(x0)); p0.setAttribute("cy", P.Y(f(x0)));
       p1.setAttribute("cx", P.X(x0 + h)); p1.setAttribute("cy", P.Y(f(x0 + h)));
+      if (cfg.sides === "both") {
+        const mL = WidgetMath.secantSlope(f, x0, -h);
+        lineL.setAttribute("x1", P.X(x0 - ext)); lineL.setAttribute("y1", P.Y(f(x0) - mL * ext));
+        lineL.setAttribute("x2", P.X(x0 + ext)); lineL.setAttribute("y2", P.Y(f(x0) + mL * ext));
+        pL.setAttribute("cx", P.X(x0 - h)); pL.setAttribute("cy", P.Y(f(x0 - h)));
+        ui.readout.textContent = `h = ${h < 0.001 ? h.toExponential(1) : fmt(h, 3)}   slope from the left = ${fmt(mL, 4)}, from the right = ${fmt(m, 4)}${Math.abs(m - mL) > 0.01 ? " (they never agree: no derivative here)" : ""}`;
+        return;
+      }
       ui.readout.textContent = `h = ${h < 0.001 ? h.toExponential(1) : fmt(h, 3)}   slope of secant = ${fmt(m, 5)}`;
     };
     const init = () => { state = cfg.mode === "trace" ? { x: x0 } : { s: 0 }; input.value = cfg.mode === "trace" ? x0 : 0; draw(); };

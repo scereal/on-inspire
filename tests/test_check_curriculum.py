@@ -66,5 +66,53 @@ class CheckCurriculumTest(unittest.TestCase):
         self.assertReports(self.broken(lambda c: c.update(official="Limits and stuff.")), "official description")
 
 
+WALK = {
+    "id": "learn-rate", "subtopic": "140.3.1.rate", "title": "t", "problem": "p",
+    "steps": [{"ask": {"prompt": "q", "format": "choice", "answer": "A",
+                       "options": [{"label": "A", "correct": True}, {"label": "B", "misconception": "m", "feedback": "f"}]},
+               "narration": "See [[limit]].", "builds_on": ["140.2.1"]}],
+    "summary": "s", "claims": [{"sympy": "diff(x**2, x)", "equals": "2*x"}],
+}
+KNOWN = {"140.2.1", "140.3.1.rate"}
+
+
+class CheckWalkthroughsTest(unittest.TestCase):
+    def broken(self, mutate):
+        w = copy.deepcopy(WALK)
+        mutate(w)
+        return cc.walkthrough_problems([w], CONCEPTS, KNOWN)
+
+    def assertReports(self, found, fragment):
+        self.assertTrue(any(fragment in p for p in found), f"expected '{fragment}' in {found}")
+
+    def ask(self, w):
+        return w["steps"][0]["ask"]
+
+    def test_valid_passes(self):
+        self.assertEqual(cc.walkthrough_problems([WALK], CONCEPTS, KNOWN), [])
+        self.assertEqual(cc.verify_walkthrough_claims([WALK]), [])
+
+    def test_unknown_term(self):
+        self.assertReports(self.broken(lambda w: w["steps"][0].update(narration="See [[ghost]].")), "unknown concept 'ghost'")
+
+    def test_choice_needs_exactly_one_correct(self):
+        self.assertReports(self.broken(lambda w: self.ask(w)["options"][1].update(correct=True)), "2 correct options")
+        self.assertReports(self.broken(lambda w: self.ask(w)["options"][0].update(correct=False)), "0 correct options")
+
+    def test_wrong_option_needs_feedback(self):
+        self.assertReports(self.broken(lambda w: self.ask(w)["options"][1].pop("feedback")), "no feedback")
+
+    def test_unknown_step_builds_on(self):
+        self.assertReports(self.broken(lambda w: w["steps"][0].update(builds_on=["140.9.9"])), "unknown target '140.9.9'")
+
+    def test_unknown_subtopic(self):
+        self.assertReports(self.broken(lambda w: w.update(subtopic="140.9.9.x")), "unknown subtopic '140.9.9.x'")
+
+    def test_false_claim(self):
+        w = copy.deepcopy(WALK)
+        w["claims"] = [{"sympy": "diff(x**2, x)", "equals": "3*x"}]
+        self.assertTrue(cc.verify_walkthrough_claims([w]))
+
+
 if __name__ == "__main__":
     unittest.main()

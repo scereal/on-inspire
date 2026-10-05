@@ -489,7 +489,10 @@ window.CONCEPTS = [
       "function"
     ],
     "related": [
-      "integral-as-area"
+      "integral-as-area",
+      "average-vs-instantaneous-rate",
+      "differentiable-implies-continuous",
+      "sum-and-constant-rules"
     ],
     "foundation": false,
     "claims": [
@@ -732,7 +735,8 @@ window.CONCEPTS = [
       "limit"
     ],
     "related": [
-      "chain-rule"
+      "chain-rule",
+      "quotient-rule"
     ],
     "foundation": false,
     "claims": [
@@ -788,7 +792,8 @@ window.CONCEPTS = [
       "derivative"
     ],
     "related": [
-      "polynomial-as-u"
+      "polynomial-as-u",
+      "negative-and-fractional-powers"
     ],
     "foundation": false,
     "claims": [
@@ -1588,5 +1593,160 @@ window.CONCEPTS = [
     ],
     "related": [],
     "foundation": false
+  },
+  {
+    "id": "average-vs-instantaneous-rate",
+    "title": "Average rate versus instantaneous rate",
+    "body": "Average speed is easy: distance covered divided by time taken. A ball that falls $s(t) = 4.9t^2$ metres covers $19.6 - 4.9 = 14.7$ m between $t = 1$ and $t = 2$, an average of 14.7 m/s. Graphically, that's the slope of the line through two points on the [[function]]'s graph.\n\nBut the ball's speed changes every instant. To find its speed at exactly $t = 2$, shrink the time window: $[2, 2.1]$, $[2, 2.01]$, $[2, 2.001]$. The averages settle toward 19.6 m/s. That settling value is a [[limit]], and it's what we mean by the instantaneous rate, the [[derivative|derivative]] at $t = 2$.",
+    "math": [
+      "\\text{average rate} = \\frac{s(b) - s(a)}{b - a}",
+      "\\lim_{h\\to 0}\\frac{s(2+h) - s(2)}{h} = 19.6"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "square",
+      "x0": 2,
+      "prompt": "Shrink the window. The average slope over [2, 2 + h] settles on the slope at exactly 2."
+    },
+    "deeper": [
+      "function",
+      "limit"
+    ],
+    "related": [
+      "derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(4.9*2**2 - 4.9*1**2)/(2 - 1)",
+        "approx": 14.7,
+        "tol": 1e-09
+      },
+      {
+        "sympy": "limit((Rational(49, 10)*(2 + h)**2 - Rational(49, 10)*4)/h, h, 0)",
+        "equals": "Rational(98, 5)"
+      }
+    ]
+  },
+  {
+    "id": "differentiable-implies-continuous",
+    "title": "Differentiable means continuous (but not the other way round)",
+    "body": "If $f$ has a [[derivative]] at $a$, it can't jump there. Write the gap as a slope times a width: $f(a+h) - f(a) = \\frac{f(a+h) - f(a)}{h}\\cdot h$. As $h \\to 0$ the slope part goes to $f'(a)$, a finite number, and the width goes to 0, so the gap goes to $f'(a)\\cdot 0 = 0$. By the definition of a [[limit]], that's exactly what continuous means.\n\nThe reverse fails. $|x|$ is continuous at 0 (no break), but the slope from the right is $+1$ and from the left is $-1$. The secant slopes never settle on one value, so there's no derivative: the graph has a corner. Continuity is necessary for a derivative, but not enough.",
+    "math": [
+      "f(a+h) - f(a) = \\frac{f(a+h)-f(a)}{h}\\cdot h \\;\\to\\; f'(a)\\cdot 0 = 0",
+      "\\lim_{h\\to 0^+}\\frac{|h|}{h} = 1,\\quad \\lim_{h\\to 0^-}\\frac{|h|}{h} = -1"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "abs",
+      "x0": 0,
+      "span": 2,
+      "sides": "both",
+      "prompt": "Shrink h. The left and right slopes stay at −1 and +1: they never agree."
+    },
+    "deeper": [
+      "derivative",
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(Abs(h)/h, h, 0, '+')",
+        "equals": "1"
+      },
+      {
+        "sympy": "limit(Abs(h)/h, h, 0, '-')",
+        "equals": "-1"
+      }
+    ]
+  },
+  {
+    "id": "sum-and-constant-rules",
+    "title": "Why derivatives split over sums and constants",
+    "body": "Take $f(x) = 3x^2 + 5x$. Its difference quotient is $\\frac{f(x+h) - f(x)}{h} = 3\\cdot\\frac{(x+h)^2 - x^2}{h} + 5\\cdot\\frac{(x+h) - x}{h}$: the sum and the constants just ride along. Now take the [[limit]] of each piece separately, which limit laws allow, and you get $3\\cdot 2x + 5\\cdot 1 = 6x + 5$.\n\nSo the [[derivative]] of a sum is the sum of the derivatives, and a constant multiple stays a constant multiple. Geometrically, stacking two graphs adds their slopes, and stretching a graph vertically by 3 makes every slope 3 times steeper.",
+    "math": [
+      "(f + g)' = f' + g'",
+      "(c\\,f)' = c\\,f'",
+      "\\frac{d}{dx}(3x^2 + 5x) = 6x + 5"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "square",
+      "x0": 1,
+      "prompt": "Shrink h on x². Each term of a sum gets this treatment separately."
+    },
+    "deeper": [
+      "derivative",
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(3*x**2 + 5*x, x)",
+        "equals": "6*x + 5"
+      },
+      {
+        "sympy": "limit((3*(x + h)**2 + 5*(x + h) - 3*x**2 - 5*x)/h, h, 0)",
+        "equals": "6*x + 5"
+      }
+    ]
+  },
+  {
+    "id": "negative-and-fractional-powers",
+    "title": "The power rule for roots and reciprocals",
+    "body": "Rewrite first: $\\sqrt{x} = x^{1/2}$ and $\\frac{1}{x} = x^{-1}$. The [[power-rule|power rule]] $n x^{n-1}$ then gives $\\frac{1}{2}x^{-1/2} = \\frac{1}{2\\sqrt{x}}$ and $-x^{-2} = -\\frac{1}{x^2}$.\n\nWhy does a rule proved for whole-number powers work here? For $\\sqrt{x}$, here's a direct check. $\\sqrt{x}\\cdot\\sqrt{x} = x$, so differentiate both sides with the product rule: $2\\sqrt{x}\\,(\\sqrt{x})' = 1$, which gives $(\\sqrt{x})' = \\frac{1}{2\\sqrt{x}}$, exactly what the power rule predicts. For $\\frac{1}{x}$, use $x\\cdot\\frac{1}{x} = 1$ the same way. The general proof for every real power comes in unit 140.4, with logarithms.",
+    "math": [
+      "\\frac{d}{dx}\\sqrt{x} = \\frac{1}{2\\sqrt{x}}",
+      "\\frac{d}{dx}\\frac{1}{x} = -\\frac{1}{x^2}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "sqrt",
+      "x0": 4,
+      "span": 3.5,
+      "prompt": "Shrink h at x = 4. The slope of √x heads to 1/(2·2) = 0.25."
+    },
+    "deeper": [
+      "power-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sqrt(x), x) - 1/(2*sqrt(x))",
+        "equals": "0"
+      },
+      {
+        "sympy": "diff(1/x, x)",
+        "equals": "-1/x**2"
+      }
+    ]
+  },
+  {
+    "id": "quotient-rule",
+    "title": "The quotient rule, from rules you already know",
+    "body": "Don't memorize it; build it. Write $\\frac{f}{g} = f\\cdot g^{-1}$. The [[product-rule|product rule]] gives $f'\\,g^{-1} + f\\,(g^{-1})'$. For the second part, the [[chain-rule|chain rule]] with the [[power-rule|power rule]] gives $(g^{-1})' = -g^{-2}\\,g'$.\n\nPut it together over a common denominator: $\\frac{f'g - fg'}{g^2}$. The order on top matters (it's a subtraction), and the bottom is squared. Those are the two most common slips, and both come straight out of this derivation.",
+    "math": [
+      "\\left(\\frac{f}{g}\\right)' = \\frac{f'g - fg'}{g^2}"
+    ],
+    "widget": {
+      "type": "product-rectangle",
+      "prompt": "The product rule as area. The quotient rule is the product rule applied to f · (1/g)."
+    },
+    "deeper": [
+      "product-rule",
+      "chain-rule",
+      "power-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(diff((x**2 + 1)/(x - 1), x) - ((2*x)*(x - 1) - (x**2 + 1)*1)/(x - 1)**2)",
+        "equals": "0"
+      }
+    ]
   }
 ];

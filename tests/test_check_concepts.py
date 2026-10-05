@@ -105,6 +105,11 @@ class CheckConceptsTest(unittest.TestCase):
         with mock.patch.object(cc, "PAGES", pages), mock.patch.object(cc, "load", lambda: concepts):
             self.assertEqual(cc.main(), 1)
 
+    def test_concept_reached_only_from_a_walkthrough_is_not_an_orphan(self):
+        concepts = VALID + [node("walk-only", deeper=["base"])]
+        self.assertReports(cc.problems(concepts, ATTACH), "orphan 'walk-only'")
+        self.assertFalse(any("walk-only" in p for p in cc.problems(concepts, ATTACH, roots={"walk-only"})))
+
     def test_unattached_entry(self):
         self.assertReports(self.broken(lambda c: c.append(node("loose", deeper=["base"], entry=True))), "entry 'loose' isn't attached to any page")
 

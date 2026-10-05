@@ -118,3 +118,4 @@
 .w-big { fill: var(--paper); font: 500 20px Figtree, system-ui, sans-serif; }
 .w-gapline { stroke: rgba(196, 92, 74, 0.45); stroke-width: 1; }
 .w-curve.dashed { stroke-dasharray: 7 5; }
+.w-secant.left { stroke: var(--aurora); }

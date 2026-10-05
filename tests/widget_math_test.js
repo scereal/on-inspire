@@ -57,6 +57,10 @@ check("even harmonics: the two halves cancel", near(M.halfContributions(2).total
 check("odd harmonics: the two halves add", near(M.halfContributions(3).total, 4 / 3, 1e-4));  // midpoint rule, 2000 strips
 check("partial sum at π/2 approaches 1", near(M.partialSum(200, Math.PI / 2), 1, 0.005));
 check("Gibbs peak stays near 1.179", near(M.peakOf(60), 1.179, 0.005));
+// MATH 140
+check("|x| right-hand slope at 0 is +1", near(M.secantSlope(M.fn("abs"), 0, 1e-4), 1, 1e-9));
+check("|x| left-hand slope at 0 is −1", near(M.secantSlope(M.fn("abs"), 0, -1e-4), -1, 1e-9));
+check("√x slope at 4 → 1/4", near(M.secantSlope(M.fn("sqrt"), 4, 1e-6), 0.25, 1e-5));
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");

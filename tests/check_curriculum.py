@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 CURRICULUM = ROOT / "docs/calculus/curriculum.js"
 WALKTHROUGHS = ROOT / "docs/calculus/learn/walkthroughs.js"
 BANK_INDEX = ROOT / "docs/math/bank/index.json"
@@ -87,17 +88,73 @@ def problems(cur, walkthrough_ids, bank_index, concept_ids):
     return found
 
 
+TERM = re.compile(r"\[\[([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
+
+
+def walkthrough_terms(walks):
+    """Every concept id a walkthrough links to: these are entry points into the "Why?" network."""
+    return {t for w in walks for step in w.get("steps", []) for t in TERM.findall(step.get("narration", ""))}
+
+
+def walkthrough_problems(walks, concept_ids, known_ids):
+    found, seen = [], set()
+    for w in walks:
+        wid = w.get("id", "?")
+        if wid in seen:
+            found.append(f"duplicate walkthrough '{wid}'")
+        seen.add(wid)
+        if w.get("subtopic") not in known_ids:
+            found.append(f"{wid}: unknown subtopic '{w.get('subtopic')}'")
+        if not w.get("steps"):
+            found.append(f"{wid}: has no steps")
+        for i, step in enumerate(w.get("steps", []), 1):
+            where = f"{wid} step {i}"
+            if not step.get("narration"):
+                found.append(f"{where}: has no narration")
+            for t in TERM.findall(step.get("narration", "")):
+                if t not in concept_ids:
+                    found.append(f"{where}: unknown concept '{t}'")
+            for t in step.get("builds_on", []):
+                ok = t.split(":", 1)[1] in concept_ids if t.startswith("foundation:") else t in known_ids
+                if not ok:
+                    found.append(f"{where}: unknown target '{t}'")
+            ask = step.get("ask")
+            if not ask:
+                found.append(f"{where}: must ask a question before explaining")
+                continue
+            if ask.get("format") == "choice":
+                options = ask.get("options", [])
+                n = sum(bool(o.get("correct")) for o in options)
+                if n != 1:
+                    found.append(f"{where}: {n} correct options")
+                for o in options:
+                    if not o.get("correct") and not o.get("feedback"):
+                        found.append(f"{where}: wrong option '{o.get('label')}' has no feedback")
+            elif ask.get("format") == "number" and not ask.get("tolerance", 0) > 0:
+                found.append(f"{where}: number step needs a tolerance")
+    return found
+
+
+def verify_walkthrough_claims(walks):
+    from tests import check_concepts
+    return check_concepts.verify_claims(walks)
+
+
 def main():
     cur = load()
     walks = {w["id"] for w in load_js(WALKTHROUGHS)} if WALKTHROUGHS.exists() else set()
     bank = json.loads(BANK_INDEX.read_text())
     concepts = {c["id"] for c in load_js(CONCEPTS)}
-    found = problems(cur, walks, bank, concepts)
+    walk_list = load_js(WALKTHROUGHS) if WALKTHROUGHS.exists() else []
+    known = {u["id"] for u in cur["units"]} | {o["id"] for u in cur["units"] for o in u["outcomes"]} | \
+            {s["id"] for u in cur["units"] for o in u["outcomes"] for s in o.get("subtopics", [])}
+    found = problems(cur, walks, bank, concepts) + walkthrough_problems(walk_list, concepts, known) + \
+            verify_walkthrough_claims(walk_list)
     for line in found:
         print("FAIL", line)
     n_out = sum(len(u["outcomes"]) for u in cur["units"])
     n_sub = sum(len(o.get("subtopics", [])) for u in cur["units"] for o in u["outcomes"])
-    print(f"curriculum: {len(cur['units'])} units, {n_out} outcomes, {n_sub} subtopics, {len(found)} problem(s)")
+    print(f"curriculum: {len(cur['units'])} units, {n_out} outcomes, {n_sub} subtopics, {len(walk_list)} walkthroughs, {len(found)} problem(s)")
     return 0 if not found else 1
 
 
