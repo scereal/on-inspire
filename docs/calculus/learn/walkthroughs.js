@@ -70,9 +70,9 @@ window.WALKTHROUGHS = [
         ],
         "widget": {
           "type": "secant",
-          "f": "square",
+          "f": "fall",
           "x0": 2,
-          "prompt": "Shrink h: the secant's slope settles on the tangent's slope."
+          "prompt": "Shrink h: the secant's slope settles on the ball's speed at t = 2."
         },
         "builds_on": [
           "140.2.1"

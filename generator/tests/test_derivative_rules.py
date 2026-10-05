@@ -43,6 +43,12 @@ class DerivativeRulesTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertNotIn(dr.RULES["quotient"], [o.label for o in sol.steps[0].options])
 
+    def test_power_level_never_offers_product(self):
+        # 5x³ is literally a constant times a function, so the product rule is a valid (if slow) first step
+        ok, why, sol, _ = validate(FW, {"f": "5*x**3", "a": 1}, 2, None)
+        self.assertTrue(ok, why)
+        self.assertNotIn(dr.RULES["product"], [o.label for o in sol.steps[0].options])
+
     def test_dropped_inner_rejected_when_inner_derivative_is_1(self):
         ok, why, _, _ = validate(FW, {"f": "(x + 3)**4", "a": 1}, 5, None)
         self.assertFalse(ok)

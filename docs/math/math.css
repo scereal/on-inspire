@@ -119,3 +119,6 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 .practice-link { margin-top: 2.4rem; }
 .practice-link a { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 0.6rem 1rem; text-decoration: none; color: var(--paper); }
 .practice-link a:hover { border-color: var(--gold); }
+
+/* Author display rules (.row { display: flex }) would otherwise beat the hidden attribute. */
+[hidden] { display: none !important; }

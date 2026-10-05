@@ -109,7 +109,7 @@ FIXTURE_WALK = [{
     "steps": [
         {"ask": {"prompt": "First question?", "format": "choice", "answer": "Right",
                  "options": [{"label": "Right", "correct": True}, {"label": "Wrong", "misconception": "m", "feedback": "Not that one."}]},
-         "narration": "Because of the [[limit]].", "builds_on": ["140.2.1"]},
+         "narration": "Because of the [[limit]]: $\\frac{6h + h^2}{h} = 6 + h$.", "builds_on": ["140.2.1"]},
         {"ask": {"prompt": "Type 4", "format": "number", "answer": 4, "tolerance": 0.01}, "narration": "Four it is."},
     ],
     "summary": "Done.", "practice": {"framework": "ibp", "level": 1},
@@ -123,20 +123,26 @@ def learn_tests(page, base, c, label):
     page.wait_for_selector(".learn-problem")
     c.ok("ball falls" in page.inner_text(".learn-problem"), f"{label}: learn shows the problem")
     c.ok(page.locator(".learn-head a[data-target], .learn-head .chip").count() >= 1, f"{label}: learn shows Builds-on chips")
-    c.ok(page.is_visible(".read-aloud"), f"{label}: Read aloud shown when speech exists")
+    c.ok(page.is_hidden(".read-aloud"), f"{label}: Read aloud hidden before answering (it would speak the answer)")
     c.ok(page.is_hidden(".learn-narration"), f"{label}: narration hidden before answering")
     page.click(".learn-step .choices button:text-is('Wrong')")
     c.ok("Not that one" in page.inner_text(".learn-step .feedback"), f"{label}: wrong answer gets its feedback")
     page.click(".learn-step .choices button:text-is('Right')")
     c.ok(page.is_visible(".learn-narration"), f"{label}: narration revealed after the right answer")
+    c.ok(page.is_visible(".read-aloud"), f"{label}: Read aloud shown after answering when speech exists")
+    page.evaluate("() => { window.__spoken = []; speechSynthesis.speak = (u) => window.__spoken.push(u.text); }")
+    page.click(".read-aloud")
+    spoken = " ".join(page.evaluate("() => window.__spoken"))
+    # the fixture formula has one "=": a second one means KaTeX's hidden MathML copy was read too
+    c.ok(spoken and not re.search(r"[$\\^]", spoken) and spoken.count("=") == 1, f"{label}: Read aloud speaks plain text, each formula once ({spoken[:80]!r})")
     page.click(".learn-narration .why-term")
     c.ok(page.is_visible(".why-panel"), f"{label}: a term opens the Why? panel")
     page.click(".why-close")
     page.click("button:text-is('Next step')")
-    page.fill(".learn-step input[type=number]", "5")
+    page.fill(".learn-step #answer", "5")
     page.click(".learn-step button:text-is('Check')")
     c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: wrong number gets feedback")
-    page.fill(".learn-step input[type=number]", "4")
+    page.fill(".learn-step #answer", "4")
     page.click(".learn-step button:text-is('Check')")
     page.click("button:text-is('Finish')")
     href = page.get_attribute("a.practice-this", "href") or ""
@@ -175,6 +181,8 @@ def play_all_walkthroughs(page, base, c, label):
         page.wait_for_selector(".learn-problem")
         for i, step in enumerate(w["steps"]):
             ask = step["ask"]
+            gate = page.locator(".learn-step button").filter(has_text=re.compile(r"^(Next step|Finish)$"))
+            c.ok(not gate.is_visible(), f"{label}: {w['id']} step {i + 1} hides Next until answered")
             if ask["format"] == "choice":
                 buttons = page.locator(".learn-step .choices button")
                 wrong = next((j for j, o in enumerate(ask["options"]) if not o.get("correct")), None)
@@ -184,9 +192,13 @@ def play_all_walkthroughs(page, base, c, label):
                     c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: {w['id']} step {i + 1} wrong-answer feedback")
                 buttons.nth(right).click()
             else:
-                page.fill(".learn-step input[type=number]", str(ask["answer"] * 3 + 7))
+                field = page.locator(".learn-step #answer")
+                c.ok(field.get_attribute("inputmode") != "decimal", f"{label}: {w['id']} step {i + 1} keyboard can type a minus sign")
+                field.fill(str(ask["answer"] * 3 + 7))
                 page.click(".learn-step button:text-is('Check')")
-                page.fill(".learn-step input[type=number]", str(ask["answer"]))
+                c.ok("$" not in page.inner_text(".learn-step .feedback"), f"{label}: {w['id']} step {i + 1} hint renders its math")
+                # a phone keyboard may type the typographic minus
+                field.fill(str(ask["answer"]).replace("-", "\u2212"))
                 page.click(".learn-step button:text-is('Check')")
             ok = page.is_visible(".learn-narration")
             c.ok(ok, f"{label}: {w['id']} step {i + 1} reveals its narration")
@@ -194,7 +206,12 @@ def play_all_walkthroughs(page, base, c, label):
                 break
             if step.get("widget"):
                 c.ok(page.locator(".learn-step .why-widget svg").count() == 1, f"{label}: {w['id']} step {i + 1} widget renders")
+                if step["widget"]["type"] == "secant" and ask["format"] == "number":
+                    page.eval_on_selector(".learn-step .why-widget input[type=range]", "e => { e.value = 100; e.dispatchEvent(new Event('input')); }")
+                    m = re.search(r"slope of secant = (-?[\d.]+)", page.inner_text(".learn-step .why-widget"))
+                    c.ok(m and abs(float(m.group(1)) - ask["answer"]) < 0.01, f"{label}: {w['id']} step {i + 1} widget settles on the answer {ask['answer']} ({m and m.group(1)})")
             page.locator(".learn-step button").filter(has_text=re.compile(r"^(Next step|Finish)$")).click()
+        c.ok("**" not in page.inner_text(".learn-summary"), f"{label}: {w['id']} summary renders its bold text")
         if page.locator("a.practice-this").count():
             href = page.get_attribute("a.practice-this", "href")
             c.ok("f=" in href and "level=" in href, f"{label}: {w['id']} finish links to practice")
@@ -220,7 +237,7 @@ def practice_tests(page, base, c, label):
     c.ok("streak:140.3.2.chain" in keys, f"{label}: per-subtopic streak recorded ({[k for k in keys if 'streak' in k]})")
     page.goto(f"{base}/math/practice/?f=ibp&level=1")
     page.wait_for_selector("#stage[data-problem]")
-    c.ok(page.locator(".practice-meta").count() == 0 or page.inner_text(".practice-meta").strip() == "", f"{label}: practice outside the curriculum shows no tags")
+    c.ok(page.eval_on_selector(".practice-meta", "e => getComputedStyle(e).display") == "none", f"{label}: practice outside the curriculum shows no tags box")
 
 
 if __name__ == "__main__":

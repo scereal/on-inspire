@@ -24,7 +24,12 @@
   };
   const terms = (text) => text.replace(/\[\[([a-z0-9-]+)(?:\|([^\]]*))?\]\]/g, (m, cid, label) =>
     `<button type="button" class="why-term" data-concept="${cid}">${label || esc(concepts[cid] ? concepts[cid].title : cid)}</button>`);
-  const paragraphs = (text) => text.split(/\n\n+/).map((p) => `<p>${terms(p)}</p>`).join("");
+  const bold = (text) => text.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  const paragraphs = (text) => text.split(/\n\n+/).map((p) => `<p>${bold(terms(p))}</p>`).join("");
+  // Phone keyboards may type a typographic minus; type="text" keeps the minus key on iOS.
+  const readNumber = (raw) => { const t = raw.trim().replace(/[\u2212\u2013]/g, "-"); return t === "" ? NaN : Number(t); };
+  // Speak what a reader sees: drop KaTeX's hidden MathML copy so each formula is read once.
+  const speakable = (node) => { const c = node.cloneNode(true); c.querySelectorAll(".katex-mathml").forEach((m) => m.remove()); return c.textContent.replace(/\s+/g, " ").trim(); };
   const chip = (target) => {
     if (target.startsWith("foundation:")) {
       const cid = target.slice(11);
@@ -124,12 +129,12 @@
         input.append(b);
       }
     } else {
-      const field = h("input", { type: "number", step: "any", inputMode: "decimal", id: "answer" });
+      const field = h("input", { type: "text", inputMode: "text", autocomplete: "off", spellcheck: false, id: "answer" });
       const check = h("button", { type: "submit", className: "primary", textContent: "Check" });
       input = h("form", { className: "row" }, h("label", { htmlFor: "answer", className: "sr-only", textContent: "Your answer" }), field, check);
       input.addEventListener("submit", (e) => {
         e.preventDefault();
-        const v = parseFloat(field.value);
+        const v = readNumber(field.value);
         if (Number.isNaN(v)) { fb.className = "feedback bad"; fb.textContent = "Type a number first."; return; }
         if (Math.abs(v - ask.answer) <= (ask.tolerance || 0)) {
           field.disabled = check.disabled = true;
@@ -139,6 +144,7 @@
         } else {
           fb.className = "feedback bad";
           fb.textContent = ask.hint || `${v > ask.answer ? "Too big" : "Too small"}. Work through it one step at a time.`;
+          math(fb);
         }
       });
     }
@@ -146,11 +152,10 @@
     read.addEventListener("click", () => {
       try {
         synth.cancel();
-        synth.speak(new SpeechSynthesisUtterance(narration.innerText));
+        synth.speak(new SpeechSynthesisUtterance(speakable(narration)));
       } catch { read.hidden = true; }
     });
     box.replaceChildren(h("h2", { textContent: `Step ${i + 1} of ${walk.steps.length}` }), prompt, input, fb, read, narration, widget, tagRow, next);
-    read.hidden = !synth;
   };
 
   const finish = () => {

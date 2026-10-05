@@ -4,6 +4,7 @@
   // Pure math -----------------------------------------------------------------------
   const FUNCTIONS = {
     square: (x) => x * x,
+    fall: (t) => 4.9 * t * t,
     cube: (x) => x * x * x,
     sin: Math.sin,
     cos: Math.cos,

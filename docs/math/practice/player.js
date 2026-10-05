@@ -176,12 +176,14 @@
       return wrap;
     }
     if (step.format === "number") {
-      const input = h("input", { type: "number", inputMode: "decimal", step: "any", id: "answer", placeholder: step.unit || "" });
+      // type="text" keeps the minus key on iPhone keyboards (many answers here are negative)
+      const input = h("input", { type: "text", inputMode: "text", autocomplete: "off", spellcheck: false, id: "answer", placeholder: step.unit || "" });
       const check = h("button", { type: "submit", className: "primary", textContent: "Check" });
       const form = h("form", { className: "row" }, h("label", { htmlFor: "answer", className: "sr-only", textContent: "Your answer" }), input, h("span", { textContent: step.unit || "" }), check);
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        const v = parseFloat(input.value);
+        const raw = input.value.trim().replace(/[\u2212\u2013]/g, "-");
+        const v = raw === "" ? NaN : Number(raw);
         if (Number.isNaN(v)) return say(fb, "bad", "Type a number first.");
         if (Math.abs(v - step.answer) <= step.tolerance) { check.disabled = input.disabled = true; correct(fb, step); }
         else wrong(fb, `${v > step.answer ? "Too big" : "Too small"}. Work through it one step at a time and check each one.`);

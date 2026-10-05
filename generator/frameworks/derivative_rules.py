@@ -193,8 +193,8 @@ class DerivativeRules(Framework):
 
     def _rule_distractors(self, rule):
         # Never offer a distractor that is also a valid first step (e.g. "product" for a quotient f·g⁻¹)
-        # (power: not "quotient", since c·x⁻ⁿ displays as c/xⁿ and the quotient rule genuinely works on it)
-        return {"sum": ["product", "chain"], "power": ["chain", "product"], "product": ["chain", "sum"],
+        # (power: not "quotient", since c·x⁻ⁿ displays as c/xⁿ, nor "product", since c·xⁿ is a constant times a function)
+        return {"sum": ["product", "chain"], "power": ["chain", "sum"], "product": ["chain", "sum"],
                 "quotient": ["chain", "sum"], "chain": ["power", "product"]}[rule]
 
     def _wrongs(self, level, p, expr):

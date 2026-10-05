@@ -11,6 +11,7 @@ const M = WidgetMath;
 
 // Batch 1: secant, limit-zoom, unit-circle, riemann, fraction-bar
 check("secant slope of x² at 1 → 2", near(M.secantSlope(M.fn("square"), 1, 1e-4), 2, 1e-3));
+check("secant slope of the falling ball 4.9t² at 2 → 19.6", near(M.secantSlope(M.fn("fall"), 2, 1e-4), 19.6, 1e-3));
 check("secant slope of sin at 0 → 1", near(M.secantSlope(M.fn("sin"), 0, 1e-4), 1, 1e-3));
 check("riemann(sin, 0, π, 1000) → 2", near(M.riemann(M.fn("sin"), 0, Math.PI, 1000), 2, 1e-4));
 check("riemann(x², 0, 1, 2000) → 1/3", near(M.riemann(M.fn("square"), 0, 1, 2000), 1 / 3, 1e-6));

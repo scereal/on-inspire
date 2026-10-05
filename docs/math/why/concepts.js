@@ -1604,9 +1604,9 @@ window.CONCEPTS = [
     ],
     "widget": {
       "type": "secant",
-      "f": "square",
+      "f": "fall",
       "x0": 2,
-      "prompt": "Shrink the window. The average slope over [2, 2 + h] settles on the slope at exactly 2."
+      "prompt": "Shrink the window. The average slope over [2, 2 + h] settles on the ball's speed at exactly t = 2: 19.6 m/s."
     },
     "deeper": [
       "function",
