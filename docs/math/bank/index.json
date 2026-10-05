@@ -21,6 +21,24 @@
   "outcome": "Each bounce keeps the same fraction of the height, a geometric sequence, and infinitely many bounces cover a finite distance.",
   "title": "Bouncing ball"
  },
+ "continuity": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Make it continuous"
+   },
+   "2": {
+    "count": 100,
+    "name": "The Intermediate Value Theorem"
+   },
+   "3": {
+    "count": 100,
+    "name": "Epsilon and delta"
+   }
+  },
+  "outcome": "Decide and enforce continuity, use the Intermediate Value Theorem, and work with the epsilon\u2013delta definition.",
+  "title": "Continuity"
+ },
  "derivative-definition": {
   "levels": {
    "1": {

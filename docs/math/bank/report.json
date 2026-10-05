@@ -43,6 +43,39 @@
   "seed": 1,
   "tried": 449
  },
+ "continuity": {
+  "acceptance_rate": 0.9836,
+  "accepted": 300,
+  "framework": "continuity",
+  "levels": {
+   "1": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 1
+    },
+    "target": 100,
+    "tried": 101
+   },
+   "2": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 1
+    },
+    "target": 100,
+    "tried": 101
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 3
+    },
+    "target": 100,
+    "tried": 103
+   }
+  },
+  "seed": 1,
+  "tried": 305
+ },
  "derivative-definition": {
   "acceptance_rate": 0.6366,
   "accepted": 310,
