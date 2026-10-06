@@ -2601,5 +2601,733 @@ window.WALKTHROUGHS = [
         "tol": 0.001
       }
     ]
+  },
+  {
+    "id": "learn-related-rates",
+    "subtopic": "140.5.1.related-rates",
+    "title": "The sliding ladder",
+    "problem": "A 10 m ladder leans against a wall. Its foot slides away from the wall at 2 m/s. How fast is the top sliding down when the foot is 6 m from the wall?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Let $x$ be the foot's distance from the wall and $y$ the top's height, so $x^2 + y^2 = 100$. Differentiate with respect to time $t$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2x\\frac{dx}{dt} + 2y\\frac{dy}{dt} = 0$",
+              "correct": true
+            },
+            {
+              "label": "$2x + 2y = 0$",
+              "misconception": "forgot-chain-in-t",
+              "feedback": "$x$ and $y$ both change with time, so each term picks up its own rate: $(x^2)' = 2x\\frac{dx}{dt}$."
+            },
+            {
+              "label": "$2x\\frac{dx}{dt} + 2y\\frac{dy}{dt} = 20$",
+              "misconception": "constant-not-zero",
+              "feedback": "The ladder's length is fixed, so 100 doesn't change: its rate is 0."
+            }
+          ]
+        },
+        "narration": "Both $x$ and $y$ depend on $t$, so the [[chain-rule]] gives each term its own rate. That's the heart of [[related-rates|related rates]]: differentiate the relation first, then plug in numbers.",
+        "builds_on": [
+          "140.4.3.implicit"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "When $x = 6$, how high is the top of the ladder, in metres?",
+          "format": "number",
+          "answer": 8,
+          "tolerance": 0.001
+        },
+        "narration": "$y = \\sqrt{100 - 36} = 8$ m: a 6-8-10 right triangle."
+      },
+      {
+        "ask": {
+          "prompt": "Substitute $x = 6$, $y = 8$ and $\\frac{dx}{dt} = 2$. What is $\\frac{dy}{dt}$, in m/s?",
+          "format": "number",
+          "answer": -1.5,
+          "tolerance": 0.005,
+          "hint": "$2(6)(2) + 2(8)\\frac{dy}{dt} = 0$"
+        },
+        "narration": "$24 + 16\\frac{dy}{dt} = 0$, so $\\frac{dy}{dt} = -1.5$ m/s.",
+        "widget": {
+          "type": "ladder",
+          "L": 10,
+          "dxdt": 2,
+          "prompt": "Slide the foot out: the top falls slowly at first, then faster and faster."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "What does the answer mean?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "The top slides down at 1.5 m/s",
+              "correct": true
+            },
+            {
+              "label": "The top slides up at 1.5 m/s",
+              "misconception": "sign-ignored",
+              "feedback": "A negative rate means $y$ is decreasing: the top is moving down."
+            },
+            {
+              "label": "The top slides down at 2 m/s, like the foot",
+              "misconception": "equal-rates",
+              "feedback": "The rates are linked by $x\\frac{dx}{dt} = -y\\frac{dy}{dt}$, not equal: $6 \\cdot 2 = 8 \\cdot 1.5$."
+            }
+          ]
+        },
+        "narration": "The minus sign says the top is falling. At this moment it falls more slowly than the foot moves, but as the ladder flattens ($y \\to 0$) the top's speed grows without bound."
+      }
+    ],
+    "summary": "Differentiating $x^2 + y^2 = 100$ in time links the rates: $2x\\frac{dx}{dt} + 2y\\frac{dy}{dt} = 0$. At $x = 6$, $y = 8$, the top falls at **1.5 m/s**.",
+    "claims": [
+      {
+        "sympy": "sqrt(100 - 36)",
+        "equals": "8"
+      },
+      {
+        "sympy": "solve(2*6*2 + 2*8*u, u)",
+        "equals": "[Rational(-3, 2)]"
+      }
+    ]
+  },
+  {
+    "id": "learn-linear-approx",
+    "subtopic": "140.5.2.linear-approx",
+    "title": "Estimating √16.5 without a calculator",
+    "problem": "Estimate $\\sqrt{16.5}$ using the tangent line to $f(x) = \\sqrt{x}$ at $x = 16$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is $f'(16)$?",
+          "format": "number",
+          "answer": 0.125,
+          "tolerance": 0.0005,
+          "hint": "$f'(x) = \\frac{1}{2\\sqrt{x}}$"
+        },
+        "narration": "$f'(16) = \\frac{1}{2\\sqrt{16}} = \\frac{1}{8}$: near 16, the square root grows by about $\\frac{1}{8}$ for each unit of $x$.",
+        "builds_on": [
+          "140.3.1.definition"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is the tangent line $L(x)$ at $x = 16$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$L(x) = 4 + \\frac{1}{8}(x - 16)$",
+              "correct": true
+            },
+            {
+              "label": "$L(x) = 4 + \\frac{1}{8}x$",
+              "misconception": "forgot-shift",
+              "feedback": "The slope multiplies the distance from 16, which is $x - 16$, not $x$ itself."
+            },
+            {
+              "label": "$L(x) = \\frac{1}{8}(x - 16)$",
+              "misconception": "forgot-base",
+              "feedback": "Start from the known value $\\sqrt{16} = 4$, then add the change."
+            }
+          ]
+        },
+        "narration": "$L(x) = f(16) + f'(16)(x - 16) = 4 + \\frac{1}{8}(x - 16)$. That's the [[linear-approximation|linear approximation]]."
+      },
+      {
+        "ask": {
+          "prompt": "Use it to estimate $\\sqrt{16.5}$.",
+          "format": "number",
+          "answer": 4.0625,
+          "tolerance": 0.0001
+        },
+        "narration": "$4 + \\frac{0.5}{8} = 4.0625$. The true value is $4.06202\\ldots$, so the estimate is off by less than 0.0005.",
+        "widget": {
+          "type": "tangent-point",
+          "mode": "approx",
+          "f": "sqrt",
+          "a": 9,
+          "b": 25,
+          "x0": 16,
+          "prompt": "Move x away from 16: the tangent line stays close at first, and it always sits above the curve."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Is 4.0625 an overestimate or an underestimate?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "An overestimate",
+              "correct": true
+            },
+            {
+              "label": "An underestimate",
+              "misconception": "concavity-backwards",
+              "feedback": "$\\sqrt{x}$ bends downward ($f'' < 0$), so its tangent line sits above the curve."
+            },
+            {
+              "label": "Exact: the tangent line matches the curve",
+              "misconception": "tangent-is-exact",
+              "feedback": "The tangent line only touches the curve at $x = 16$."
+            }
+          ]
+        },
+        "narration": "$f''(x) = -\\frac{1}{4}x^{-3/2} < 0$: the curve bends downward, away from its tangent line, which therefore sits above it. The [[second-derivative|second derivative]] tells you which way the error goes.",
+        "builds_on": [
+          "140.4.4.higher"
+        ]
+      }
+    ],
+    "summary": "$L(x) = 4 + \\frac{1}{8}(x - 16)$ gives $\\sqrt{16.5} \\approx$ **4.0625**, a slight overestimate because $\\sqrt{x}$ is concave down.",
+    "claims": [
+      {
+        "sympy": "diff(sqrt(x), x).subs(x, 16)",
+        "equals": "1/8"
+      },
+      {
+        "sympy": "4 + Rational(1, 2)/8",
+        "equals": "65/16"
+      },
+      {
+        "sympy": "sqrt(Rational(33, 2))",
+        "approx": 4.06202,
+        "tol": 1e-05
+      },
+      {
+        "sympy": "diff(sqrt(x), x, 2).subs(x, 16)",
+        "equals": "-1/256"
+      }
+    ]
+  },
+  {
+    "id": "learn-mvt",
+    "subtopic": "140.5.3.mvt",
+    "title": "The speedometer must read the average",
+    "problem": "A car covers 120 km in 1.5 hours. Must its speedometer have read exactly 80 km/h at some instant?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is the average speed, in km/h?",
+          "format": "number",
+          "answer": 80,
+          "tolerance": 0.01
+        },
+        "narration": "$\\frac{120}{1.5} = 80$ km/h: the slope of the chord on the distance-time graph."
+      },
+      {
+        "ask": {
+          "prompt": "What does the Mean Value Theorem guarantee?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "At some instant, the speed was exactly 80 km/h",
+              "correct": true
+            },
+            {
+              "label": "The speed was 80 km/h the whole time",
+              "misconception": "average-is-constant",
+              "feedback": "The car could speed up and slow down. The theorem promises only one instant."
+            },
+            {
+              "label": "Exactly halfway through the trip, the speed was 80 km/h",
+              "misconception": "midpoint-always",
+              "feedback": "The theorem says when only for special cases. In general it guarantees an instant, not which one."
+            }
+          ]
+        },
+        "narration": "Position is a smooth function of time, so the [[mean-value-theorem|Mean Value Theorem]] applies: at some instant $c$, the instantaneous speed equals the average speed. It needs the function to be [[continuity|continuous]], with no teleporting.",
+        "builds_on": [
+          "140.2.4.ivt"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "For $f(x) = x^2$ on $[1, 3]$, find the $c$ with $f'(c)$ equal to the average slope.",
+          "format": "number",
+          "answer": 2,
+          "tolerance": 0.001,
+          "hint": "The average slope is $\\frac{9 - 1}{3 - 1} = 4$, and $f'(c) = 2c$."
+        },
+        "narration": "$2c = 4$ gives $c = 2$: the tangent at $x = 2$ is parallel to the chord.",
+        "widget": {
+          "type": "tangent-point",
+          "mode": "slide",
+          "chord": true,
+          "f": "square",
+          "a": 1,
+          "b": 3,
+          "prompt": "Slide the tangent until it's parallel to the dashed chord: that's c = 2."
+        },
+        "builds_on": [
+          "140.3.1.definition"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Is $c$ always the midpoint? Try $x^3$ on $[0, 3]$.",
+          "format": "choice",
+          "options": [
+            {
+              "label": "No: there $c = \\sqrt{3} \\approx 1.73$",
+              "correct": true
+            },
+            {
+              "label": "Yes: $c$ is always the midpoint",
+              "misconception": "midpoint-always",
+              "feedback": "For $x^3$ on $[0, 3]$ the average slope is 9, and $3c^2 = 9$ gives $c = \\sqrt{3}$, not 1.5."
+            },
+            {
+              "label": "There's no such $c$ for $x^3$",
+              "misconception": "mvt-fails",
+              "feedback": "$x^3$ is smooth everywhere, so the theorem applies: $c = \\sqrt{3}$."
+            }
+          ]
+        },
+        "narration": "For a parabola, $c$ always lands at the midpoint, but that's special. For $x^3$ on $[0, 3]$, $c = \\sqrt{3}$. The theorem promises a $c$; it doesn't promise where."
+      }
+    ],
+    "summary": "Average speed 80 km/h means the speedometer read **exactly 80 km/h** at some instant. In general $f'(c) = \\frac{f(b) - f(a)}{b - a}$ for some $c$ strictly between $a$ and $b$.",
+    "claims": [
+      {
+        "sympy": "Rational(120, 1)/Rational(3, 2)",
+        "equals": "80"
+      },
+      {
+        "sympy": "solve(2*x - 4, x)",
+        "equals": "[2]"
+      },
+      {
+        "sympy": "solve(3*x**2 - 9, x)",
+        "equals": "[-sqrt(3), sqrt(3)]"
+      },
+      {
+        "sympy": "sqrt(3)",
+        "approx": 1.732,
+        "tol": 0.001
+      }
+    ]
+  },
+  {
+    "id": "learn-extrema",
+    "subtopic": "140.5.4.extrema",
+    "title": "Highest and lowest on an interval",
+    "problem": "Find the absolute maximum and minimum of $f(x) = x^3 - 3x$ on $[-2, 3]$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Where is $f'(x) = 0$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x = -1$ and $x = 1$",
+              "correct": true
+            },
+            {
+              "label": "$x = 0$ and $x = \\pm\\sqrt{3}$",
+              "misconception": "zeros-not-critical",
+              "feedback": "Those are where $f(x) = 0$. Critical points are where the slope $f'(x) = 3x^2 - 3$ is 0."
+            },
+            {
+              "label": "$x = 1$ only",
+              "misconception": "missed-root",
+              "feedback": "$3x^2 - 3 = 0$ means $x^2 = 1$: both $x = 1$ and $x = -1$."
+            }
+          ]
+        },
+        "narration": "$f'(x) = 3x^2 - 3 = 0$ at $x = \\pm 1$: the [[critical-points|critical points]].",
+        "builds_on": [
+          "140.3.2.power"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Which $x$-values are the candidates for the absolute max and min?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-2, -1, 1, 3$",
+              "correct": true
+            },
+            {
+              "label": "$-1, 1$",
+              "misconception": "forgot-endpoints",
+              "feedback": "On a closed interval, the ends are candidates too: the extreme values often sit there."
+            },
+            {
+              "label": "$-2, 3$",
+              "misconception": "forgot-critical",
+              "feedback": "The critical points inside the interval, $\\pm 1$, are candidates as well."
+            }
+          ]
+        },
+        "narration": "The extremes of a continuous function on a closed interval happen at critical points inside it or at its ends. Both ends and both critical points are in.",
+        "builds_on": [
+          "140.2.4.ivt"
+        ],
+        "widget": {
+          "type": "tangent-point",
+          "mode": "slide",
+          "f": "crit3",
+          "a": -2,
+          "b": 3,
+          "prompt": "Slide along the curve: flat at −1 and 1, but the highest point is at the right end."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "What is the absolute maximum value?",
+          "format": "number",
+          "answer": 18,
+          "tolerance": 0.001,
+          "hint": "Evaluate $f$ at all four candidates."
+        },
+        "narration": "$f(-2) = -2$, $f(-1) = 2$, $f(1) = -2$, $f(3) = 18$. The maximum, 18, is at the endpoint $x = 3$, not at a critical point."
+      },
+      {
+        "ask": {
+          "prompt": "What is the absolute minimum value?",
+          "format": "number",
+          "answer": -2,
+          "tolerance": 0.001
+        },
+        "narration": "The minimum value $-2$ happens twice, at $x = -2$ and $x = 1$. A minimum value is unique even when it's reached at more than one place."
+      }
+    ],
+    "summary": "Candidates: the critical points $\\pm 1$ and the ends $-2$, $3$. The absolute max is **18** (at $x = 3$) and the absolute min is **−2** (at $x = -2$ and $x = 1$).",
+    "claims": [
+      {
+        "sympy": "solve(diff(x**3 - 3*x, x), x)",
+        "equals": "[-1, 1]"
+      },
+      {
+        "sympy": "[(x**3 - 3*x).subs(x, -2), (x**3 - 3*x).subs(x, -1), (x**3 - 3*x).subs(x, 1), (x**3 - 3*x).subs(x, 3)]",
+        "equals": "[-2, 2, -2, 18]"
+      }
+    ]
+  },
+  {
+    "id": "learn-sketch",
+    "subtopic": "140.5.4.sketch",
+    "title": "Reading a curve from its derivatives",
+    "problem": "Describe the shape of $f(x) = x^3 - 3x$ using $f'(x) = 3(x - 1)(x + 1)$ and $f''(x) = 6x$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Where is $f$ increasing?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x < -1$ or $x > 1$",
+              "correct": true
+            },
+            {
+              "label": "$-1 < x < 1$",
+              "misconception": "sign-backwards",
+              "feedback": "Between $-1$ and $1$ the factors have opposite signs, so $f' < 0$ there: decreasing."
+            },
+            {
+              "label": "$x > 1$ only",
+              "misconception": "one-critical-point",
+              "feedback": "$f'$ is positive on both sides outside $[-1, 1]$: check $x = -2$, where $f' = 9$."
+            }
+          ]
+        },
+        "narration": "$f' > 0$ outside $[-1, 1]$ and $f' < 0$ inside: up, then down, then up.",
+        "builds_on": [
+          "140.4.4.higher"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Where is the inflection point? (Give its $x$-value.)",
+          "format": "number",
+          "answer": 0,
+          "tolerance": 0.001
+        },
+        "narration": "$f''(x) = 6x$ changes sign at $x = 0$: the curve switches from bending down to bending up."
+      },
+      {
+        "ask": {
+          "prompt": "What happens at $x = -1$, where $f''(-1) = -6$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "A local maximum",
+              "correct": true
+            },
+            {
+              "label": "A local minimum",
+              "misconception": "second-derivative-backwards",
+              "feedback": "$f'' < 0$ means the curve bends downward there: a peak."
+            },
+            {
+              "label": "Neither: it's an inflection point",
+              "misconception": "inflection-confusion",
+              "feedback": "An inflection point needs $f'' = 0$; here $f''(-1) = -6$."
+            }
+          ]
+        },
+        "narration": "$f'(-1) = 0$ and $f''(-1) < 0$: a local peak, with $f(-1) = 2$. Likewise $f''(1) = 6 > 0$ makes $x = 1$ a local valley. That's the [[second-derivative|second-derivative test]] at the [[critical-points|critical points]]."
+      },
+      {
+        "ask": {
+          "prompt": "Where is the graph concave up?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x > 0$",
+              "correct": true
+            },
+            {
+              "label": "$x < 0$",
+              "misconception": "concavity-backwards",
+              "feedback": "Concave up means $f'' > 0$, and $6x > 0$ for $x > 0$."
+            },
+            {
+              "label": "$-1 < x < 1$",
+              "misconception": "concavity-is-decreasing",
+              "feedback": "That's where $f$ decreases. Concavity comes from the sign of $f''$, not $f'$."
+            }
+          ]
+        },
+        "narration": "$f'' = 6x > 0$ for $x > 0$: bending up like a cup. Put it together: rise to a peak at $(-1, 2)$, bend over at $(0, 0)$, fall to a valley at $(1, -2)$, then rise again."
+      }
+    ],
+    "summary": "$f'$ says up–down–up with turns at $\\pm 1$; $f''$ says concave down for $x < 0$ and up for $x > 0$. So: **local max at $(-1, 2)$, inflection at $(0, 0)$, local min at $(1, -2)$**.",
+    "claims": [
+      {
+        "sympy": "factor(diff(x**3 - 3*x, x))",
+        "equals": "3*(x - 1)*(x + 1)"
+      },
+      {
+        "sympy": "diff(x**3 - 3*x, x, 2)",
+        "equals": "6*x"
+      },
+      {
+        "sympy": "(x**3 - 3*x).subs(x, -1)",
+        "equals": "2"
+      },
+      {
+        "sympy": "diff(x**3 - 3*x, x).subs(x, -2)",
+        "equals": "9"
+      }
+    ]
+  },
+  {
+    "id": "learn-optimization",
+    "subtopic": "140.5.5.optimization",
+    "title": "Fencing a field by a river",
+    "problem": "You have 100 m of fence to enclose a rectangular field along a straight river. The river side needs no fence. What's the largest area you can enclose?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Let $x$ be the length of each side perpendicular to the river. Which function gives the area?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$A(x) = x(100 - 2x)$",
+              "correct": true
+            },
+            {
+              "label": "$A(x) = x(100 - x)$",
+              "misconception": "wrong-constraint",
+              "feedback": "There are two sides of length $x$, so the side along the river is $100 - 2x$."
+            },
+            {
+              "label": "$A(x) = x(50 - x)$",
+              "misconception": "wrong-constraint",
+              "feedback": "Only three sides are fenced, not four: the river side is $100 - 2x$."
+            }
+          ]
+        },
+        "narration": "Two sides of length $x$ and one side of $100 - 2x$ use all 100 m. The area is $A(x) = x(100 - 2x)$, for $0 \\le x \\le 50$.",
+        "builds_on": [
+          "140.5.4.extrema"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Where is $A'(x) = 0$?",
+          "format": "number",
+          "answer": 25,
+          "tolerance": 0.001,
+          "hint": "$A(x) = 100x - 2x^2$"
+        },
+        "narration": "$A'(x) = 100 - 4x = 0$ at $x = 25$.",
+        "widget": {
+          "type": "tangent-point",
+          "mode": "slide",
+          "f": "fencearea",
+          "a": 0,
+          "b": 50,
+          "prompt": "Slide x: the area peaks where the tangent goes flat, at x = 25."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "What is the largest area, in m²?",
+          "format": "number",
+          "answer": 1250,
+          "tolerance": 0.01
+        },
+        "narration": "$A(25) = 25 \\times 50 = 1250$ m²: the field is twice as long as it is deep."
+      },
+      {
+        "ask": {
+          "prompt": "How do you know 1250 is the maximum, not a minimum?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$A'' = -4 < 0$, and $A = 0$ at both ends",
+              "correct": true
+            },
+            {
+              "label": "Because $A'(25) = 0$",
+              "misconception": "critical-point-is-max",
+              "feedback": "A zero slope can be a minimum too. You need $A''$, or a comparison with the ends."
+            },
+            {
+              "label": "Because 25 is in the middle of $[0, 50]$",
+              "misconception": "coincidence",
+              "feedback": "That's a coincidence of this problem. The second derivative, or the endpoint values, are what settle it."
+            }
+          ]
+        },
+        "narration": "$A'' = -4$ means the area curve bends downward, so $x = 25$ is a peak, and the endpoints give zero area. This is [[optimization]] in miniature: build the function, find its [[critical-points|critical points]], check the ends."
+      }
+    ],
+    "summary": "$A(x) = x(100 - 2x)$ peaks at $x = 25$, so the best field is 25 m by 50 m, with area **1250 m²**.",
+    "claims": [
+      {
+        "sympy": "solve(diff(x*(100 - 2*x), x), x)",
+        "equals": "[25]"
+      },
+      {
+        "sympy": "(x*(100 - 2*x)).subs(x, 25)",
+        "equals": "1250"
+      },
+      {
+        "sympy": "diff(x*(100 - 2*x), x, 2)",
+        "equals": "-4"
+      }
+    ]
+  },
+  {
+    "id": "learn-lhopital",
+    "subtopic": "140.5.6.lhopital",
+    "title": "Comparing how fast top and bottom vanish",
+    "problem": "Find $\\lim_{x\\to 0}\\frac{e^{2x} - 1}{x}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Substitute $x = 0$. What form do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{0}{0}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{\\infty}{\\infty}$",
+              "misconception": "wrong-form",
+              "feedback": "At $x = 0$, $e^0 - 1 = 0$ and the bottom is 0."
+            },
+            {
+              "label": "Neither: substitute directly",
+              "misconception": "missed-indeterminate",
+              "feedback": "Substituting gives $\\frac{0}{0}$, which isn't a value."
+            }
+          ]
+        },
+        "narration": "$\\frac{e^0 - 1}{0} = \\frac{0}{0}$: an [[indeterminate-form|indeterminate form]].",
+        "builds_on": [
+          "140.2.2.factor"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "L'Hôpital's rule replaces the top and bottom by their derivatives. What do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{2e^{2x}}{1}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{2e^{2x}\\cdot x - (e^{2x} - 1)}{x^2}$",
+              "misconception": "quotient-rule-instead",
+              "feedback": "That's the quotient rule. L'Hôpital differentiates the top and bottom separately."
+            },
+            {
+              "label": "$\\frac{2e^{2x}}{x}$",
+              "misconception": "differentiated-top-only",
+              "feedback": "Differentiate the bottom too: $x' = 1$."
+            }
+          ]
+        },
+        "narration": "Top: $(e^{2x} - 1)' = 2e^{2x}$. Bottom: $x' = 1$. Near 0 both are almost their tangent lines, so their ratio is almost the ratio of their slopes.",
+        "builds_on": [
+          "140.4.1.exp-log"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is the limit?",
+          "format": "number",
+          "answer": 2,
+          "tolerance": 0.001
+        },
+        "narration": "$\\frac{2e^0}{1} = 2$. That's [[lhopital|L'Hôpital's rule]].",
+        "widget": {
+          "type": "limit-zoom",
+          "g": "lhop",
+          "at": 0,
+          "limit": 2,
+          "prompt": "Zoom in at 0: the ratio settles on 2."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "Now try $\\lim_{x\\to 0}\\frac{\\cos x}{x + 1}$. What is it?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$1$",
+              "correct": true
+            },
+            {
+              "label": "$0$",
+              "misconception": "blind-lhopital",
+              "feedback": "That's what blindly differentiating gives ($\\frac{-\\sin 0}{1}$). But substitution gives $\\frac{1}{1}$: not indeterminate, so L'Hôpital doesn't apply."
+            },
+            {
+              "label": "It doesn't exist",
+              "misconception": "assumed-indeterminate",
+              "feedback": "The bottom is 1 at $x = 0$, not 0: just substitute."
+            }
+          ]
+        },
+        "narration": "$\\frac{\\cos 0}{0 + 1} = 1$. L'Hôpital is only for $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$. Used anywhere else, it gives wrong answers, here 0."
+      }
+    ],
+    "summary": "$\\frac{e^{2x} - 1}{x}$ is $\\frac{0}{0}$ at 0, and differentiating top and bottom gives $\\frac{2e^{2x}}{1} \\to$ **2**. Always check the form first: $\\frac{\\cos x}{x + 1} \\to 1$ by substitution.",
+    "claims": [
+      {
+        "sympy": "limit((exp(2*x) - 1)/x, x, 0)",
+        "equals": "2"
+      },
+      {
+        "sympy": "limit(cos(x)/(x + 1), x, 0)",
+        "equals": "1"
+      },
+      {
+        "sympy": "(-sin(x)/1).subs(x, 0)",
+        "equals": "0"
+      }
+    ]
   }
 ];

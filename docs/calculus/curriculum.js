@@ -458,37 +458,132 @@ window.CURRICULUM = {
           "id": "140.5.1",
           "title": "Solve related-rates problems",
           "summary": "Connect how fast linked quantities change.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.1.related-rates",
+              "title": "Related rates",
+              "learn": "learn-related-rates",
+              "practice": {
+                "framework": "applications",
+                "level": 1
+              },
+              "builds_on": [
+                "140.4.3.implicit"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.2",
           "title": "Use linear approximation and differentials",
           "summary": "Estimate values with the tangent line, and judge the error.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.2.linear-approx",
+              "title": "The tangent line as an approximation",
+              "learn": "learn-linear-approx",
+              "practice": {
+                "framework": "applications",
+                "level": 2
+              },
+              "builds_on": [
+                "140.3.1.definition",
+                "140.4.4.higher"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.3",
           "title": "Apply the Mean Value Theorem",
           "summary": "Somewhere, the instantaneous rate equals the average rate.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.3.mvt",
+              "title": "The Mean Value Theorem",
+              "learn": "learn-mvt",
+              "practice": {
+                "framework": "applications",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.4.ivt",
+                "140.3.1.definition"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.4",
           "title": "Find extrema and sketch curves",
           "summary": "Use the first and second derivatives to read a graph's shape.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.4.extrema",
+              "title": "Absolute extrema on a closed interval",
+              "learn": "learn-extrema",
+              "practice": {
+                "framework": "applications",
+                "level": 4
+              },
+              "builds_on": [
+                "140.2.4.ivt",
+                "140.3.2.power"
+              ]
+            },
+            {
+              "id": "140.5.4.sketch",
+              "title": "Reading a graph's shape from f′ and f″",
+              "learn": "learn-sketch",
+              "practice": {
+                "framework": "applications",
+                "level": 5
+              },
+              "builds_on": [
+                "140.4.4.higher",
+                "140.5.4.extrema"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.5",
           "title": "Solve optimization problems",
           "summary": "Build the function, then find its best value.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.5.optimization",
+              "title": "Optimization problems",
+              "learn": "learn-optimization",
+              "practice": {
+                "framework": "applications",
+                "level": 6
+              },
+              "builds_on": [
+                "140.5.4.extrema"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.6",
           "title": "Evaluate indeterminate limits with L'Hôpital's rule",
           "summary": "When 0/0 or ∞/∞ appears, compare rates instead.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.6.lhopital",
+              "title": "L'Hôpital's rule",
+              "learn": "learn-lhopital",
+              "practice": {
+                "framework": "applications",
+                "level": 7
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "140.4.1.exp-log"
+              ]
+            }
+          ]
         }
       ]
     },
