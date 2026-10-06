@@ -3329,5 +3329,597 @@ window.WALKTHROUGHS = [
         "equals": "0"
       }
     ]
+  },
+  {
+    "id": "learn-domain",
+    "subtopic": "140.1.1.domain",
+    "title": "Which inputs does this formula accept?",
+    "problem": "Find the domain of $f(x) = \\frac{\\sqrt{x - 2}}{x - 5}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What does the square root need?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x - 2 \\ge 0$",
+              "correct": true
+            },
+            {
+              "label": "$x - 2 > 0$",
+              "misconception": "strict-for-root",
+              "feedback": "Zero is fine under a square root: $\\sqrt{0} = 0$."
+            },
+            {
+              "label": "$x - 2 \\ne 0$",
+              "misconception": "only-zero-matters",
+              "feedback": "Negative inputs are the problem: there's no real square root of a negative number."
+            }
+          ]
+        },
+        "narration": "A square root can't take a negative number, but it can take 0. So $x - 2 \\ge 0$, which means $x \\ge 2$.",
+        "builds_on": [
+          "foundation:function"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What does the denominator need?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x \\ne 5$",
+              "correct": true
+            },
+            {
+              "label": "$x > 5$",
+              "misconception": "denominator-positive",
+              "feedback": "The bottom only has to be nonzero. Dividing by a negative number is fine."
+            },
+            {
+              "label": "Nothing: the bottom can be anything",
+              "misconception": "forgot-denominator",
+              "feedback": "At $x = 5$ the bottom is 0, and division by 0 is undefined."
+            }
+          ]
+        },
+        "narration": "Division by zero is undefined, so $x - 5 \\ne 0$, which means $x \\ne 5$."
+      },
+      {
+        "ask": {
+          "prompt": "Put them together. What is the domain?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x \\ge 2$, except $x = 5$",
+              "correct": true
+            },
+            {
+              "label": "$x \\ge 2$",
+              "misconception": "forgot-denominator",
+              "feedback": "That still includes $x = 5$, where the bottom is 0."
+            },
+            {
+              "label": "$x > 5$",
+              "misconception": "denominator-positive",
+              "feedback": "Values between 2 and 5 work fine: try $x = 3$, which gives $\\frac{1}{-2}$."
+            }
+          ]
+        },
+        "narration": "Both conditions must hold: $x \\ge 2$ and $x \\ne 5$. That's the [[domain-and-range|domain]] of this [[function]]."
+      },
+      {
+        "ask": {
+          "prompt": "What is $f(2)$?",
+          "format": "number",
+          "answer": 0,
+          "tolerance": 0.001
+        },
+        "narration": "$f(2) = \\frac{\\sqrt{0}}{-3} = 0$. The endpoint $x = 2$ really is in the domain, which is why the condition was $\\ge$, not $>$.",
+        "widget": {
+          "type": "secant",
+          "mode": "trace",
+          "f": "sqrt",
+          "x0": 2,
+          "span": 2,
+          "prompt": "Drag along √x: the graph starts at x = 0, with nothing to its left."
+        }
+      }
+    ],
+    "summary": "The square root needs $x \\ge 2$ and the bottom needs $x \\ne 5$, so the domain is **$x \\ge 2$ with $x \\ne 5$**.",
+    "claims": [
+      {
+        "sympy": "(sqrt(x - 2)/(x - 5)).subs(x, 2)",
+        "equals": "0"
+      },
+      {
+        "sympy": "(sqrt(x - 2)/(x - 5)).subs(x, 3)",
+        "equals": "-1/2"
+      }
+    ]
+  },
+  {
+    "id": "learn-composition",
+    "subtopic": "140.1.1.composition",
+    "title": "Which function goes first?",
+    "problem": "Let $f(x) = 2x + 1$ and $g(x) = x^2$. Compare $(f \\circ g)(3)$ with $(g \\circ f)(3)$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "$(f \\circ g)(3) = f(g(3))$ starts with $g$. What is $g(3)$?",
+          "format": "number",
+          "answer": 9,
+          "tolerance": 0.001
+        },
+        "narration": "$g(3) = 3^2 = 9$. That output becomes $f$'s input.",
+        "builds_on": [
+          "foundation:function"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "So what is $f(g(3)) = f(9)$?",
+          "format": "number",
+          "answer": 19,
+          "tolerance": 0.001
+        },
+        "narration": "$f(9) = 2 \\cdot 9 + 1 = 19$."
+      },
+      {
+        "ask": {
+          "prompt": "Now the other order: what is $(g \\circ f)(3) = g(f(3))$?",
+          "format": "number",
+          "answer": 49,
+          "tolerance": 0.001,
+          "hint": "$f(3) = 7$ first, then square."
+        },
+        "narration": "$f(3) = 7$, then $g(7) = 49$. Same two functions, opposite order, different answer: 19 versus 49. In [[function-composition|composition]], order matters."
+      },
+      {
+        "ask": {
+          "prompt": "Which is the formula for $(f \\circ g)(x)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2x^2 + 1$",
+              "correct": true
+            },
+            {
+              "label": "$(2x + 1)^2$",
+              "misconception": "order-swapped",
+              "feedback": "That's $g(f(x))$: it does $f$ first. $f(g(x))$ puts $x^2$ into $f$."
+            },
+            {
+              "label": "$(2x + 1)x^2$",
+              "misconception": "composition-is-product",
+              "feedback": "That multiplies $f$ and $g$. Composition feeds one into the other."
+            }
+          ]
+        },
+        "narration": "Put $g(x) = x^2$ wherever $f$ has an $x$: $f(x^2) = 2x^2 + 1$.",
+        "widget": {
+          "type": "transform",
+          "base": "square",
+          "a": 2,
+          "h": 0,
+          "k": 1,
+          "prompt": "2x² + 1: square first, then double, then add 1. That's f after g."
+        }
+      }
+    ],
+    "summary": "$(f \\circ g)(3) = f(9) = $ **19**, but $(g \\circ f)(3) = g(7) = $ **49**. Composition does the inner function first, and order matters.",
+    "claims": [
+      {
+        "sympy": "(2*x + 1).subs(x, 9)",
+        "equals": "19"
+      },
+      {
+        "sympy": "(x**2).subs(x, 7)",
+        "equals": "49"
+      },
+      {
+        "sympy": "expand((2*x + 1).subs(x, x**2))",
+        "equals": "2*x**2 + 1"
+      }
+    ]
+  },
+  {
+    "id": "learn-inverse-fn",
+    "subtopic": "140.1.1.inverse",
+    "title": "Fahrenheit back to Celsius",
+    "problem": "Fahrenheit is $F = \\frac{9}{5}C + 32$. Find the formula that turns Fahrenheit back into Celsius, and convert 212 °F.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Solve $F = \\frac{9}{5}C + 32$ for $C$:",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$C = \\frac{5}{9}(F - 32)$",
+              "correct": true
+            },
+            {
+              "label": "$C = \\frac{9}{5}(F - 32)$",
+              "misconception": "solved-wrong",
+              "feedback": "To undo multiplying by $\\frac{9}{5}$, multiply by $\\frac{5}{9}$."
+            },
+            {
+              "label": "$C = \\frac{1}{\\frac{9}{5}F + 32}$",
+              "misconception": "inverse-is-reciprocal",
+              "feedback": "The inverse undoes the formula; it isn't 1 divided by it."
+            }
+          ]
+        },
+        "narration": "Undo the steps in reverse order: first subtract 32, then divide by $\\frac{9}{5}$, which means multiplying by $\\frac{5}{9}$. That's the [[inverse-function|inverse function]].",
+        "builds_on": [
+          "140.1.1.composition"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Convert 212 °F to Celsius.",
+          "format": "number",
+          "answer": 100,
+          "tolerance": 0.001
+        },
+        "narration": "$\\frac{5}{9}(212 - 32) = \\frac{5}{9}\\cdot 180 = 100$ °C: water's boiling point, as it should be."
+      },
+      {
+        "ask": {
+          "prompt": "Check: composing the conversion with its inverse gives what?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Exactly what you started with",
+              "correct": true
+            },
+            {
+              "label": "1",
+              "misconception": "reciprocal-cancel",
+              "feedback": "That would be multiplying a number by its reciprocal. Composing a function with its inverse undoes it, returning the input."
+            },
+            {
+              "label": "The square of the input",
+              "misconception": "composition-is-product",
+              "feedback": "Composition isn't multiplication: the second function undoes the first."
+            }
+          ]
+        },
+        "narration": "$\\frac{9}{5}\\cdot\\frac{5}{9}(F - 32) + 32 = F$. Going there and back returns the input, and that's the definition of an inverse. Its graph is the original reflected across $y = x$.",
+        "widget": {
+          "type": "mirror",
+          "f": "cubeplus",
+          "x0": 1,
+          "prompt": "Any inverse is a reflection across y = x: move the point and watch its mirror image."
+        }
+      }
+    ],
+    "summary": "Undoing $F = \\frac{9}{5}C + 32$ step by step gives $C = \\frac{5}{9}(F - 32)$, so 212 °F is **100 °C**.",
+    "claims": [
+      {
+        "sympy": "solve(Eq(x, Rational(9, 5)*y + 32), y)",
+        "equals": "[5*x/9 - Rational(160, 9)]"
+      },
+      {
+        "sympy": "(Rational(5, 9)*(x - 32)).subs(x, 212)",
+        "equals": "100"
+      },
+      {
+        "sympy": "simplify(Rational(9, 5)*(Rational(5, 9)*(x - 32)) + 32)",
+        "equals": "x"
+      }
+    ]
+  },
+  {
+    "id": "learn-transform",
+    "subtopic": "140.1.2.transform",
+    "title": "Moving a parabola",
+    "problem": "Describe the graph of $y = 2(x - 3)^2 + 1$ starting from $y = x^2$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Where is the vertex?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$(3, 1)$",
+              "correct": true
+            },
+            {
+              "label": "$(-3, 1)$",
+              "misconception": "shift-sign",
+              "feedback": "$(x - 3)^2$ is 0 when $x = 3$, so the vertex moves right to 3."
+            },
+            {
+              "label": "$(3, 2)$",
+              "misconception": "stretch-moves-vertex",
+              "feedback": "The stretch multiplies $(x - 3)^2$, which is 0 at the vertex, so it doesn't move the vertex; only $+1$ does."
+            }
+          ]
+        },
+        "narration": "$(x - 3)^2$ is smallest, 0, at $x = 3$, and there $y = 1$. The minus sign inside means a shift right: what $x^2$ did at 0 now happens at 3.",
+        "builds_on": [
+          "foundation:function"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Compared with $y = x^2$, what does the factor 2 do?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Makes it twice as steep (narrower)",
+              "correct": true
+            },
+            {
+              "label": "Makes it twice as wide",
+              "misconception": "stretch-backwards",
+              "feedback": "Multiplying the outputs by 2 doubles every height, so the parabola gets steeper, not wider."
+            },
+            {
+              "label": "Nothing: it's the same shape",
+              "misconception": "stretch-ignored",
+              "feedback": "Every height above the vertex is doubled."
+            }
+          ]
+        },
+        "narration": "Outside the function, the 2 doubles every height above the vertex: a vertical stretch. That's [[graph-transformations|graph transformation]]: inside changes act sideways (and backwards), outside changes act up and down (as written)."
+      },
+      {
+        "ask": {
+          "prompt": "What is $y$ when $x = 4$?",
+          "format": "number",
+          "answer": 3,
+          "tolerance": 0.001
+        },
+        "narration": "$2(4 - 3)^2 + 1 = 3$. One step right of the vertex, the original parabola would rise by 1; this one rises by 2.",
+        "widget": {
+          "type": "transform",
+          "base": "square",
+          "a": 2,
+          "h": 3,
+          "k": 1,
+          "prompt": "Change a, h and k one at a time and watch the vertex and the steepness."
+        }
+      }
+    ],
+    "summary": "$y = 2(x - 3)^2 + 1$ is $x^2$ shifted **right 3** and **up 1**, then stretched vertically by 2: vertex $(3, 1)$, twice as steep.",
+    "claims": [
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 3)",
+        "equals": "1"
+      },
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 4)",
+        "equals": "3"
+      }
+    ]
+  },
+  {
+    "id": "learn-exp-log-eq",
+    "subtopic": "140.1.3.exp-log",
+    "title": "When the unknown is in the exponent",
+    "problem": "Solve $3 \\cdot 2^x = 48$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What's the first step?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Divide both sides by 3: $2^x = 16$",
+              "correct": true
+            },
+            {
+              "label": "Multiply out: $6^x = 48$",
+              "misconception": "multiplied-base",
+              "feedback": "$3 \\cdot 2^x$ isn't $6^x$: the exponent only applies to the 2."
+            },
+            {
+              "label": "Subtract 3: $2^x = 45$",
+              "misconception": "wrong-inverse-operation",
+              "feedback": "The 3 multiplies, so undo it by dividing."
+            }
+          ]
+        },
+        "narration": "The 3 multiplies $2^x$, so divide it away: $2^x = 16$.",
+        "builds_on": [
+          "140.1.1.inverse"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is $x$?",
+          "format": "number",
+          "answer": 4,
+          "tolerance": 0.001
+        },
+        "narration": "$2^4 = 16$, so $x = 4$. In log form, $x = \\log_2 16$: the [[logarithm]] undoes the exponential."
+      },
+      {
+        "ask": {
+          "prompt": "What does $\\log_2 16$ mean?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "The power of 2 that gives 16, which is 4",
+              "correct": true
+            },
+            {
+              "label": "$16 \\div 2 = 8$",
+              "misconception": "log-is-division",
+              "feedback": "A log asks for an exponent, not a quotient: $2^? = 16$."
+            },
+            {
+              "label": "$2^{16}$",
+              "misconception": "log-as-power",
+              "feedback": "That's the other direction. $\\log_2 16$ asks which power of 2 equals 16."
+            }
+          ]
+        },
+        "narration": "$\\log_2 16 = 4$ because $2^4 = 16$. A log is an exponent."
+      },
+      {
+        "ask": {
+          "prompt": "Which equals $\\log_2(8 \\cdot 4)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\log_2 8 + \\log_2 4 = 5$",
+              "correct": true
+            },
+            {
+              "label": "$\\log_2 8 \\cdot \\log_2 4 = 6$",
+              "misconception": "logs-multiply",
+              "feedback": "Logs turn products into sums: $\\log(AB) = \\log A + \\log B$."
+            },
+            {
+              "label": "$\\log_2 12$",
+              "misconception": "log-of-sum",
+              "feedback": "$8 \\cdot 4 = 32$, not 12, and $\\log_2 32 = 5$."
+            }
+          ]
+        },
+        "narration": "$\\log_2 32 = 5 = 3 + 2$. Exponents add when you multiply, so logs of products add."
+      }
+    ],
+    "summary": "Dividing by 3 gives $2^x = 16$, so $x = \\log_2 16 = $ **4**. A log is the exponent that undoes the exponential.",
+    "claims": [
+      {
+        "sympy": "solve(3*2**x - 48, x)",
+        "equals": "[4]"
+      },
+      {
+        "sympy": "log(16, 2)",
+        "equals": "4"
+      },
+      {
+        "sympy": "log(32, 2)",
+        "equals": "5"
+      }
+    ]
+  },
+  {
+    "id": "learn-trig-values",
+    "subtopic": "140.1.3.trig-values",
+    "title": "Exact values without a calculator",
+    "problem": "Find the exact value of $\\sin\\left(\\frac{5\\pi}{6}\\right)$, then $\\cos\\left(\\frac{5\\pi}{6}\\right)$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Which quadrant is $\\frac{5\\pi}{6}$ in?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Quadrant II",
+              "correct": true
+            },
+            {
+              "label": "Quadrant I",
+              "misconception": "wrong-quadrant",
+              "feedback": "$\\frac{5\\pi}{6}$ is more than $\\frac{\\pi}{2}$ (a quarter turn) but less than $\\pi$."
+            },
+            {
+              "label": "Quadrant III",
+              "misconception": "wrong-quadrant",
+              "feedback": "Quadrant III starts at $\\pi$, a half turn; $\\frac{5\\pi}{6}$ is just short of it."
+            }
+          ]
+        },
+        "narration": "$\\frac{5\\pi}{6}$ is between $\\frac{\\pi}{2}$ and $\\pi$: the upper left of the [[unit-circle|unit circle]].",
+        "builds_on": [
+          "foundation:unit-circle"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is the reference angle (the angle to the nearest $x$-axis)?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{\\pi}{6}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{5\\pi}{6}$",
+              "misconception": "used-the-angle",
+              "feedback": "The reference angle is measured to the nearest $x$-axis: $\\pi - \\frac{5\\pi}{6}$."
+            },
+            {
+              "label": "$\\frac{\\pi}{3}$",
+              "misconception": "reference-slip",
+              "feedback": "That's the angle to the $y$-axis. Measure to the $x$-axis: $\\pi - \\frac{5\\pi}{6} = \\frac{\\pi}{6}$."
+            }
+          ]
+        },
+        "narration": "$\\pi - \\frac{5\\pi}{6} = \\frac{\\pi}{6}$. The point at $\\frac{5\\pi}{6}$ is the mirror image of the point at $\\frac{\\pi}{6}$."
+      },
+      {
+        "ask": {
+          "prompt": "So what is $\\sin\\left(\\frac{5\\pi}{6}\\right)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{1}{2}$",
+              "correct": true
+            },
+            {
+              "label": "$-\\frac{1}{2}$",
+              "misconception": "quadrant-sign",
+              "feedback": "In quadrant II the point is above the axis, so sine (the height) is positive."
+            },
+            {
+              "label": "$\\frac{\\sqrt{3}}{2}$",
+              "misconception": "reference-slip",
+              "feedback": "That's $\\sin\\frac{\\pi}{3}$. The reference angle is $\\frac{\\pi}{6}$, and $\\sin\\frac{\\pi}{6} = \\frac{1}{2}$."
+            }
+          ]
+        },
+        "narration": "$\\sin\\frac{\\pi}{6} = \\frac{1}{2}$, and sine is positive in quadrant II, so $\\sin\\frac{5\\pi}{6} = \\frac{1}{2}$.",
+        "widget": {
+          "type": "unit-circle",
+          "mode": "basic",
+          "prompt": "Drag the point to 5π/6 (150°): its height is 1/2, the same as at π/6."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "And $\\cos\\left(\\frac{5\\pi}{6}\\right)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-\\frac{\\sqrt{3}}{2}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{\\sqrt{3}}{2}$",
+              "misconception": "quadrant-sign",
+              "feedback": "In quadrant II the point is left of the axis, so cosine (the width) is negative."
+            },
+            {
+              "label": "$-\\frac{1}{2}$",
+              "misconception": "cofunction-swap",
+              "feedback": "That's the sine's size. Cosine at reference angle $\\frac{\\pi}{6}$ is $\\frac{\\sqrt{3}}{2}$, made negative here."
+            }
+          ]
+        },
+        "narration": "$\\cos\\frac{\\pi}{6} = \\frac{\\sqrt{3}}{2}$, and in quadrant II cosine is negative: $-\\frac{\\sqrt{3}}{2}$. Reference angle for the size, quadrant for the sign."
+      }
+    ],
+    "summary": "Reference angle $\\frac{\\pi}{6}$, quadrant II: $\\sin\\frac{5\\pi}{6} = $ **1/2** and $\\cos\\frac{5\\pi}{6} = $ **−√3/2**.",
+    "claims": [
+      {
+        "sympy": "sin(5*pi/6)",
+        "equals": "1/2"
+      },
+      {
+        "sympy": "cos(5*pi/6)",
+        "equals": "-sqrt(3)/2"
+      },
+      {
+        "sympy": "pi - 5*pi/6",
+        "equals": "pi/6"
+      }
+    ]
   }
 ];

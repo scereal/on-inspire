@@ -51,13 +51,12 @@ def map_tests(page, base, c, label):
     c.ok(is_open(page, "140.2.1"), f"{label}: a chip to an unbuilt outcome opens it")
     c.ok(page.locator("[data-outcome='140.2.1'] [data-subtopic]").count() == 2, f"{label}: 140.2.1 lists its 2 subtopics")
     page.goto("about:blank")
-    page.goto(f"{base}/calculus/math-140/#140.3.2.power")
-    page.wait_for_selector("[data-subtopic='140.3.2.power'] a[data-target='140.1.3']")
-    page.click("[data-subtopic='140.3.2.power'] a[data-target='140.1.3']")
-    c.ok(is_open(page, "140.1.3"), f"{label}: a chip to an unbuilt outcome opens it")
-    c.ok("coming soon" in page.inner_text("[data-outcome='140.1.3']").lower(), f"{label}: unbuilt outcome says coming soon")
-    page.click("[data-outcome='140.1.3'] > button")
-    c.ok(not is_open(page, "140.1.3"), f"{label}: an outcome closes again")
+    page.goto(f"{base}/calculus/math-140/#140.6.1")          # 140.6 is the last unit still to build
+    page.wait_for_selector("[data-outcome='140.6.1']")
+    c.ok(is_open(page, "140.6.1"), f"{label}: a deep link to an unbuilt outcome opens it")
+    c.ok("coming soon" in page.inner_text("[data-outcome='140.6.1']").lower(), f"{label}: unbuilt outcome says coming soon")
+    page.click("[data-outcome='140.6.1'] > button")
+    c.ok(not is_open(page, "140.6.1"), f"{label}: an outcome closes again")
     page.goto(f"{base}/calculus/math-140/#140.3.2")
     page.wait_for_selector("[data-outcome]")
     page.wait_for_timeout(200)
@@ -217,7 +216,7 @@ def play_all_walkthroughs(page, base, c, label):
                 break
             if step.get("widget"):
                 c.ok(page.locator(".learn-step .why-widget svg").count() == 1, f"{label}: {w['id']} step {i + 1} widget renders")
-                if step["widget"]["type"] == "secant" and ask["format"] == "number":
+                if step["widget"]["type"] == "secant" and step["widget"].get("mode") != "trace" and ask["format"] == "number":
                     page.eval_on_selector(".learn-step .why-widget input[type=range]", "e => { e.value = 100; e.dispatchEvent(new Event('input')); }")
                     m = re.search(r"slope of secant = (-?[\d.]+)", page.inner_text(".learn-step .why-widget"))
                     c.ok(m and abs(float(m.group(1)) - ask["answer"]) < 0.01, f"{label}: {w['id']} step {i + 1} widget settles on the answer {ask['answer']} ({m and m.group(1)})")

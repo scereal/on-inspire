@@ -16,19 +16,94 @@ window.CURRICULUM = {
           "id": "140.1.1",
           "title": "Work with domain, range, composition and inverse functions",
           "summary": "Read what a function accepts and returns, chain functions together, and undo them.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.1.domain",
+              "title": "Finding the domain from a formula",
+              "learn": "learn-domain",
+              "practice": {
+                "framework": "functions",
+                "level": 1
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.1.1.composition",
+              "title": "Composing functions",
+              "learn": "learn-composition",
+              "practice": {
+                "framework": "functions",
+                "level": 2
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.1.1.inverse",
+              "title": "Inverse functions",
+              "learn": "learn-inverse-fn",
+              "practice": {
+                "framework": "functions",
+                "level": 3
+              },
+              "builds_on": [
+                "140.1.1.composition"
+              ]
+            }
+          ]
         },
         {
           "id": "140.1.2",
           "title": "Transform graphs by shifting, stretching and reflecting",
           "summary": "Predict how a graph moves when you change its formula.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.2.transform",
+              "title": "Shifts, stretches and reflections",
+              "learn": "learn-transform",
+              "practice": {
+                "framework": "functions",
+                "level": 4
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            }
+          ]
         },
         {
           "id": "140.1.3",
           "title": "Recognize and use the elementary functions",
           "summary": "Polynomials, rational functions, powers and roots, exponentials, logarithms, trig and inverse trig.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.3.exp-log",
+              "title": "Exponentials and logarithms",
+              "learn": "learn-exp-log-eq",
+              "practice": {
+                "framework": "functions",
+                "level": 5
+              },
+              "builds_on": [
+                "140.1.1.inverse"
+              ]
+            },
+            {
+              "id": "140.1.3.trig-values",
+              "title": "Exact trig values on the unit circle",
+              "learn": "learn-trig-values",
+              "practice": {
+                "framework": "functions",
+                "level": 6
+              },
+              "builds_on": [
+                "foundation:unit-circle"
+              ]
+            }
+          ]
         }
       ]
     },
