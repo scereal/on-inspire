@@ -4076,9 +4076,9 @@ window.WALKTHROUGHS = [
               "correct": true
             },
             {
-              "label": "$C$ is the value at $x = 0$, which you compute next",
+              "label": "$C$ is one particular number we just haven't worked out yet",
               "misconception": "c-is-computed",
-              "feedback": "Without more information there's no single value: every constant works. A known point pins it down later."
+              "feedback": "No single value is hiding there: every constant works, because constants differentiate to 0. A known value can pick one out later."
             },
             {
               "label": "It's optional notation",
