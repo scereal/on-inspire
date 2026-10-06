@@ -22,6 +22,12 @@
     } catch {}
     return node;
   };
+  // Show options in a fresh random order each time: the data lists the right answer first.
+  const shuffled = (items) => {
+    const order = items.map((item, index) => ({ item, index }));
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    return order;
+  };
   const terms = (text) => text.replace(/\[\[([a-z0-9-]+)(?:\|([^\]]*))?\]\]/g, (m, cid, label) =>
     `<button type="button" class="why-term" data-concept="${cid}">${label || esc(concepts[cid] ? concepts[cid].title : cid)}</button>`);
   const bold = (text) => text.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
@@ -115,8 +121,9 @@
     let input;
     if (ask.format === "choice") {
       input = h("div", { className: "choices" });
-      for (const o of ask.options) {
+      for (const { item: o, index } of shuffled(ask.options)) {
         const b = math(h("button", { type: "button", innerHTML: o.label }));
+        b.dataset.index = index;
         b.addEventListener("click", () => {
           if (o.correct) {
             b.classList.add("right");

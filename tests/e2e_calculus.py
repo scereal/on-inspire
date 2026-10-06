@@ -97,6 +97,7 @@ def main():
             learn_tests(page, base, c, name)
             play_all_walkthroughs(page, base, c, name)
             practice_tests(page, base, c, name)
+            shuffle_test(page, base, c, name)
             page.close()
         no_speech_test(browser, base, c)
         browser.close()
@@ -191,13 +192,13 @@ def play_all_walkthroughs(page, base, c, label):
             gate = page.locator(".learn-step button").filter(has_text=re.compile(r"^(Next step|Finish)$"))
             c.ok(not gate.is_visible(), f"{label}: {w['id']} step {i + 1} hides Next until answered")
             if ask["format"] == "choice":
-                buttons = page.locator(".learn-step .choices button")
+                pick = lambda j: page.locator(f".learn-step .choices button[data-index='{j}']")
                 wrong = next((j for j, o in enumerate(ask["options"]) if not o.get("correct")), None)
                 right = next(j for j, o in enumerate(ask["options"]) if o.get("correct"))
                 if wrong is not None:
-                    buttons.nth(wrong).click()
+                    pick(wrong).click()
                     c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: {w['id']} step {i + 1} wrong-answer feedback")
-                buttons.nth(right).click()
+                pick(right).click()
             else:
                 field = page.locator(".learn-step #answer")
                 c.ok(field.get_attribute("inputmode") != "decimal", f"{label}: {w['id']} step {i + 1} keyboard can type a minus sign")
@@ -228,6 +229,17 @@ def play_all_walkthroughs(page, base, c, label):
         else:
             c.failures.append(f"{label}: {w['id']} finish screen missing Practice link")
 
+
+
+def shuffle_test(page, base, c, label):
+    """The right answer must not always be the first button (learn-factor's first step has it first in the data)."""
+    seen = set()
+    for _ in range(10):
+        page.goto(f"{base}/calculus/learn/?id=learn-factor")
+        page.wait_for_selector(".learn-step .choices button")
+        order = page.eval_on_selector_all(".learn-step .choices button", "bs => bs.map(b => b.dataset.index)")
+        seen.add(order.index("0") if "0" in order else -1)
+    c.ok(len(seen) > 1 and -1 not in seen, f"{label}: walkthrough options are shuffled (right answer seen at {sorted(seen)})")
 
 
 def practice_tests(page, base, c, label):

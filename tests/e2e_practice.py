@@ -48,13 +48,14 @@ def play(page, base, fw, level, failures):
         fmt = step["format"]
         if fmt == "choice":
             buttons = page.locator(".choices button")
+            pick = lambda j: page.locator(f".choices button[data-index='{j}']")
             wrong = next((j for j, o in enumerate(step["options"]) if not o["correct"]), None)
             right = next(j for j, o in enumerate(step["options"]) if o["correct"])
             if wrong is not None:
-                buttons.nth(wrong).click()
+                pick(wrong).click()
                 if "bad" not in (page.get_attribute(".task .feedback", "class") or ""):
                     failures.append(f"{where}: no feedback after a wrong choice")
-            buttons.nth(right).click()
+            pick(right).click()
         elif fmt == "number":
             page.fill("#answer", str(step["answer"] * 3 + 1))
             page.click("form.row button[type=submit]")
@@ -85,6 +86,20 @@ def play(page, base, fw, level, failures):
         failures.append(f"{fw}-{level}: finish screen missing")
 
 
+def correct_positions(page, base, fw, level, loads=10):
+    """Where the right answer lands among the buttons of the first choice step, over several loads."""
+    seen = set()
+    for _ in range(loads):
+        page.goto(f"{base}?f={fw}&level={level}")
+        page.wait_for_selector(".choices button")
+        pid = page.get_attribute("#stage", "data-problem")
+        problem = next(p for p in json.loads((BANK / f"{fw}-{level}.json").read_text())["problems"] if p["id"] == pid)
+        right = next(j for j, o in enumerate(problem["steps"][0]["options"]) if o["correct"])
+        order = page.eval_on_selector_all(".choices button", "bs => bs.map(b => b.dataset.index)")
+        seen.add(order.index(str(right)) if str(right) in order else -1)
+    return seen
+
+
 def main():
     base = serve()
     index = json.loads((BANK / "index.json").read_text())
@@ -99,6 +114,9 @@ def main():
             for fw, info in index.items():
                 for level in info["levels"]:
                     play(page, base, fw, int(level), failures)
+            positions = correct_positions(page, base, "limits", 3)
+            if positions <= {0} or -1 in positions:
+                failures.append(f"{name}: the right answer always sits in the same place ({positions}), so position gives it away")
             page.goto(f"{base}?f=ibp&level=9")
             page.wait_for_selector("text=isn't available yet")
             width = page.evaluate("document.documentElement.scrollWidth")

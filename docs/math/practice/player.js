@@ -20,6 +20,12 @@
     }
     return node;
   };
+  // Show options in a fresh random order each time: the data lists the right answer first.
+  const shuffled = (items) => {
+    const order = items.map((item, index) => ({ item, index }));
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    return order;
+  };
   const say = (box, kind, html) => { box.className = `feedback ${kind}`; box.innerHTML = html; math(box); };
 
   // Where this level sits in the course outline, if it's part of one --------------
@@ -159,8 +165,9 @@
   function render(step, fb) {
     if (step.format === "choice") {
       const wrap = h("div", { className: "choices" });
-      for (const o of step.options) {
+      for (const { item: o, index } of shuffled(step.options)) {
         const b = math(h("button", { type: "button", innerHTML: o.label }));
+        b.dataset.index = index;
         b.addEventListener("click", () => {
           if (o.correct) {
             b.classList.add("right");
