@@ -74,6 +74,44 @@ class ApplicationsTest(unittest.TestCase):
         self.assertAlmostEqual(sol.steps[2].answer, float(min(grid)))
         self.assertIn("-3", correct(sol.steps[0]).label)
 
+    # Level 5: curve sketching -------------------------------------------------------
+    def test_level5_increasing_and_second_derivative_test(self):
+        ok, why, sol, _ = validate(FW, {"a": 1, "r": -1, "s": 1, "d": 0}, 5, None)        # f' = 3(x + 1)(x − 1)
+        self.assertTrue(ok, why)
+        self.assertIn("x < -1", correct(sol.steps[0]).label)
+        self.assertAlmostEqual(sol.steps[1].answer, 0)
+        self.assertEqual(correct(sol.steps[2]).value, "max")
+        ok, why, sol, _ = validate(FW, {"a": -1, "r": 0, "s": 2, "d": 1}, 5, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(correct(sol.steps[2]).value, "min")
+
+    # Level 6: optimization ----------------------------------------------------------
+    def test_level6_optimum_matches_sympy(self):
+        for p, xs, best in [({"family": "river", "n": 100}, 25, 1250), ({"family": "box", "n": 12}, 2, 128),
+                            ({"family": "sum", "n": 36}, 6, 12)]:
+            ok, why, sol, _ = validate(FW, p, 6, None)
+            self.assertTrue(ok, why)
+            self.assertAlmostEqual(sol.steps[1].answer, xs)
+            self.assertAlmostEqual(sol.steps[2].answer, best)
+
+    # Level 7: L'Hôpital -------------------------------------------------------------
+    def test_level7_not_indeterminate_means_substitute(self):
+        ok, why, sol, _ = validate(FW, {"family": "plain", "k": 2, "m": 3, "n": 1}, 7, None)   # (cos x + 2)/(x + 3) → 1
+        self.assertTrue(ok, why)
+        self.assertEqual(correct(sol.steps[0]).value, "neither")
+        self.assertFalse(by_misconception(sol.steps[1], "blind-lhopital").correct)
+
+    def test_level7_quotient_rule_is_always_wrong(self):
+        for p in [{"family": "exp", "k": 2, "m": 1, "n": 1}, {"family": "cos", "k": 3, "m": 1, "n": 1}, {"family": "ln", "k": 1, "m": 1, "n": 2},
+                  {"family": "growth", "k": 1, "m": 1, "n": 3}]:
+            ok, why, sol, _ = validate(FW, p, 7, None)
+            self.assertTrue(ok, why)
+            q = by_misconception(sol.steps[1], "quotient-rule-instead")
+            self.assertIsNotNone(q, p)
+            self.assertFalse(q.correct)
+            f, point = ap.lhopital_parts(p)
+            self.assertAlmostEqual(sol.steps[2].answer, float(sp.limit(f, x, point)))
+
     def test_no_text_glitches_and_no_coin_flips(self):
         problems, _ = bank.build(FW, seed=1)
         bad = re.compile(r"(?<![\d.])1 \\(sec|cos|sin|tan|sqrt)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname")

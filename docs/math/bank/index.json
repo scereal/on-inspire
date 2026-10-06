@@ -16,6 +16,18 @@
    "4": {
     "count": 100,
     "name": "Absolute extrema"
+   },
+   "5": {
+    "count": 100,
+    "name": "Curve sketching"
+   },
+   "6": {
+    "count": 100,
+    "name": "Optimization"
+   },
+   "7": {
+    "count": 100,
+    "name": "L'H\u00f4pital's rule"
    }
   },
   "outcome": "Use derivatives for related rates, approximation, the Mean Value Theorem, extrema, optimization and L'H\u00f4pital's rule.",

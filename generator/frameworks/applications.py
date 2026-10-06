@@ -4,6 +4,9 @@ Level 1: related rates.
 Level 2: linear approximation.
 Level 3: the Mean Value Theorem.
 Level 4: absolute extrema on a closed interval.
+Level 5: curve sketching (increasing, inflection, second-derivative test).
+Level 6: optimization.
+Level 7: L'Hôpital's rule.
 """
 import sympy as sp
 
@@ -37,7 +40,7 @@ def key(e):
 
 def clean(v):
     v = sp.nsimplify(v)
-    return v.is_Rational and v.q <= MAX_DEN and abs(v.p) <= 2000
+    return v.is_Rational and v.q <= MAX_DEN and abs(v.p) <= 200000
 
 
 def same(a, b):
@@ -73,6 +76,24 @@ def mvt_parts(p):
     return x**3 + p["p"] * x, -b, 2 * b
 
 
+# Level 7 ----------------------------------------------------------------------------
+
+def lhopital_parts(p):
+    k, m, n = p["k"], p["m"], p["n"]
+    fam = p["family"]
+    if fam == "exp":
+        return (sp.exp(k * x) - 1) / (m * x), sp.Integer(0)
+    if fam == "sin":
+        return sp.sin(k * x) / (m * x), sp.Integer(0)
+    if fam == "cos":
+        return (1 - sp.cos(k * x)) / (m * x**2), sp.Integer(0)
+    if fam == "ln":
+        return sp.log(x) / (x**n - 1), sp.Integer(1)
+    if fam == "growth":
+        return x**n / sp.exp(x), sp.oo
+    return (sp.cos(x) + k) / (x + m), sp.Integer(0)
+
+
 class Applications(Framework):
     id = "applications"
     title = "Applications of the derivative"
@@ -82,6 +103,9 @@ class Applications(Framework):
         2: Level("Linear approximation", {"slope": 1, "tangent-line": 1, "estimate": 1, "concavity": 1}),
         3: Level("The Mean Value Theorem", {"average-slope": 1, "mvt": 1, "solve": 1}),
         4: Level("Absolute extrema", {"candidates": 1, "max": 1, "min": 1}),
+        5: Level("Curve sketching", {"increasing": 1, "inflection": 1, "second-derivative-test": 1}),
+        6: Level("Optimization", {"objective": 1, "optimize": 1, "value": 1}),
+        7: Level("L'Hôpital's rule", {"form": 1, "differentiate": 1, "limit": 1}),
     }
     misconceptions = {
         "forgot-chain-in-t": "Differentiated with respect to x instead of t: every changing quantity picks up its own rate.",
@@ -101,8 +125,23 @@ class Applications(Framework):
         "forgot-endpoints": "Left out the endpoints. On a closed interval the extremes can sit at the ends.",
         "outside-point": "Included a critical point outside the interval.",
         "forgot-critical": "Checked only the endpoints and missed the critical points inside.",
+        "sign-backwards": "Read the sign of f′ backwards: f is increasing where f′ > 0.",
+        "one-critical-point": "Used only one critical point; f′ changes sign at both.",
+        "second-derivative-backwards": "Flipped the second-derivative test: f″ < 0 means a peak (local max).",
+        "inflection-confusion": "Called a critical point with f″ ≠ 0 neither; f″ ≠ 0 settles it as a max or a min.",
+        "wrong-constraint": "Used the constraint incorrectly when writing the objective in one variable.",
+        "forgot-a-factor": "Left a factor out of the objective function.",
+        "optimized-the-constraint": "Wrote the constraint (which is fixed) instead of the quantity to optimize.",
+        "quotient-rule-instead": "Applied the quotient rule. L'Hôpital differentiates the top and the bottom separately.",
+        "differentiated-top-only": "Differentiated only the top. L'Hôpital differentiates both.",
+        "differentiated-bottom-only": "Differentiated only the bottom. L'Hôpital differentiates both.",
+        "flipped": "Put the bottom's derivative on top.",
+        "assumed-indeterminate": "Assumed the form was indeterminate without substituting first.",
+        "wrong-form": "Misread which indeterminate form it is.",
+        "missed-indeterminate": "Missed that the form is indeterminate: substitution gives 0/0 or ∞/∞.",
+        "blind-lhopital": "Applied L'Hôpital to a limit that isn't 0/0 or ∞/∞, which gives a wrong answer.",
     }
-    targets = {1: 100, 2: 100, 3: 100, 4: 100}
+    targets = {1: 100, 2: 100, 3: 100, 4: 100, 5: 100, 6: 100, 7: 100}
 
     def themes_for(self, level):
         return []
@@ -127,9 +166,20 @@ class Applications(Framework):
             if rng.random() < 0.35:
                 return {"family": "cubic", "p": rng.randint(-3, 5), "b": rng.randint(1, 3)}
             return {"family": "quad", "p": nz(-3, 3), "q": rng.randint(-5, 5), "r": rng.randint(-4, 4), "a": rng.randint(-3, 2), "w": rng.randint(1, 4)}
-        p = rng.choice([1, 2])
-        lo = rng.randint(-4, 1)
-        return {"p": p, "q": rng.randint(-5, 5), "lo": lo, "hi": rng.randint(lo + 2, 4)}
+        if level == 4:
+            p = rng.choice([1, 2])
+            lo = rng.randint(-4, 1)
+            return {"p": p, "q": rng.randint(-5, 5), "lo": lo, "hi": rng.randint(lo + 2, 4)}
+        if level == 5:
+            r = rng.randint(-4, 2)
+            return {"a": rng.choice([1, -1]), "r": r, "s": r + rng.choice([2, 4, 6]), "d": rng.randint(-5, 5)}
+        if level == 6:
+            family = rng.choice(["river", "box", "sum", "rect4", "split"])
+            n = {"river": range(20, 401, 20), "box": range(6, 121, 6), "sum": [k * k for k in range(2, 31)],
+                 "rect4": range(8, 201, 8), "split": range(10, 201, 10)}[family]
+            return {"family": family, "n": rng.choice(list(n))}
+        family = rng.choice(["exp", "sin", "cos", "ln", "growth", "plain"])
+        return {"family": family, "k": rng.randint(1, 5), "m": rng.choice([1, 2, 3, 4]) if family != "plain" else nz(-4, 4), "n": rng.randint(1, 4)}
 
     def canonical(self, p, level):
         return f"{level}:" + ",".join(f"{k}={p[k]}" for k in sorted(p))
@@ -138,7 +188,7 @@ class Applications(Framework):
         return solution.answers.get("_checks", [])
 
     def solve(self, p, level, theme):
-        return [None, self._related, self._approx, self._mvt, self._extrema][level](p)
+        return [None, self._related, self._approx, self._mvt, self._extrema, self._sketch, self._optimize, self._lhopital][level](p)
 
     def _choice(self, prompt, right_label, right_value, wrongs):
         """wrongs: (misconception, label, value, feedback); needs two of them."""
@@ -299,6 +349,141 @@ class Applications(Framework):
         story = f"Find the absolute maximum and minimum of $f(x) = {L(f)}$ on $[{lo}, {hi}]$."
         scene = {"type": "integral", "tex": f"f(x) = {L(f)}, \\quad x \\in [{lo}, {hi}]", "rule": f"f'(x) = {L(sp.diff(f, x))}"}
         return Solution(steps, story, scene, ["candidates", "max", "min"], {"max": float(hi_v), "min": float(lo_v), "_checks": []})
+
+
+    # Level 5 ----------------------------------------------------------------------------
+    def _sketch(self, p):
+        a, r, s_, d = p["a"], p["r"], p["s"], p["d"]
+        f = sp.expand(a * (x**3 - sp.Rational(3, 2) * (r + s_) * x**2 + 3 * r * s_ * x) + d)
+        fp, fpp = sp.diff(f, x), sp.diff(f, x, 2)
+        assert sp.expand(fp - 3 * a * (x - r) * (x - s_)) == 0
+        outer, inner = f"$x < {r}$ or $x > {s_}$", f"${r} < x < {s_}$"
+        right, flip = (outer, inner) if a > 0 else (inner, outer)
+        inc = self._choice("Where is $f$ increasing?", right, "right", [
+            ("sign-backwards", flip, "flip", f"$f'(x) = {L(fp)}$ is {'positive' if a > 0 else 'negative'} outside $[{r}, {s_}]$. Increasing means $f' > 0$."),
+            ("one-critical-point", f"$x > {r}$", "half", f"$f'$ changes sign at both $x = {r}$ and $x = {s_}$, so the picture changes twice."),
+        ])
+        infl = sp.Rational(r + s_, 2)
+        at_r = fpp.subs(x, r)
+        kind = "max" if at_r < 0 else "min"
+        test = self._choice(f"At the critical point $x = {r}$, $f''({r}) = {at_r}$. What happens there?", f"A local {'maximum' if kind == 'max' else 'minimum'}", kind, [
+            ("second-derivative-backwards", f"A local {'minimum' if kind == 'max' else 'maximum'}", "min" if kind == "max" else "max",
+             f"$f'' < 0$ means the curve bends downward: a peak. $f'' > 0$ means it bends upward: a valley. Here $f''({r}) = {at_r}$."),
+            ("inflection-confusion", "Neither: it's an inflection point", "neither",
+             f"An inflection point needs $f'' = 0$. Here $f''({r}) = {at_r} \\ne 0$, so the test decides."),
+        ])
+        steps = [inc,
+                 Step("Where is the inflection point? (Give its $x$-value.)", "number", float(infl), tolerance=0.01,
+                      explain=f"$f''(x) = {L(fpp)} = 0$ at $x = {L(infl)}$."),
+                 test]
+        story = f"Let $f(x) = {L(f)}$, so $f'(x) = {L(sp.factor(fp))}$."
+        scene = {"type": "integral", "tex": f"f(x) = {L(f)}", "rule": f"f'(x) = {L(sp.factor(fp))}"}
+        return Solution(steps, story, scene, ["increasing", "inflection", "second-derivative-test"], {"_checks": [("clean", clean(infl), "inflection not clean")]})
+
+    # Level 6 ----------------------------------------------------------------------------
+    def _optimize(self, p):
+        fam, n = p["family"], p["n"]
+        if fam == "river":
+            obj, lo, hi, maximize = x * (n - 2 * x), 0, sp.Rational(n, 2), True
+            wrongs = [("wrong-constraint", x * (n - x), f"Two sides have length $x$, so the side along the river is ${n} - 2x$."),
+                      ("wrong-constraint", x * (sp.Rational(n, 2) - x), f"Only three sides are fenced (not four), so the river side is ${n} - 2x$.")]
+            story = f"You have {n} m of fence to enclose a rectangular field along a straight river, fencing only the three sides away from the river. Let $x$ be the length of each side perpendicular to the river."
+            ask, what, unit = "the area $A(x)$", "maximum area", "m²"
+        elif fam == "box":
+            obj, lo, hi, maximize = x * (n - 2 * x) ** 2, 0, sp.Rational(n, 2), True
+            wrongs = [("wrong-constraint", x * (n - x) ** 2, f"Cutting $x$ from both ends of each side leaves ${n} - 2x$."),
+                      ("forgot-a-factor", (n - 2 * x) ** 2, "That's the base area. Volume is base area times the height $x$.")]
+            story = f"An open box is made from a {n} cm by {n} cm sheet by cutting an $x$ by $x$ square from each corner and folding up the sides."
+            ask, what, unit = "the volume $V(x)$", "maximum volume", "cm³"
+        elif fam == "rect4":
+            obj, lo, hi, maximize = x * (sp.Rational(n, 2) - x), 0, sp.Rational(n, 2), True
+            wrongs = [("wrong-constraint", x * (n - 2 * x), f"All four sides are fenced: $2x + 2y = {n}$, so $y = {n // 2} - x$."),
+                      ("wrong-constraint", x * (n - x), f"The perimeter counts each side twice: $2x + 2y = {n}$.")]
+            story = f"A rectangle has perimeter {n} m. Let $x$ be the length of one side."
+            ask, what, unit = "the area $A(x)$", "maximum area", "m²"
+        elif fam == "split":
+            obj, lo, hi, maximize = x * (n - x), 0, sp.Integer(n), True
+            wrongs = [("optimized-the-constraint", x + (n - x), f"That's the sum, which is fixed at {n}. You want to maximize the product."),
+                      ("wrong-constraint", x * (n - 2 * x), f"The other number is ${n} - x$, so the product is $x({n} - x)$.")]
+            story = f"Two positive numbers add up to {n}. Let $x$ be one of them."
+            ask, what, unit = "their product $P(x)$", "largest possible product", ""
+        else:
+            obj, lo, hi, maximize = x + n / x, 0, sp.oo, False
+            wrongs = [("optimized-the-constraint", x * (sp.Integer(n) / x), f"That's the product, which is fixed at {n}. You want to minimize the sum $x + y$ with $y = \\frac{{{n}}}{{x}}$."),
+                      ("wrong-constraint", x + n * x, f"From $xy = {n}$, $y = \\frac{{{n}}}{{x}}$, not ${n}x$.")]
+            story = f"Two positive numbers multiply to {n}. Let $x$ be one of them."
+            ask, what, unit = "the sum $S(x)$", "smallest possible sum", ""
+        crit = [c for c in sp.solve(sp.diff(obj, x), x) if c.is_real and lo < c < (hi if hi != sp.oo else 10**9)]
+        if len(crit) != 1:
+            raise NoSolution("needs one interior critical point")
+        c = crit[0]
+        second = sp.diff(obj, x, 2).subs(x, c)
+        if (second < 0) != maximize:
+            raise NoSolution("the critical point isn't the right kind of extremum")
+        best = obj.subs(x, c)
+        sym = {"river": "A", "box": "V", "sum": "S", "rect4": "A", "split": "P"}[fam]
+        obj_step = self._choice(f"Write {ask} in terms of $x$.", f"${sym}(x) = {L(obj)}$", "right",
+                                [(m, f"${sym}(x) = {L(e)}$", f"w{i}", fb) for i, (m, e, fb) in enumerate(wrongs)])
+        steps = [obj_step,
+                 Step(f"What value of $x$ gives the {what}?", "number", float(c), tolerance=0.01,
+                      explain=f"${sym}'(x) = {L(sp.factor(sp.diff(obj, x)))} = 0$ at $x = {L(c)}$, and ${sym}''({L(c)}) = {L(second)}$ confirms it's a {'maximum' if maximize else 'minimum'}."),
+                 Step(f"What is the {what}{', in ' + unit if unit else ''}?", "number", float(best), tolerance=0.01,
+                      explain=f"${sym}({L(c)}) = {L(best)}$")]
+        checks = [("clean", clean(c) and clean(best), "optimum isn't clean")]
+        scene = {"type": "integral", "tex": f"{sym}(x) = \\ ?", "rule": "\\text{write it in one variable, then set the derivative to 0}"}
+        return Solution(steps, story, scene, ["objective", "optimize", "value"], {"best": float(best), "_checks": checks})
+
+    # Level 7 ----------------------------------------------------------------------------
+    def _lhopital(self, p):
+        f, point = lhopital_parts(p)
+        top, bottom = sp.fraction(sp.together(f))
+        where = sp.latex(point).replace("\\infty", "\\infty")
+        limit = sp.limit(f, x, point)
+        t0, b0 = sp.limit(top, x, point), sp.limit(bottom, x, point)
+        form = "0/0" if t0 == 0 and b0 == 0 else ("inf/inf" if t0.is_infinite and b0.is_infinite else "neither")
+        forms = {"0/0": "$\\frac{0}{0}$", "inf/inf": "$\\frac{\\infty}{\\infty}$", "neither": "Neither: substitute directly"}
+        others = [k for k in forms if k != form]
+        form_step = self._choice(f"Substitute $x \\to {where}$. What form do you get?", forms[form], form, [
+            ("assumed-indeterminate" if form == "neither" else ("wrong-form" if o != "neither" else "missed-indeterminate"), forms[o], o,
+             ({"0/0": "Substitute: the top and bottom both go to 0.", "inf/inf": "Both the top and bottom grow without bound.",
+               "neither": f"The top approaches ${L(t0)}$, which isn't 0 or infinite, so there's nothing indeterminate."}[form]))
+            for o in others])
+        if form == "neither":
+            if limit in (0,) or not clean(limit):
+                raise NoSolution("the substituted value must be clean and differ from the blind-L'Hôpital value 0")
+            blind = sp.limit(sp.diff(top, x) / sp.diff(bottom, x), x, point)
+            if same(blind, limit):
+                raise NoSolution("blind L'Hôpital happens to agree")
+            value_step = self._choice("So what is the limit?", f"${L(limit)}$", "right", [
+                ("blind-lhopital", f"${L(blind)}$", "blind", f"L'Hôpital only works on $\\frac{{0}}{{0}}$ or $\\frac{{\\infty}}{{\\infty}}$. Here substitution already gives $\\frac{{{L(t0)}}}{{{L(b0)}}}$."),
+                ("assumed-indeterminate", "It doesn't exist", "dne", f"The bottom approaches ${L(b0)}$, not 0, so substitution works: ${L(limit)}$."),
+            ])
+            steps = [form_step, value_step]
+        else:
+            ratio = sp.diff(top, x) / sp.diff(bottom, x)
+            quot = (sp.diff(top, x) * bottom - top * sp.diff(bottom, x)) / bottom**2
+            topy = sp.diff(top, x) / bottom
+            frac = lambda a, b: f"$\\frac{{{L(a)}}}{{{L(b)}}}$"
+            ft, fb_ = sp.diff(top, x), sp.diff(bottom, x)
+            cands = [("quotient-rule-instead", (ft * bottom - top * fb_) / bottom**2,
+                      f"$\\frac{{({L(ft)})({L(bottom)}) - ({L(top)})({L(fb_)})}}{{({L(bottom)})^2}}$",
+                      "That's the quotient rule. L'Hôpital differentiates the top and the bottom separately: $\\frac{f'}{g'}$."),
+                     ("differentiated-top-only", ft / bottom, frac(ft, bottom), "Differentiate the bottom too: $\\frac{f'}{g'}$."),
+                     ("differentiated-bottom-only", top / fb_, frac(top, fb_), "Differentiate the top too: $\\frac{f'}{g'}$."),
+                     ("flipped", fb_ / ft, frac(fb_, ft), "Keep the top's derivative on top: $\\frac{f'}{g'}$, not $\\frac{g'}{f'}$.")]
+            kept = []
+            for m, e, lbl, fb in cands:
+                if not same(e, ft / fb_) and all(not same(e, k[1]) for k in kept) and lbl != frac(ft, fb_):
+                    kept.append((m, e, lbl, fb))
+            diff_step = self._choice("Apply L'Hôpital's rule once. The new limit is of:", frac(ft, fb_), "right",
+                                     [(m, lbl, f"w{i}", fb) for i, (m, e, lbl, fb) in enumerate(kept[:2])])
+            steps = [form_step, diff_step,
+                     Step(f"What is the limit?", "number", float(limit), tolerance=0.01,
+                          explain=f"$\\lim_{{x\\to {where}}} {L(f)} = {L(limit)}$" + (" (apply the rule a second time: still $\\frac{0}{0}$ after the first)" if p["family"] == "cos" else ""))]
+        checks = [("clean", clean(limit), "limit isn't clean")]
+        story = f"Find $\\lim_{{x\\to {where}}} {L(f)}$."
+        scene = {"type": "integral", "tex": f"\\lim_{{x\\to {where}}} {L(f)}", "rule": "\\lim\\frac{f}{g} = \\lim\\frac{f'}{g'} \\text{ for } \\tfrac{0}{0} \\text{ or } \\tfrac{\\infty}{\\infty}"}
+        return Solution(steps, story, scene, ["form", "differentiate", "limit"][:len(steps)], {"limit": float(limit), "_checks": checks})
 
 
 FRAMEWORK = Applications()
