@@ -62,7 +62,7 @@ def pick(right, candidates, n=2):
 
 def approx_parts(p):
     a, d = sp.Integer(p["a"]), sp.Rational(p["d"])
-    f = {"sqrt": sp.sqrt(x), "cbrt": sp.cbrt(x), "recip": 1 / x}[p["func"]]
+    f = {"sqrt": sp.sqrt(x), "cbrt": sp.cbrt(x), "recip": 1 / x, "square": x**2, "ln": sp.log(x)}[p["func"]]
     return f, a, d
 
 
@@ -88,9 +88,9 @@ def lhopital_parts(p):
     if fam == "cos":
         return (1 - sp.cos(k * x)) / (m * x**2), sp.Integer(0)
     if fam == "ln":
-        return sp.log(x) / (x**n - 1), sp.Integer(1)
+        return k * sp.log(x) / (x**n - 1), sp.Integer(1)
     if fam == "growth":
-        return x**n / sp.exp(x), sp.oo
+        return x**n / sp.exp(k * x), sp.oo
     return (sp.cos(x) + k) / (x + m), sp.Integer(0)
 
 
@@ -158,9 +158,12 @@ class Applications(Framework):
             return {"family": family, "w": rng.randint(2, 12), "h": rng.randint(2, 12), "dw": rng.choice(["1", "2", "3", "0.5"]),
                     "dh": rng.choice(["1", "2", "-1", "0.5", "-2"])}
         if level == 2:
-            func = rng.choice(["sqrt", "sqrt", "cbrt", "recip"])
-            a = {"sqrt": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144], "cbrt": [1, 8, 27, 64, 125, 216], "recip": [1, 2, 4, 5, 10]}[func]
-            deltas = ["0.5", "-0.5", "1", "-1", "0.2", "-0.2", "0.4", "-0.4", "0.3", "-0.3", "0.6", "-0.6", "1.5", "2", "-2", "3"]
+            # concave (overestimates) or convex (underestimates) about equally often in the bank (concave candidates are rejected more), so the verdict can't be guessed
+            func = rng.choice(["sqrt", "cbrt", "ln"]) if rng.random() < 0.62 else rng.choice(["recip", "square"])
+            a = {"sqrt": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144], "cbrt": [1, 8, 27, 64, 125, 216], "recip": [1, 2, 4, 5, 10],
+                 "square": [3, 5, 7, 10, 12, 20], "ln": [1]}[func]
+            deltas = ["0.5", "-0.5", "1", "-1", "0.2", "-0.2", "0.4", "-0.4", "0.3", "-0.3", "0.6", "-0.6", "0.8", "-0.8",
+                      "1.5", "-1.5", "2", "-2", "2.5", "-2.5", "3", "-3", "4", "-4", "5", "6"]
             return {"func": func, "a": rng.choice(a), "d": rng.choice(deltas)}
         if level == 3:
             if rng.random() < 0.35:
@@ -179,7 +182,14 @@ class Applications(Framework):
                  "rect4": range(8, 201, 8), "split": range(10, 201, 10)}[family]
             return {"family": family, "n": rng.choice(list(n))}
         family = rng.choice(["exp", "sin", "cos", "ln", "growth", "plain"])
-        return {"family": family, "k": rng.randint(1, 5), "m": rng.choice([1, 2, 3, 4]) if family != "plain" else nz(-4, 4), "n": rng.randint(1, 4)}
+        # Only the parameters a family uses vary, so no two problems are the same limit in disguise
+        if family in ("exp", "sin", "cos"):
+            return {"family": family, "k": rng.randint(1, 5), "m": rng.randint(1, 4), "n": 0}
+        if family == "ln":
+            return {"family": family, "k": rng.randint(1, 5), "m": 0, "n": rng.randint(1, 4)}
+        if family == "growth":
+            return {"family": family, "k": rng.randint(1, 3), "m": 0, "n": rng.randint(1, 4)}
+        return {"family": family, "k": rng.randint(1, 5), "m": nz(-4, 4), "n": 0}
 
     def canonical(self, p, level):
         return f"{level}:" + ",".join(f"{k}={p[k]}" for k in sorted(p))
@@ -231,10 +241,9 @@ class Applications(Framework):
                 ("units-wrong", "cm per second", "cm/s", "Volume is in cm³, so its rate is cm³ per second."),
                 ("units-wrong", "cm² per second", "cm2/s", "Volume is in cm³, so its rate is cm³ per second."),
             ])
-            steps = [d_step,
-                     Step(f"How fast is the volume growing when the edge is {e} cm, in cm³/s?", "number", float(dV), tolerance=0.01,
-                          explain=f"$3({e})^2({dec(rate)}) = {dec(dV)}$ cm³/s."),
-                     mean]
+            steps = [d_step, mean,
+                     Step(f"How fast is the volume growing when the edge is {e} cm?", "number", float(dV), tolerance=0.01,
+                          explain=f"$3({e})^2({dec(rate)}) = {dec(dV)}$ cm³/s.")]
             story = f"The edges of a cube grow at {dec(rate)} cm/s."
             answer = dV
         else:
@@ -248,10 +257,9 @@ class Applications(Framework):
                 ("units-wrong", "cm per second", "cm/s", "Area is in cm², so its rate is cm² per second."),
                 ("units-wrong", "cm²", "cm2", "A rate needs \"per second\": cm² per second."),
             ])
-            steps = [d_step,
-                     Step(f"How fast is the area changing when $w = {w}$ cm and $h = {h}$ cm, in cm²/s?", "number", float(dA), tolerance=0.01,
-                          explain=f"$({dec(dw)})({h}) + ({w})({dec(dh)}) = {dec(dA)}$ cm²/s."),
-                     mean]
+            steps = [d_step, mean,
+                     Step(f"How fast is the area changing when $w = {w}$ cm and $h = {h}$ cm?", "number", float(dA), tolerance=0.01,
+                          explain=f"$({dec(dw)})({h}) + ({w})({dec(dh)}) = {dec(dA)}$ cm²/s.")]
             move = lambda r: f"{'grows' if r > 0 else 'shrinks'} at {dec(abs(r))} cm/s"
             story = f"A rectangle's width $w$ {move(dw)} and its height $h$ {move(dh)}."
             answer = dA
@@ -262,7 +270,7 @@ class Applications(Framework):
     # Level 2 ----------------------------------------------------------------------------
     def _approx(self, p):
         f, a, d = approx_parts(p)
-        if a + d <= 0 or abs(d) >= a:
+        if p["func"] in ("sqrt", "cbrt", "recip", "ln") and (a + d <= 0 or abs(d) >= a):
             raise NoSolution("the estimate point must stay well inside the domain")
         fa, fpa, fppa = f.subs(x, a), sp.diff(f, x).subs(x, a), sp.diff(f, x, 2).subs(x, a)
         tangent = fa + fpa * (x - a)
@@ -271,7 +279,7 @@ class Applications(Framework):
         if abs(float(est - true)) < 0.0002:
             raise NoSolution("the estimate is indistinguishable from the true value at this tolerance")
         over = fppa < 0
-        name = {"sqrt": "\\sqrt{x}", "cbrt": "\\sqrt[3]{x}", "recip": "\\frac{1}{x}"}[p["func"]]
+        name = {"sqrt": "\\sqrt{x}", "cbrt": "\\sqrt[3]{x}", "recip": "\\frac{1}{x}", "square": "x^2", "ln": "\\ln x"}[p["func"]]
         xv = a + d
         line = self._choice(f"What is the tangent line $L(x)$ at $x = {a}$?", f"$L(x) = {L(fa)} + {L(fpa)}(x - {a})$".replace("+ -", "- "), "right", [
             ("forgot-shift", f"$L(x) = {L(fa)} + {L(fpa)}x$".replace("+ -", "- "), "no-shift", f"The slope multiplies the distance from the tangent point, $x - {a}$, not $x$ itself."),
@@ -284,11 +292,12 @@ class Applications(Framework):
             ("tangent-is-exact", "Exact: the tangent line matches the curve", "exact",
              "The tangent line only touches the curve at $x = " + str(a) + "$. Elsewhere it's an approximation."),
         ])
+        bend.explain = f"The true value is ${dec(true)}$, so the estimate is {'over' if over else 'under'} by ${dec(abs(est - true))}$."
         steps = [
             Step(f"What is $f'({a})$ for $f(x) = {name}$?", "number", float(fpa), tolerance=0.0005, explain=f"$f'({a}) = {L(fpa)}$"),
             line,
-            Step(f"Use $L(x)$ to estimate $f({dec(xv)})$.", "number", float(est), tolerance=0.0001,
-                 explain=f"$L({dec(xv)}) = {L(fa)} + \\left({L(fpa)}\\right)({dec(d)}) = {dec(est)}$ (the true value is ${dec(true)}$)."),
+            Step(f"Use $L(x)$ to estimate $f({dec(xv)})$, to 4 decimal places.", "number", float(est), tolerance=0.0001,
+                 explain=f"$L({dec(xv)}) = {L(fa)} + \\left({L(fpa)}\\right)({dec(d)}) = {dec(est)}$"),
             bend,
         ]
         story = f"Estimate ${name.replace('x', dec(xv))}$ using the tangent line to $f(x) = {name}$ at $x = {a}$."
@@ -316,7 +325,8 @@ class Applications(Framework):
             Step("Find that $c$.", "number", float(c), tolerance=0.01, explain=f"$f'(x) = {L(sp.diff(f, x))} = {L(avg)}$ inside the interval at $c = {L(c)}$."),
         ]
         story = f"Let $f(x) = {L(f)}$ on $[{a}, {b}]$."
-        scene = {"type": "integral", "tex": f"f'(c) = \\frac{{f({b}) - f({a})}}{{{b} - ({a})}}".replace("- (-", "+ (").replace("+ (", "+ ").replace(")}", "}") if a < 0 else f"f'(c) = \\frac{{f({b}) - f({a})}}{{{b} - {a}}}", "rule": ""}
+        denom = f"{b} + {-a}" if a < 0 else f"{b} - {a}"
+        scene = {"type": "integral", "tex": f"f'(c) = \\frac{{f({b}) - f({a})}}{{{denom}}}", "rule": ""}
         checks = [("clean", clean(c) and clean(avg), "c or the average isn't clean")]
         return Solution(steps, story, scene, ["average-slope", "mvt", "solve"], {"c": float(c), "_checks": checks})
 
@@ -334,17 +344,18 @@ class Applications(Framework):
             raise NoSolution("a tie: the max or min happens twice")
         show = lambda cs: "$" + ", ".join(str(c) for c in cs) + "$" if cs else "none"
         wrongs = []
+        if outside:
+            wrongs.append(("outside-point", show(sorted(set(cands + outside))), "outside", f"$x = {', '.join(map(str, outside))}$ is outside $[{lo}, {hi}]$, so it doesn't count."))
         if inside:
             wrongs.append(("forgot-endpoints", show(sorted(inside)), "inside", f"On a closed interval the endpoints ${lo}$ and ${hi}$ are candidates too."))
             wrongs.append(("forgot-critical", show([lo, hi]), "ends", f"Check where $f'(x) = 0$ inside the interval as well: $x = {', '.join(map(str, inside))}$."))
-        if outside:
-            wrongs.append(("outside-point", show(sorted(set(cands + outside))), "outside", f"$x = {', '.join(map(str, outside))}$ is outside $[{lo}, {hi}]$, so it doesn't count."))
         cand_step = self._choice(f"Which $x$-values are the candidates for the absolute max and min on $[{lo}, {hi}]$?", show(cands), "right", wrongs[:2])
         steps = [
             cand_step,
             Step(f"What is the absolute maximum value of $f$ on $[{lo}, {hi}]$?", "number", float(hi_v), tolerance=0.01,
-                 explain="Compare: " + ", ".join(f"$f({c}) = {values[c]}$" for c in cands) + "."),
-            Step(f"And the absolute minimum value?", "number", float(lo_v), tolerance=0.01),
+                 explain=f"The largest of the candidate values is ${hi_v}$."),
+            Step(f"And the absolute minimum value?", "number", float(lo_v), tolerance=0.01,
+                 explain="All the candidate values: " + ", ".join(f"$f({c}) = {values[c]}$" for c in cands) + "."),
         ]
         story = f"Find the absolute maximum and minimum of $f(x) = {L(f)}$ on $[{lo}, {hi}]$."
         scene = {"type": "integral", "tex": f"f(x) = {L(f)}, \\quad x \\in [{lo}, {hi}]", "rule": f"f'(x) = {L(sp.diff(f, x))}"}
@@ -403,14 +414,14 @@ class Applications(Framework):
             ask, what, unit = "the area $A(x)$", "maximum area", "m²"
         elif fam == "split":
             obj, lo, hi, maximize = x * (n - x), 0, sp.Integer(n), True
-            wrongs = [("optimized-the-constraint", x + (n - x), f"That's the sum, which is fixed at {n}. You want to maximize the product."),
+            wrongs = [("optimized-the-constraint", x + (n - x), f"That's the sum, which is fixed at {n}. You want to maximize the product.", f"x + ({n} - x)"),
                       ("wrong-constraint", x * (n - 2 * x), f"The other number is ${n} - x$, so the product is $x({n} - x)$.")]
             story = f"Two positive numbers add up to {n}. Let $x$ be one of them."
             ask, what, unit = "their product $P(x)$", "largest possible product", ""
         else:
             obj, lo, hi, maximize = x + n / x, 0, sp.oo, False
-            wrongs = [("optimized-the-constraint", x * (sp.Integer(n) / x), f"That's the product, which is fixed at {n}. You want to minimize the sum $x + y$ with $y = \\frac{{{n}}}{{x}}$."),
-                      ("wrong-constraint", x + n * x, f"From $xy = {n}$, $y = \\frac{{{n}}}{{x}}$, not ${n}x$.")]
+            wrongs = [("optimized-the-constraint", x * (sp.Integer(n) / x), f"That's the product, which is fixed at {n}. You want to minimize the sum $x + y$ with $y = \\frac{{{n}}}{{x}}$.", f"x \\cdot \\frac{{{n}}}{{x}}"),
+                      ("wrong-constraint", x + n * x, f"From $xy = {n}$, $y = \\frac{{{n}}}{{x}}$, not ${n}x$.", f"x + {n}x")]
             story = f"Two positive numbers multiply to {n}. Let $x$ be one of them."
             ask, what, unit = "the sum $S(x)$", "smallest possible sum", ""
         crit = [c for c in sp.solve(sp.diff(obj, x), x) if c.is_real and lo < c < (hi if hi != sp.oo else 10**9)]
@@ -423,7 +434,7 @@ class Applications(Framework):
         best = obj.subs(x, c)
         sym = {"river": "A", "box": "V", "sum": "S", "rect4": "A", "split": "P"}[fam]
         obj_step = self._choice(f"Write {ask} in terms of $x$.", f"${sym}(x) = {L(obj)}$", "right",
-                                [(m, f"${sym}(x) = {L(e)}$", f"w{i}", fb) for i, (m, e, fb) in enumerate(wrongs)])
+                                [(w[0], f"${sym}(x) = {w[3] if len(w) > 3 else L(w[1])}$", f"w{i}", w[2]) for i, w in enumerate(wrongs)])
         steps = [obj_step,
                  Step(f"What value of $x$ gives the {what}?", "number", float(c), tolerance=0.01,
                       explain=f"${sym}'(x) = {L(sp.factor(sp.diff(obj, x)))} = 0$ at $x = {L(c)}$, and ${sym}''({L(c)}) = {L(second)}$ confirms it's a {'maximum' if maximize else 'minimum'}."),
@@ -434,10 +445,20 @@ class Applications(Framework):
         return Solution(steps, story, scene, ["objective", "optimize", "value"], {"best": float(best), "_checks": checks})
 
     # Level 7 ----------------------------------------------------------------------------
+    def _repeat_note(self, p):
+        k, m, n = p["k"], p["m"], p["n"]
+        if p["family"] == "cos":
+            return (f". After one round it's still $\\frac{{0}}{{0}}$, so apply the rule again: "
+                    f"$\\frac{{{L(k * k * sp.cos(k * x))}}}{{{2 * m}}} \\to {L(sp.Rational(k * k, 2 * m))}$")
+        if p["family"] == "growth" and n > 1:
+            return f". Apply the rule {n} times: each round lowers the power of $x$ by one, while $e^{{{k}x}}$ keeps growing.".replace("e^{1x}", "e^{x}")
+        return ""
+
     def _lhopital(self, p):
         f, point = lhopital_parts(p)
         top, bottom = sp.fraction(sp.together(f))
-        where = sp.latex(point).replace("\\infty", "\\infty")
+        where = sp.latex(point)
+        shown = f"\\frac{{{L(top)}}}{{{L(bottom)}}}"
         limit = sp.limit(f, x, point)
         t0, b0 = sp.limit(top, x, point), sp.limit(bottom, x, point)
         form = "0/0" if t0 == 0 and b0 == 0 else ("inf/inf" if t0.is_infinite and b0.is_infinite else "neither")
@@ -479,10 +500,10 @@ class Applications(Framework):
                                      [(m, lbl, f"w{i}", fb) for i, (m, e, lbl, fb) in enumerate(kept[:2])])
             steps = [form_step, diff_step,
                      Step(f"What is the limit?", "number", float(limit), tolerance=0.01,
-                          explain=f"$\\lim_{{x\\to {where}}} {L(f)} = {L(limit)}$" + (" (apply the rule a second time: still $\\frac{0}{0}$ after the first)" if p["family"] == "cos" else ""))]
+                          explain=f"$\\lim_{{x\\to {where}}} {shown} = {L(limit)}$" + self._repeat_note(p))]
         checks = [("clean", clean(limit), "limit isn't clean")]
-        story = f"Find $\\lim_{{x\\to {where}}} {L(f)}$."
-        scene = {"type": "integral", "tex": f"\\lim_{{x\\to {where}}} {L(f)}", "rule": "\\lim\\frac{f}{g} = \\lim\\frac{f'}{g'} \\text{ for } \\tfrac{0}{0} \\text{ or } \\tfrac{\\infty}{\\infty}"}
+        story = f"Find $\\lim_{{x\\to {where}}} {shown}$."
+        scene = {"type": "integral", "tex": f"\\lim_{{x\\to {where}}} {shown}", "rule": "\\lim\\frac{f}{g} = \\lim\\frac{f'}{g'} \\text{ for } \\tfrac{0}{0} \\text{ or } \\tfrac{\\infty}{\\infty}"}
         return Solution(steps, story, scene, ["form", "differentiate", "limit"][:len(steps)], {"limit": float(limit), "_checks": checks})
 
 

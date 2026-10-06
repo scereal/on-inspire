@@ -1,6 +1,6 @@
 {
  "applications": {
-  "acceptance_rate": 0.5872,
+  "acceptance_rate": 0.5587,
   "accepted": 700,
   "framework": "applications",
   "levels": {
@@ -15,17 +15,17 @@
    "2": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 30,
-     "exists": 116
+     "duplicate": 24,
+     "exists": 59
     },
     "target": 100,
-    "tried": 246
+    "tried": 183
    },
    "3": {
     "accepted": 100,
     "rejected": {
-     "distinct": 4,
-     "duplicate": 22
+     "distinct": 8,
+     "duplicate": 18
     },
     "target": 100,
     "tried": 126
@@ -33,39 +33,39 @@
    "4": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 22,
-     "exists": 103
+     "duplicate": 25,
+     "exists": 105
     },
     "target": 100,
-    "tried": 225
+    "tried": 230
    },
    "5": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 12
+     "duplicate": 14
     },
     "target": 100,
-    "tried": 112
+    "tried": 114
    },
    "6": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 139
+     "duplicate": 146
     },
     "target": 100,
-    "tried": 239
+    "tried": 246
    },
    "7": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 11
+     "duplicate": 121
     },
     "target": 100,
-    "tried": 111
+    "tried": 221
    }
   },
   "seed": 1,
-  "tried": 1192
+  "tried": 1253
  },
  "bounce": {
   "acceptance_rate": 0.6904,

@@ -57,7 +57,8 @@ def play(page, base, fw, level, failures):
                     failures.append(f"{where}: no feedback after a wrong choice")
             pick(right).click()
         elif fmt == "number":
-            page.fill("#answer", str(step["answer"] * 3 + 1))
+            # a number that's clearly wrong (3a + 1 equals a when a = -0.5)
+            page.fill("#answer", str(step["answer"] + max(1, abs(step["answer"])) + 10 * step.get("tolerance", 0)))
             page.click("form.row button[type=submit]")
             if "bad" not in (page.get_attribute(".task .feedback", "class") or ""):
                 failures.append(f"{where}: no feedback after a wrong number")

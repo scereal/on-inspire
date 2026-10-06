@@ -31,7 +31,7 @@ class ApplicationsTest(unittest.TestCase):
     def test_level1_rectangle_product_rule(self):
         ok, why, sol, _ = validate(FW, {"family": "rectangle", "w": 4, "h": 3, "dw": "2", "dh": "1"}, 1, None)
         self.assertTrue(ok, why)
-        self.assertAlmostEqual(sol.steps[1].answer, 2 * 3 + 4 * 1)
+        self.assertAlmostEqual(sol.steps[2].answer, 2 * 3 + 4 * 1)
 
     # Level 2: linear approximation --------------------------------------------------
     def test_level2_sqrt_overestimates(self):
@@ -114,7 +114,7 @@ class ApplicationsTest(unittest.TestCase):
 
     def test_no_text_glitches_and_no_coin_flips(self):
         problems, _ = bank.build(FW, seed=1)
-        bad = re.compile(r"(?<![\d.])1 \\(sec|cos|sin|tan|sqrt)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname")
+        bad = re.compile(r"(?<![\d.{])1 ?\\(sec|cos|sin|tan|sqrt)|\{1\\(cos|sin)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname")
         for level, items in problems.items():
             for p in items:
                 for st in p["steps"]:
@@ -124,6 +124,63 @@ class ApplicationsTest(unittest.TestCase):
                                         [o.get("feedback", "") for o in st.get("options", [])] + [o["label"] for o in st.get("options", [])]]
                 for t in texts:
                     self.assertIsNone(bad.search(t), f"L{level} {p['id']}: {t}")
+
+    def test_scene_text_is_clean_and_balanced(self):
+        problems, _ = bank.build(FW, seed=1)
+        for level, items in problems.items():
+            for p in items:
+                for t in [p["scene"].get("tex", ""), p["scene"].get("rule", ""), p["story"]] + [st["prompt"] for st in p["steps"]]:
+                    stripped = t.replace("\\left(", "").replace("\\right)", "")
+                    self.assertEqual(stripped.count("("), stripped.count(")"), f"L{level} {p['id']}: {t}")
+                    self.assertEqual(t.count("{"), t.count("}"), f"L{level} {p['id']}: {t}")
+
+    def test_no_two_problems_read_the_same(self):
+        problems, _ = bank.build(FW, seed=1)
+        for level, items in problems.items():
+            texts = [p["story"] + "|".join(st["prompt"] for st in p["steps"]) for p in items]
+            self.assertEqual(len(texts), len(set(texts)), f"L{level} repeats a problem")
+
+    def test_level7_growth_family_is_shown_as_a_fraction(self):
+        ok, why, sol, _ = validate(FW, {"family": "growth", "k": 1, "m": 0, "n": 2}, 7, None)
+        self.assertTrue(ok, why)
+        self.assertIn("\\frac", sol.story)
+        self.assertIn("2", sol.steps[2].explain)          # the rule is applied twice
+
+    def test_level4_outside_point_distractor_appears(self):
+        problems, _ = bank.build(FW, seed=1)
+        names = {o.get("misconception") for p in problems[4] for o in p["steps"][0]["options"]}
+        self.assertIn("outside-point", names)
+
+    def test_level4_max_explain_doesnt_give_away_the_min(self):
+        ok, why, sol, _ = validate(FW, {"p": 1, "q": 1, "lo": -3, "hi": 3}, 4, None)
+        self.assertTrue(ok, why)
+        self.assertNotIn("-17", sol.steps[1].explain)
+
+    def test_level1_units_come_before_the_number(self):
+        ok, why, sol, _ = validate(FW, {"family": "cube", "edge": 3, "rate": "0.5"}, 1, None)
+        self.assertTrue(ok, why)
+        self.assertEqual(sol.steps[1].format, "choice")
+        self.assertNotIn("cm³/s", sol.steps[2].prompt)
+
+    def test_level2_true_value_held_back_and_decimals_stated(self):
+        ok, why, sol, _ = validate(FW, {"func": "sqrt", "a": 16, "d": "0.5"}, 2, None)
+        self.assertTrue(ok, why)
+        self.assertNotIn("true value", sol.steps[2].explain)
+        self.assertIn("4 decimal places", sol.steps[2].prompt)
+
+    def test_level2_verdicts_are_mixed(self):
+        from collections import Counter
+        problems, _ = bank.build(FW, seed=1)
+        verdicts = Counter(next(o["value"] for o in p["steps"][3]["options"] if o["correct"]) for p in problems[2])
+        self.assertGreaterEqual(min(verdicts["over"], verdicts["under"]), 35, verdicts)
+
+    def test_level6_distractors_keep_their_shape(self):
+        for p in [{"family": "split", "n": 10}, {"family": "sum", "n": 64}]:
+            ok, why, sol, _ = validate(FW, p, 6, None)
+            self.assertTrue(ok, why)
+            for o in sol.steps[0].options:
+                self.assertIsNone(re.search(r"= -?\d+\$$", o.label), o.label)
+                self.assertIsNone(re.search(r"= \d+ x\$$", o.label), o.label)
 
     def test_bank(self):
         problems, report = bank.build(FW, seed=1)
