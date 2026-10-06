@@ -1,4 +1,26 @@
 {
+ "applications": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Related rates"
+   },
+   "2": {
+    "count": 100,
+    "name": "Linear approximation"
+   },
+   "3": {
+    "count": 100,
+    "name": "The Mean Value Theorem"
+   },
+   "4": {
+    "count": 100,
+    "name": "Absolute extrema"
+   }
+  },
+  "outcome": "Use derivatives for related rates, approximation, the Mean Value Theorem, extrema, optimization and L'H\u00f4pital's rule.",
+  "title": "Applications of the derivative"
+ },
  "bounce": {
   "levels": {
    "1": {

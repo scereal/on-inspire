@@ -1,7 +1,7 @@
 """Registry of problem frameworks, keyed by framework id (module names use underscores, ids may use hyphens)."""
 import importlib
 
-NAMES = ["ibp", "projectile", "mixing", "bounce", "derivative_definition", "derivative_rules", "limits", "continuity", "elementary_derivatives"]
+NAMES = ["ibp", "projectile", "mixing", "bounce", "derivative_definition", "derivative_rules", "limits", "continuity", "elementary_derivatives", "applications"]
 
 
 def get(framework_id):
