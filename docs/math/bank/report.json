@@ -1,4 +1,47 @@
 {
+ "antiderivatives": {
+  "acceptance_rate": 0.6957,
+  "accepted": 400,
+  "framework": "antiderivatives",
+  "levels": {
+   "1": {
+    "accepted": 100,
+    "rejected": {
+     "clean": 116
+    },
+    "target": 100,
+    "tried": 216
+   },
+   "2": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 23,
+     "exists": 7
+    },
+    "target": 100,
+    "tried": 130
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 1,
+     "exists": 27
+    },
+    "target": 100,
+    "tried": 128
+   },
+   "4": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 1
+    },
+    "target": 100,
+    "tried": 101
+   }
+  },
+  "seed": 1,
+  "tried": 575
+ },
  "applications": {
   "acceptance_rate": 0.5587,
   "accepted": 700,
