@@ -7,6 +7,8 @@ from generator.core import bank
 from generator.core.validators import validate
 from generator.frameworks import elementary_derivatives as ed
 
+from functools import lru_cache
+
 FW = ed.FRAMEWORK
 x = ed.x
 
@@ -17,6 +19,12 @@ def correct(step):
 
 def by_misconception(step, name):
     return next((o for o in step.options if o.misconception == name), None)
+
+
+@lru_cache(maxsize=None)
+def built():
+    """Build the bank once per test run; several tests read it."""
+    return bank.build(FW, seed=1)
 
 
 class ElementaryDerivativesTest(unittest.TestCase):
@@ -158,7 +166,7 @@ class ElementaryDerivativesTest(unittest.TestCase):
         self.assertFalse(validate(FW, {"a": 1, "b": 0, "c": 2, "d": 1, "t0": 1}, 7, None)[0])
 
     def test_no_sign_glitches_in_text(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         # also: write ln (not log), arctan (not atan), and tan's derivative as sec², matching its distractors
         bad = re.compile(r"(?<![\d.])1 \\(sec|cos|sin|tan)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname|tan\^\{2\}")
         for level, items in problems.items():
@@ -169,7 +177,7 @@ class ElementaryDerivativesTest(unittest.TestCase):
                     self.assertIsNone(bad.search(t), f"L{level} {p['id']}: {t}")
 
     def test_bank(self):
-        problems, report = bank.build(FW, seed=1)
+        problems, report = built()
         for level in FW.levels:
             self.assertGreaterEqual(len(problems[level]), 100, report["levels"][str(level)])
 

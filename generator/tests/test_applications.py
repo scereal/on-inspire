@@ -7,6 +7,8 @@ from generator.core import bank
 from generator.core.validators import validate
 from generator.frameworks import applications as ap
 
+from functools import lru_cache
+
 FW = ap.FRAMEWORK
 x = ap.x
 
@@ -17,6 +19,12 @@ def correct(step):
 
 def by_misconception(step, name):
     return next((o for o in step.options if o.misconception == name), None)
+
+
+@lru_cache(maxsize=None)
+def built():
+    """Build the bank once per test run; several tests read it."""
+    return bank.build(FW, seed=1)
 
 
 class ApplicationsTest(unittest.TestCase):
@@ -113,7 +121,7 @@ class ApplicationsTest(unittest.TestCase):
             self.assertAlmostEqual(sol.steps[2].answer, float(sp.limit(f, x, point)))
 
     def test_no_text_glitches_and_no_coin_flips(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         bad = re.compile(r"(?<![\d.{])1 ?\\(sec|cos|sin|tan|sqrt)|\{1\\(cos|sin)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname")
         for level, items in problems.items():
             for p in items:
@@ -126,7 +134,7 @@ class ApplicationsTest(unittest.TestCase):
                     self.assertIsNone(bad.search(t), f"L{level} {p['id']}: {t}")
 
     def test_scene_text_is_clean_and_balanced(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         for level, items in problems.items():
             for p in items:
                 for t in [p["scene"].get("tex", ""), p["scene"].get("rule", ""), p["story"]] + [st["prompt"] for st in p["steps"]]:
@@ -135,7 +143,7 @@ class ApplicationsTest(unittest.TestCase):
                     self.assertEqual(t.count("{"), t.count("}"), f"L{level} {p['id']}: {t}")
 
     def test_no_two_problems_read_the_same(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         for level, items in problems.items():
             texts = [p["story"] + "|".join(st["prompt"] for st in p["steps"]) for p in items]
             self.assertEqual(len(texts), len(set(texts)), f"L{level} repeats a problem")
@@ -147,7 +155,7 @@ class ApplicationsTest(unittest.TestCase):
         self.assertIn("2", sol.steps[2].explain)          # the rule is applied twice
 
     def test_level4_outside_point_distractor_appears(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         names = {o.get("misconception") for p in problems[4] for o in p["steps"][0]["options"]}
         self.assertIn("outside-point", names)
 
@@ -170,7 +178,7 @@ class ApplicationsTest(unittest.TestCase):
 
     def test_level2_verdicts_are_mixed(self):
         from collections import Counter
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         verdicts = Counter(next(o["value"] for o in p["steps"][3]["options"] if o["correct"]) for p in problems[2])
         self.assertGreaterEqual(min(verdicts["over"], verdicts["under"]), 35, verdicts)
 
@@ -183,7 +191,7 @@ class ApplicationsTest(unittest.TestCase):
                 self.assertIsNone(re.search(r"= \d+ x\$$", o.label), o.label)
 
     def test_bank(self):
-        problems, report = bank.build(FW, seed=1)
+        problems, report = built()
         for level in FW.levels:
             self.assertGreaterEqual(len(problems[level]), 100, report["levels"][str(level)])
 

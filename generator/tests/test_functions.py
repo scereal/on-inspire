@@ -7,6 +7,8 @@ from generator.core import bank
 from generator.core.validators import validate
 from generator.frameworks import functions as fn
 
+from functools import lru_cache
+
 FW = fn.FRAMEWORK
 x = fn.x
 
@@ -17,6 +19,12 @@ def correct(step):
 
 def by_misconception(step, name):
     return next((o for o in step.options if o.misconception == name), None)
+
+
+@lru_cache(maxsize=None)
+def built():
+    """Build the bank once per test run; several tests read it."""
+    return bank.build(FW, seed=1)
 
 
 class FunctionsTest(unittest.TestCase):
@@ -65,7 +73,7 @@ class FunctionsTest(unittest.TestCase):
 
     # Shared lessons -----------------------------------------------------------------
     def test_bank_text_is_clean(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         bad = re.compile(r"(?<![\d.{])1 ?\\(sec|cos|sin|tan|sqrt)|\{1\\(cos|sin)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log(?!_)|operatorname")
         for level, items in problems.items():
             texts_seen = set()
@@ -86,7 +94,7 @@ class FunctionsTest(unittest.TestCase):
                     self.assertEqual(t.count("{"), t.count("}"), f"L{level} {p['id']}: {t}")
 
     def test_bank(self):
-        problems, report = bank.build(FW, seed=1)
+        problems, report = built()
         for level in FW.levels:
             self.assertGreaterEqual(len(problems[level]), 100, report["levels"][str(level)])
 

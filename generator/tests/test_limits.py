@@ -6,6 +6,8 @@ from generator.core import bank
 from generator.core.validators import validate
 from generator.frameworks import limits as lim
 
+from functools import lru_cache
+
 FW = lim.FRAMEWORK
 x = lim.x
 
@@ -16,6 +18,12 @@ def correct(step):
 
 def by_misconception(step, name):
     return next((o for o in step.options if o.misconception == name), None)
+
+
+@lru_cache(maxsize=None)
+def built():
+    """Build the bank once per test run; several tests read it."""
+    return bank.build(FW, seed=1)
 
 
 class LimitsTest(unittest.TestCase):
@@ -150,7 +158,7 @@ class LimitsTest(unittest.TestCase):
     def test_no_sign_glitches_in_text(self):
         # e.g. "(x - -4)", "+ -3", "(x - 0)", or an empty square root
         import re
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         bad = re.compile(r"- -|\+ -|x - 0\b|\\sqrt\{\\;\}|\$(negative|positive)\$")
         for level, items in problems.items():
             for p in items:
@@ -160,7 +168,7 @@ class LimitsTest(unittest.TestCase):
                     self.assertIsNone(bad.search(t), f"L{level} {p['id']}: {t}")
 
     def test_bank(self):
-        problems, report = bank.build(FW, seed=1)
+        problems, report = built()
         for level in FW.levels:
             self.assertGreaterEqual(len(problems[level]), 100, report["levels"][str(level)])
 

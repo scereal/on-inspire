@@ -7,6 +7,8 @@ from generator.core import bank
 from generator.core.validators import validate
 from generator.frameworks import continuity as co
 
+from functools import lru_cache
+
 FW = co.FRAMEWORK
 x = co.x
 
@@ -17,6 +19,12 @@ def correct(step):
 
 def by_misconception(step, name):
     return next((o for o in step.options if o.misconception == name), None)
+
+
+@lru_cache(maxsize=None)
+def built():
+    """Build the bank once per test run; several tests read it."""
+    return bank.build(FW, seed=1)
 
 
 class ContinuityTest(unittest.TestCase):
@@ -58,21 +66,21 @@ class ContinuityTest(unittest.TestCase):
         self.assertEqual(correct(sol.steps[1]).value, "doesnt-apply")
 
     def test_level2_converse_is_never_correct(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         for p in problems[2]:
             step = p["steps"][1]
             self.assertFalse(any(o["correct"] and o.get("misconception") == "ivt-converse" for o in step["options"]), p["id"])
 
     def test_level2_verdicts_are_balanced(self):
         from collections import Counter
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         verdicts = Counter(next(o["value"] for o in p["steps"][1]["options"] if o["correct"]) for p in problems[2])
         for v in ("guaranteed", "no-guarantee", "doesnt-apply"):
             self.assertGreaterEqual(verdicts[v], 20, verdicts)
 
     def test_level2_broken_functions_really_miss_the_target(self):
         # the lesson: the end values straddle N, yet f(x) = N has no solution, because f breaks
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         for p in problems[2]:
             if p["params"]["family"] == "break":
                 q = p["params"]
@@ -94,7 +102,7 @@ class ContinuityTest(unittest.TestCase):
         self.assertFalse(ok)
 
     def test_no_sign_glitches_in_text(self):
-        problems, _ = bank.build(FW, seed=1)
+        problems, _ = built()
         bad = re.compile(r"- -|\+ -|x - 0\b|\$(negative|positive)\$")
         for level, items in problems.items():
             for p in items:
@@ -104,7 +112,7 @@ class ContinuityTest(unittest.TestCase):
                     self.assertIsNone(bad.search(t), f"L{level} {p['id']}: {t}")
 
     def test_bank(self):
-        problems, report = bank.build(FW, seed=1)
+        problems, report = built()
         for level in FW.levels:
             self.assertGreaterEqual(len(problems[level]), 100, report["levels"][str(level)])
 
