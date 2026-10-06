@@ -597,7 +597,10 @@ window.CONCEPTS = [
       "ftc"
     ],
     "related": [
-      "check-by-differentiating"
+      "check-by-differentiating",
+      "reverse-power-rule",
+      "basic-antiderivatives",
+      "initial-value-problem"
     ],
     "foundation": false,
     "claims": [
@@ -2632,6 +2635,100 @@ window.CONCEPTS = [
       {
         "sympy": "expand_log(log(a*b), force=True)",
         "equals": "log(a) + log(b)"
+      }
+    ]
+  },
+  {
+    "id": "reverse-power-rule",
+    "title": "The power rule, run backwards",
+    "body": "The [[power-rule|power rule]] lowers the exponent and multiplies by the old one: $(x^4)' = 4x^3$. To undo it, raise the exponent by one and divide by the new one: an antiderivative of $x^3$ is $\\frac{x^4}{4}$. Check by differentiating: $\\frac{4x^3}{4} = x^3$.\n\nTerm by term, $\\int (3x^2 + 4x - 5)\\,dx = x^3 + 2x^2 - 5x + C$. It works for fractional and negative powers too ($\\int x^{1/2}\\,dx = \\frac{2}{3}x^{3/2}$), with one exception: $x^{-1}$ would need dividing by 0, and its antiderivative is $\\ln|x|$ instead. The $+ C$ is there because [[antiderivative-plus-c|every antiderivative has one]].",
+    "math": [
+      "\\int x^n\\,dx = \\frac{x^{n+1}}{n + 1} + C \\quad (n \\ne -1)"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "square",
+      "a": 0,
+      "b": 2,
+      "prompt": "Sweep x: the area under x² grows like x³/3, whose slope is x²."
+    },
+    "deeper": [
+      "power-rule",
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(3*x**2 + 4*x - 5, x)",
+        "equals": "x**3 + 2*x**2 - 5*x"
+      },
+      {
+        "sympy": "integrate(sqrt(x), x)",
+        "equals": "2*x**Rational(3, 2)/3"
+      }
+    ]
+  },
+  {
+    "id": "basic-antiderivatives",
+    "title": "Antiderivatives of sin, cos, eˣ and 1/x",
+    "body": "Every derivative you know, read backwards, is an antiderivative. Since $(\\sin x)' = \\cos x$, $\\int\\cos x\\,dx = \\sin x + C$. Since $(\\cos x)' = -\\sin x$, $\\int\\sin x\\,dx = -\\cos x + C$: the minus sign comes along. And $\\int e^x\\,dx = e^x + C$, $\\int\\frac{1}{x}\\,dx = \\ln|x| + C$ ([[derivative-of-sin-cos|why sin′ = cos]], [[derivative-of-exp|why eˣ is its own derivative]]).\n\nWith an inside multiple, undo the chain rule by dividing: $\\int\\cos(3x)\\,dx = \\frac{\\sin(3x)}{3} + C$, because differentiating $\\sin(3x)$ brings out a 3 you need to cancel. Multiplying by 3 instead is the classic slip. Always check by differentiating, and keep the [[antiderivative-plus-c|+ C]].",
+    "math": [
+      "\\int\\cos kx\\,dx = \\frac{\\sin kx}{k} + C, \\quad \\int\\sin kx\\,dx = -\\frac{\\cos kx}{k} + C, \\quad \\int e^{kx}\\,dx = \\frac{e^{kx}}{k} + C"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "prompt": "Sweep x: the area under cos x traces sin x."
+    },
+    "deeper": [
+      "derivative-of-sin-cos",
+      "derivative-of-exp",
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(cos(3*x), x)",
+        "equals": "sin(3*x)/3"
+      },
+      {
+        "sympy": "integrate(sin(x), x)",
+        "equals": "-cos(x)"
+      },
+      {
+        "sympy": "integrate(exp(2*x), x)",
+        "equals": "exp(2*x)/2"
+      }
+    ]
+  },
+  {
+    "id": "initial-value-problem",
+    "title": "Initial-value problems: pinning down the + C",
+    "body": "Knowing $f'$ gives a whole family of functions, $F(x) + C$, all the same shape and shifted up or down ([[antiderivative-plus-c|why the + C]]). One known value picks out the single member that passes through it.\n\nIf $f'(x) = 6x^2 - 2$, then $f(x) = 2x^3 - 2x + C$. Told that $f(1) = 5$: $2 - 2 + C = 5$, so $C = 5$ and $f(x) = 2x^3 - 2x + 5$. Motion works the same way twice over: integrate acceleration to get velocity (using the starting velocity for the constant), then integrate velocity to get position (using the starting position).",
+    "math": [
+      "f(x) = 2x^3 - 2x + C, \\quad f(1) = 5 \\implies C = 5"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "mode": "shift",
+      "prompt": "Shift the family up and down: only one member passes through a given point."
+    },
+    "deeper": [
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(6*x**2 - 2, x)",
+        "equals": "2*x**3 - 2*x"
+      },
+      {
+        "sympy": "solve(2 - 2 + u - 5, u)",
+        "equals": "[5]"
       }
     ]
   }
