@@ -22,12 +22,23 @@
     } catch {}
     return node;
   };
+  // Show options in a fresh random order each time: the data lists the right answer first.
+  const shuffled = (items) => {
+    const order = items.map((item, index) => ({ item, index }));
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    return order;
+  };
   const terms = (text) => text.replace(/\[\[([a-z0-9-]+)(?:\|([^\]]*))?\]\]/g, (m, cid, label) =>
     `<button type="button" class="why-term" data-concept="${cid}">${label || esc(concepts[cid] ? concepts[cid].title : cid)}</button>`);
   const bold = (text) => text.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
   const paragraphs = (text) => text.split(/\n\n+/).map((p) => `<p>${bold(terms(p))}</p>`).join("");
   // Phone keyboards may type a typographic minus; type="text" keeps the minus key on iOS.
-  const readNumber = (raw) => { const t = raw.trim().replace(/[\u2212\u2013]/g, "-"); return t === "" ? NaN : Number(t); };
+  const readNumber = (raw) => {
+    const t = raw.trim().replace(/[\u2212\u2013]/g, "-").replace(/\s+/g, "");
+    const frac = t.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);   // exact answers may be typed as fractions, e.g. 3/2
+    if (frac) return Number(frac[2]) === 0 ? NaN : Number(frac[1]) / Number(frac[2]);
+    return t === "" ? NaN : Number(t);
+  };
   // Speak what a reader sees: drop KaTeX's hidden MathML copy so each formula is read once.
   const speakable = (node) => { const c = node.cloneNode(true); c.querySelectorAll(".katex-mathml").forEach((m) => m.remove()); return c.textContent.replace(/\s+/g, " ").trim(); };
   const chip = (target) => {
@@ -110,8 +121,9 @@
     let input;
     if (ask.format === "choice") {
       input = h("div", { className: "choices" });
-      for (const o of ask.options) {
+      for (const { item: o, index } of shuffled(ask.options)) {
         const b = math(h("button", { type: "button", innerHTML: o.label }));
+        b.dataset.index = index;
         b.addEventListener("click", () => {
           if (o.correct) {
             b.classList.add("right");

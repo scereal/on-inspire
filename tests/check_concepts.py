@@ -12,7 +12,7 @@ CONCEPTS = ROOT / "docs/math/why/concepts.js"
 PAGES = [ROOT / "docs/math/square-wave/index.html", ROOT / "docs/math/two-cups/index.html",
          ROOT / "docs/math/integration-by-parts/index.html"]
 WIDGETS = {"secant", "limit-zoom", "riemann", "accumulator", "unit-circle", "wave-mixer", "parabola-min",
-           "product-rectangle", "chain-stretch", "derivative-ladder", "fraction-bar"}
+           "product-rectangle", "chain-stretch", "derivative-ladder", "fraction-bar", "far-out", "circle-tangent", "tangent-point", "ladder", "transform", "mirror"}
 REQUIRED = ("id", "title", "body", "deeper", "related", "foundation")
 TERM = re.compile(r"\[\[([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
 VAR = re.compile(r"\{\{([A-Za-z_]\w*)\}\}")  # {{name}}: single braces belong to LaTeX
@@ -146,7 +146,9 @@ def verify_claims(concepts):
                 if "approx" in claim:
                     ok = abs(float(value) - claim["approx"]) <= claim.get("tol", 1e-6)
                 else:
-                    ok = sp.simplify(value - sp.sympify(claim["equals"], locals=names)) == 0
+                    expected = sp.sympify(claim["equals"], locals=names)
+                    # ∞ − ∞ and list − list can't be subtracted, so compare those exactly
+                    ok = value == expected if (isinstance(value, (list, tuple)) or value.is_finite is False) else sp.simplify(value - expected) == 0
             except Exception as e:  # a claim that can't be evaluated is a failed claim
                 ok, value = False, f"error: {e}"
             if not ok:

@@ -17,7 +17,12 @@ window.CONCEPTS = [
     },
     "deeper": [],
     "related": [
-      "limit"
+      "limit",
+      "domain-and-range",
+      "function-composition",
+      "inverse-function",
+      "graph-transformations",
+      "logarithm"
     ],
     "foundation": true,
     "claims": [
@@ -44,7 +49,13 @@ window.CONCEPTS = [
     },
     "deeper": [],
     "related": [
-      "function"
+      "function",
+      "one-sided-limit",
+      "indeterminate-form",
+      "squeeze-theorem",
+      "limit-at-infinity",
+      "continuity",
+      "epsilon-delta"
     ],
     "foundation": true,
     "claims": [
@@ -492,7 +503,10 @@ window.CONCEPTS = [
       "integral-as-area",
       "average-vs-instantaneous-rate",
       "differentiable-implies-continuous",
-      "sum-and-constant-rules"
+      "sum-and-constant-rules",
+      "second-derivative",
+      "linear-approximation",
+      "critical-points"
     ],
     "foundation": false,
     "claims": [
@@ -583,7 +597,10 @@ window.CONCEPTS = [
       "ftc"
     ],
     "related": [
-      "check-by-differentiating"
+      "check-by-differentiating",
+      "reverse-power-rule",
+      "basic-antiderivatives",
+      "initial-value-problem"
     ],
     "foundation": false,
     "claims": [
@@ -705,7 +722,8 @@ window.CONCEPTS = [
       "cos-h-minus-1-over-h"
     ],
     "related": [
-      "sine-waves"
+      "sine-waves",
+      "derivative-of-arctan"
     ],
     "foundation": false,
     "claims": [
@@ -764,7 +782,9 @@ window.CONCEPTS = [
       "derivative"
     ],
     "related": [
-      "product-rule"
+      "product-rule",
+      "implicit-differentiation",
+      "inverse-function-derivative"
     ],
     "foundation": false,
     "claims": [
@@ -826,7 +846,9 @@ window.CONCEPTS = [
       "derivative",
       "limit"
     ],
-    "related": [],
+    "related": [
+      "derivative-of-ln"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -1648,7 +1670,9 @@ window.CONCEPTS = [
       "derivative",
       "limit"
     ],
-    "related": [],
+    "related": [
+      "continuity"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -1746,6 +1770,974 @@ window.CONCEPTS = [
       {
         "sympy": "simplify(diff((x**2 + 1)/(x - 1), x) - ((2*x)*(x - 1) - (x**2 + 1)*1)/(x - 1)**2)",
         "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "one-sided-limit",
+    "title": "A limit from one side",
+    "body": "Sometimes a function heads toward one value from the left and a different value from the right. A parking garage that charges 4 dollars per started hour costs 8 dollars at 1 h 59 min and 12 dollars at 2 h 01 min. As $t$ approaches 2 from the left, the cost approaches 8. From the right, it approaches 12.\n\nWe write $\\lim_{t\\to 2^-}$ for the left-hand limit and $\\lim_{t\\to 2^+}$ for the right-hand one. The ordinary two-sided [[limit]] exists exactly when both one-sided limits exist and agree. Here they don't, so the cost has no limit at 2, even though it has a value there.",
+    "math": [
+      "\\lim_{x\\to a} f(x) = L \\iff \\lim_{x\\to a^-} f(x) = L = \\lim_{x\\to a^+} f(x)"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "jump",
+      "at": 0,
+      "left": 1,
+      "right": 3,
+      "prompt": "Zoom in on the jump. The left side keeps heading to 1 and the right side to 3, however close you get."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(Abs(x)/x, x, 0, '+')",
+        "equals": "1"
+      },
+      {
+        "sympy": "limit(Abs(x)/x, x, 0, '-')",
+        "equals": "-1"
+      }
+    ]
+  },
+  {
+    "id": "indeterminate-form",
+    "title": "0/0 means \"simplify first\", not zero",
+    "body": "Substitute $x = 3$ into $\\frac{x^2 - 9}{x - 3}$ and you get $\\frac{0}{0}$. That isn't an answer. It's a sign that the top and bottom are both shrinking, and the [[limit]] depends on how fast each one shrinks: $\\frac{x}{x} \\to 1$, $\\frac{x^2}{x} \\to 0$, and $\\frac{x}{x^2}$ blows up, all from the same 0/0.\n\nSo simplify while $x$ is near 3 but not equal to it. Factor the top as $(x - 3)(x + 3)$ and cancel the common $x - 3$. That's allowed because a limit never looks at $x = 3$ itself. What's left, $x + 3$, approaches 6. When a square root causes the 0/0, the [[conjugate-trick|conjugate trick]] does the same job.",
+    "math": [
+      "\\frac{x^2 - 9}{x - 3} = \\frac{(x - 3)(x + 3)}{x - 3} = x + 3 \\to 6"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "hole",
+      "at": 1,
+      "limit": 2,
+      "prompt": "The formula is 0/0 at x = 1, but zoom in: the outputs settle on 2."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [
+      "conjugate-trick",
+      "lhopital"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(x**2/x, x, 0)",
+        "equals": "0"
+      },
+      {
+        "sympy": "limit((x**2 - 9)/(x - 3), x, 3)",
+        "equals": "6"
+      },
+      {
+        "sympy": "limit(x/x**2, x, 0, '+')",
+        "equals": "oo"
+      }
+    ]
+  },
+  {
+    "id": "conjugate-trick",
+    "title": "Multiplying by the conjugate clears a square root",
+    "body": "$(a - b)(a + b) = a^2 - b^2$: the middle terms cancel. Apply it to a square root and the root disappears. $(\\sqrt{x + 4} - 2)(\\sqrt{x + 4} + 2) = (x + 4) - 4 = x$.\n\nThat's the trick for limits like $\\frac{\\sqrt{x+4} - 2}{x}$ at 0, which is 0/0. Multiply top and bottom by the conjugate $\\sqrt{x+4} + 2$. The top becomes $x$, which cancels with the bottom, leaving $\\frac{1}{\\sqrt{x+4} + 2}$. At $x = 0$ that's $\\frac{1}{4}$. Multiplying by $\\frac{\\sqrt{x+4} + 2}{\\sqrt{x+4} + 2}$ is multiplying by 1, so nothing about the function changes except how it's written.",
+    "math": [
+      "(\\sqrt{x+4} - 2)(\\sqrt{x+4} + 2) = x",
+      "\\lim_{x\\to 0}\\frac{\\sqrt{x+4} - 2}{x} = \\frac{1}{4}"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "rootdiff",
+      "at": 0,
+      "limit": 0.25,
+      "prompt": "Zoom in at 0: the outputs settle on 1/4, the value the conjugate trick predicts."
+    },
+    "deeper": [],
+    "related": [],
+    "foundation": true,
+    "claims": [
+      {
+        "sympy": "expand((sqrt(x + 4) - 2)*(sqrt(x + 4) + 2))",
+        "equals": "x"
+      },
+      {
+        "sympy": "limit((sqrt(x + 4) - 2)/x, x, 0)",
+        "equals": "1/4"
+      }
+    ]
+  },
+  {
+    "id": "squeeze-theorem",
+    "title": "The squeeze theorem",
+    "body": "If $g(x) \\le f(x) \\le h(x)$ near $a$, and both $g$ and $h$ approach the same [[limit]] $L$, then $f$ is trapped and must approach $L$ too.\n\nTake $x^2 \\sin(1/x)$ at 0. You can't use \"the limit of a product is the product of the limits\": $\\sin(1/x)$ swings between $-1$ and $1$ faster and faster and has no limit. But those swings are bounded, so $-x^2 \\le x^2\\sin(1/x) \\le x^2$. Both bounds go to 0, so the function goes to 0. The bounds have to meet: $-1 \\le \\sin(1/x) \\le 1$ alone squeezes nothing.",
+    "math": [
+      "-x^2 \\le x^2\\sin\\frac{1}{x} \\le x^2",
+      "\\lim_{x\\to 0} x^2\\sin\\frac{1}{x} = 0"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "x2sin",
+      "at": 0,
+      "limit": 0,
+      "bounds": [
+        "square",
+        "negsquare"
+      ],
+      "prompt": "Zoom in: the wiggles never escape the two parabolas, and the parabolas pinch to 0."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit(x**2*sin(1/x), x, 0)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "limit-at-infinity",
+    "title": "Limits at infinity",
+    "body": "A [[limit]] can also describe where a function settles as $x$ grows without bound. A print shop pays 5000 dollars for setup, then 3 dollars per poster. The average cost per poster is $\\frac{5000 + 3n}{n} = \\frac{5000}{n} + 3$. As $n$ grows, $\\frac{5000}{n}$ shrinks to nothing and the average cost approaches 3 dollars. The line $y = 3$ is a horizontal asymptote.\n\nFor a fraction of polynomials, divide the top and bottom by the highest power in the bottom. Only the leading terms survive. Equal degrees give the ratio of the leading coefficients, a smaller top gives 0, and a bigger top means no finite limit. A [[vertical-asymptote|vertical asymptote]] is the sideways cousin: the output blows up instead of the input.",
+    "math": [
+      "\\lim_{n\\to\\infty}\\frac{5000 + 3n}{n} = 3",
+      "\\lim_{x\\to\\infty}\\frac{2x^2 + 1}{5x^2 - x} = \\frac{2}{5}"
+    ],
+    "widget": {
+      "type": "far-out",
+      "mode": "infinity",
+      "f": "avgcost",
+      "asymptote": 3,
+      "prompt": "Push n further out: the average cost flattens toward 3 dollars."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [
+      "vertical-asymptote"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((5000 + 3*x)/x, x, oo)",
+        "equals": "3"
+      },
+      {
+        "sympy": "limit((2*x**2 + 1)/(5*x**2 - x), x, oo)",
+        "equals": "2/5"
+      }
+    ]
+  },
+  {
+    "id": "vertical-asymptote",
+    "title": "Vertical asymptotes: when the output blows up",
+    "body": "At $x = 2$, $\\frac{x + 1}{x - 2}$ has top 3 and bottom 0. A nonzero number divided by something tiny is huge, so the outputs blow up. Read the sign from each [[one-sided-limit|side]]. Just right of 2, the bottom is a tiny positive number, so the output heads to $+\\infty$. Just left, the bottom is tiny and negative, so the output heads to $-\\infty$.\n\nCompare 0/0. If the top is also 0 at that point, the factor may cancel and leave a hole instead of an asymptote: $\\frac{(x - 1)(x + 1)}{x - 1}$ has no asymptote at 1. Writing the [[limit]] as $\\infty$ is shorthand for \"grows without bound\", not a number it reaches. See also [[limit-at-infinity|limits at infinity]].",
+    "math": [
+      "\\lim_{x\\to 2^+}\\frac{x + 1}{x - 2} = +\\infty, \\qquad \\lim_{x\\to 2^-}\\frac{x + 1}{x - 2} = -\\infty"
+    ],
+    "widget": {
+      "type": "far-out",
+      "mode": "asymptote",
+      "f": "asym",
+      "at": 2,
+      "prompt": "Close in on x = 2 from both sides: one side shoots up, the other plunges."
+    },
+    "deeper": [
+      "limit",
+      "one-sided-limit"
+    ],
+    "related": [
+      "limit-at-infinity"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '+')",
+        "equals": "oo"
+      },
+      {
+        "sympy": "limit((x + 1)/(x - 2), x, 2, '-')",
+        "equals": "-oo"
+      }
+    ]
+  },
+  {
+    "id": "continuity",
+    "title": "Continuous means the limit equals the value",
+    "body": "A function is continuous at $a$ when three things hold: $f(a)$ is defined, the [[limit]] as $x \\to a$ exists, and the two are equal. Informally, you can draw the graph through $a$ without lifting your pen.\n\nIt fails in three ways:\n- a **hole**, where the limit exists but the value is missing or somewhere else;\n- a **jump**, where the [[one-sided-limit|one-sided limits]] disagree;\n- a **blow-up**, where there's a vertical asymptote.\n\nPolynomials, $\\sin$, $\\cos$ and $e^x$ are continuous everywhere, which is why you can find their limits just by substituting. Continuity is what makes the [[intermediate-value-theorem|Intermediate Value Theorem]] work.",
+    "math": [
+      "f \\text{ continuous at } a \\iff \\lim_{x\\to a} f(x) = f(a)"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "jump",
+      "at": 0,
+      "left": 1,
+      "right": 3,
+      "prompt": "A jump: the sides head to different values, so no single value can make this continuous."
+    },
+    "deeper": [
+      "limit",
+      "one-sided-limit"
+    ],
+    "related": [
+      "intermediate-value-theorem",
+      "mean-value-theorem"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((x**2 - 1)/(x - 1), x, 1)",
+        "equals": "2"
+      },
+      {
+        "sympy": "limit(x**3 - 2*x, x, 2)",
+        "equals": "4"
+      }
+    ]
+  },
+  {
+    "id": "intermediate-value-theorem",
+    "title": "The Intermediate Value Theorem",
+    "body": "If $f$ is [[continuity|continuous]] on $[a, b]$, it takes every value between $f(a)$ and $f(b)$ somewhere in between. An unbroken graph can't get from below a line to above it without crossing.\n\nTake $f(x) = x^3 + x - 1$. $f(0) = -1$ and $f(1) = 1$, so somewhere in $(0, 1)$ it equals 0. The theorem says a root exists, not where it is or how many there are. The converse fails: $(x - 0.5)^2 - 0.01$ is positive at both 0 and 1 but still has two roots in between. And continuity matters: $\\frac{1}{x}$ goes from $-1$ to $1$ on $[-1, 1]$ without ever being 0, because it breaks at 0.",
+    "math": [
+      "f(0) = -1 < 0 < 1 = f(1) \\implies \\text{some } c \\in (0, 1) \\text{ has } f(c) = 0"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "ivtcubic",
+      "x0": 0.5,
+      "span": 1,
+      "prompt": "Drag from x = 0 to x = 1: the output goes from −1 to 1, so it has to pass through 0."
+    },
+    "deeper": [
+      "continuity"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 0)",
+        "equals": "-1"
+      },
+      {
+        "sympy": "(x**3 + x - 1).subs(x, 1)",
+        "equals": "1"
+      },
+      {
+        "sympy": "((x - Rational(1, 2))**2 - Rational(1, 100)).subs(x, 0)",
+        "equals": "6/25"
+      },
+      {
+        "sympy": "solve((x - Rational(1, 2))**2 - Rational(1, 100), x)",
+        "equals": "[Rational(2, 5), Rational(3, 5)]"
+      }
+    ]
+  },
+  {
+    "id": "epsilon-delta",
+    "title": "ε and δ: what \"approaches\" means exactly",
+    "body": "$\\lim_{x\\to 1}(2x + 1) = 3$ is a promise: name any tolerance $\\varepsilon > 0$, and I can find a distance $\\delta > 0$ so that every $x$ within $\\delta$ of 1 gives an output within $\\varepsilon$ of 3.\n\nFind $\\delta$ by working backwards. $|(2x + 1) - 3| = |2x - 2| = 2|x - 1|$. That's less than $\\varepsilon$ exactly when $|x - 1| < \\frac{\\varepsilon}{2}$. So $\\delta = \\frac{\\varepsilon}{2}$ works for every $\\varepsilon$: for $\\varepsilon = 0.1$, any $x$ within 0.05 of 1 lands within 0.1 of 3. This is the precise meaning behind every [[limit]].",
+    "math": [
+      "|(2x + 1) - 3| = 2|x - 1| < \\varepsilon \\iff |x - 1| < \\frac{\\varepsilon}{2}"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "line21",
+      "at": 1,
+      "limit": 3,
+      "epsilon": true,
+      "prompt": "Shrink ε: the δ-window (dashed lines) shrinks with it, always half as wide."
+    },
+    "deeper": [
+      "limit"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(((2*x + 1) - 3) - 2*(x - 1))",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-ln",
+    "title": "Why the derivative of ln x is 1/x",
+    "body": "$y = \\ln x$ means $e^y = x$: the natural log undoes [[derivative-of-exp|the exponential]]. Differentiate both sides of $e^y = x$, remembering that $y$ depends on $x$: $e^y\\,y' = 1$, so $y' = \\frac{1}{e^y} = \\frac{1}{x}$. That's the [[inverse-function-derivative|inverse-function rule]] in action.\n\nWhat about $\\ln(5x)$? Since $\\ln(5x) = \\ln 5 + \\ln x$, the 5 only shifts the graph up by a constant, and shifting doesn't change slopes. So $(\\ln(kx))' = \\frac{1}{x}$ too, not $\\frac{k}{x}$. It's also what powers [[logarithmic-differentiation|logarithmic differentiation]].",
+    "math": [
+      "(\\ln x)' = \\frac{1}{x}",
+      "(\\ln kx)' = \\frac{1}{x}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "ln",
+      "x0": 2,
+      "span": 1.5,
+      "prompt": "Shrink h at x = 2: the slope settles on 1/2, which is 1/x."
+    },
+    "deeper": [
+      "derivative-of-exp",
+      "inverse-function-derivative"
+    ],
+    "related": [
+      "logarithmic-differentiation"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(log(x), x)",
+        "equals": "1/x"
+      },
+      {
+        "sympy": "simplify(diff(log(5*x), x))",
+        "equals": "1/x"
+      }
+    ]
+  },
+  {
+    "id": "inverse-function-derivative",
+    "title": "The slope of an inverse is the reciprocal slope",
+    "body": "If $g$ undoes $f$, then $f(g(x)) = x$. Differentiate with the [[chain-rule]]: $f'(g(x))\\cdot g'(x) = 1$, so $g'(x) = \\frac{1}{f'(g(x))}$. On a graph, the inverse is the mirror image across $y = x$, which swaps rise and run, so every slope flips to its reciprocal.\n\nThe catch is the point. $f(x) = x^3 + x$ has $f(1) = 2$ and $f'(1) = 4$, so $(f^{-1})'(2) = \\frac{1}{4}$. You evaluate $f'$ at the input 1 that $f$ sends to 2, not at 2 itself. The [[derivative]] of $\\sqrt{x}$ works the same way: it undoes $x^2$, so at $x = 4$ its slope is $\\frac{1}{2 \\cdot 2} = \\frac{1}{4}$.",
+    "math": [
+      "(f^{-1})'(b) = \\frac{1}{f'(a)} \\quad \\text{where } f(a) = b"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "sqrt",
+      "x0": 4,
+      "prompt": "√x undoes x². At x = 4 its slope settles on 1/4, the reciprocal of x²'s slope 4 at x = 2."
+    },
+    "deeper": [
+      "derivative",
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(sqrt(x), x).subs(x, 4)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "1/diff(x**3 + x, x).subs(x, 1)",
+        "equals": "1/4"
+      },
+      {
+        "sympy": "(x**3 + x).subs(x, 1)",
+        "equals": "2"
+      }
+    ]
+  },
+  {
+    "id": "derivative-of-arctan",
+    "title": "Why the derivative of arctan x is 1/(1 + x²)",
+    "body": "$y = \\arctan x$ means $\\tan y = x$, with $y$ between $-\\frac{\\pi}{2}$ and $\\frac{\\pi}{2}$. Differentiate both sides: $\\sec^2 y \\cdot y' = 1$, so $y' = \\cos^2 y$. The identity $1 + \\tan^2 y = \\sec^2 y$ (from the [[unit-circle|unit circle]]) turns that into $\\frac{1}{1 + x^2}$. It's the [[inverse-function-derivative|inverse-function rule]] again.\n\nSo $(\\arctan x)' = \\frac{1}{1 + x^2}$: slope 1 at the origin, $\\frac{1}{2}$ at $x = 1$, and flattening toward 0 far out, matching the horizontal asymptotes at $\\pm\\frac{\\pi}{2}$. The same method gives $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$.",
+    "math": [
+      "(\\arctan x)' = \\frac{1}{1 + x^2}",
+      "(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "atan",
+      "x0": 1,
+      "prompt": "Shrink h at x = 1: the slope settles on 1/2 = 1/(1 + 1²)."
+    },
+    "deeper": [
+      "inverse-function-derivative",
+      "unit-circle"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(atan(x), x)",
+        "equals": "1/(x**2 + 1)"
+      },
+      {
+        "sympy": "diff(atan(x), x).subs(x, 1)",
+        "equals": "1/2"
+      },
+      {
+        "sympy": "diff(asin(x), x)",
+        "equals": "1/sqrt(1 - x**2)"
+      }
+    ]
+  },
+  {
+    "id": "implicit-differentiation",
+    "title": "Implicit differentiation",
+    "body": "Some curves aren't written as $y = f(x)$. The circle $x^2 + y^2 = 25$ is one. Treat $y$ as a function of $x$ anyway and differentiate both sides. The [[chain-rule]] turns $y^2$ into $2y\\,y'$, not just $2y$, because $y$ depends on $x$.\n\nSo $2x + 2y\\,y' = 0$, which gives $y' = -\\frac{x}{y}$. At $(3, 4)$ the slope is $-\\frac{3}{4}$, perpendicular to the radius (slope $\\frac{4}{3}$), just as geometry says a tangent to a circle should be. At $(5, 0)$ the formula divides by zero: the tangent there is vertical.",
+    "math": [
+      "2x + 2y\\,y' = 0 \\implies y' = -\\frac{x}{y}"
+    ],
+    "widget": {
+      "type": "circle-tangent",
+      "r": 5,
+      "deg": 53.13,
+      "prompt": "Move the point around x² + y² = 25: the tangent's slope is always −x/y."
+    },
+    "deeper": [
+      "chain-rule"
+    ],
+    "related": [
+      "related-rates"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "idiff(x**2 + y**2 - 25, y, x)",
+        "equals": "-x/y"
+      },
+      {
+        "sympy": "(-x/y).subs({x: 3, y: 4})",
+        "equals": "-3/4"
+      }
+    ]
+  },
+  {
+    "id": "logarithmic-differentiation",
+    "title": "Logarithmic differentiation",
+    "body": "For $y = x^x$, neither the power rule (fixed exponent) nor the exponential rule (fixed base) applies. Take the log of both sides: $\\ln y = x \\ln x$. Differentiate, using [[implicit-differentiation|implicit differentiation]] on the left and the [[derivative-of-ln|derivative of ln]]: $\\frac{y'}{y} = \\ln x + 1$. Then multiply back by $y$: $y' = x^x(\\ln x + 1)$.\n\nThe same trick tames tangled products and quotients, because logs turn them into sums: $\\ln\\frac{x^2(x + 1)^3}{x + 2} = 2\\ln x + 3\\ln(x + 1) - \\ln(x + 2)$. The step people forget is the last one: multiplying by $y$.",
+    "math": [
+      "\\ln y = x\\ln x \\implies \\frac{y'}{y} = \\ln x + 1 \\implies y' = x^x(\\ln x + 1)"
+    ],
+    "widget": {
+      "type": "secant",
+      "f": "xpowx",
+      "x0": 1,
+      "span": 0.8,
+      "prompt": "At x = 1 the slope of xˣ settles on 1 · (ln 1 + 1) = 1."
+    },
+    "deeper": [
+      "derivative-of-ln",
+      "chain-rule"
+    ],
+    "related": [
+      "implicit-differentiation"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "simplify(diff(x**x, x) - x**x*(log(x) + 1))",
+        "equals": "0"
+      },
+      {
+        "sympy": "diff(x**x, x).subs(x, 1)",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "second-derivative",
+    "title": "The second derivative: how the slope changes",
+    "body": "Differentiate a [[derivative]] and you get the second derivative, $f''$, which measures how the slope itself is changing. For a position $s(t)$, $s'$ is velocity and $s''$ is acceleration.\n\nOn a graph, $f'' > 0$ means the slopes are increasing, so the curve bends upward (concave up, like a cup). $f'' < 0$ means it bends downward. A ball thrown upward at 20 m/s has height $h(t) = 20t - 4.9t^2$. Its velocity $h'(t) = 20 - 9.8t$ falls steadily, and $h''(t) = -9.8$ everywhere: the graph is concave down, and that $-9.8$ is gravity.",
+    "math": [
+      "h(t) = 20t - 4.9t^2, \\quad h'(t) = 20 - 9.8t, \\quad h''(t) = -9.8"
+    ],
+    "widget": {
+      "type": "derivative-ladder",
+      "poly": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "prompt": "Differentiate again and again: each column is the slope of the one before it."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t, 2)",
+        "equals": "-49/5"
+      },
+      {
+        "sympy": "diff(20*t - Rational(49, 10)*t**2, t).subs(t, 1)",
+        "equals": "51/5"
+      }
+    ]
+  },
+  {
+    "id": "related-rates",
+    "title": "Related rates: linked quantities change together",
+    "body": "When two quantities are tied by an equation, their rates of change are tied too. A 10 m ladder leans on a wall: the foot is $x$ m out and the top is $y$ m up, with $x^2 + y^2 = 100$. Both change with time $t$, so differentiate with respect to $t$, using the [[chain-rule]] on each: $2x\\,\\frac{dx}{dt} + 2y\\,\\frac{dy}{dt} = 0$.\n\nAt the moment $x = 6$ (so $y = 8$), if the foot slides out at 2 m/s, then $12 + 16\\,\\frac{dy}{dt} = 0$ and $\\frac{dy}{dt} = -1.5$ m/s. The minus sign says the top is falling. This is [[implicit-differentiation|implicit differentiation]] with $t$ in place of $x$. Plug in numbers only after differentiating: the relation must hold at every moment, not just one.",
+    "math": [
+      "x^2 + y^2 = 100 \\implies 2x\\,\\frac{dx}{dt} + 2y\\,\\frac{dy}{dt} = 0"
+    ],
+    "widget": {
+      "type": "ladder",
+      "L": 10,
+      "dxdt": 2,
+      "prompt": "Slide the foot out: the top's speed grows as the ladder flattens."
+    },
+    "deeper": [
+      "implicit-differentiation",
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(2*6*2 + 2*8*u, u)",
+        "equals": "[Rational(-3, 2)]"
+      },
+      {
+        "sympy": "sqrt(100 - 36)",
+        "equals": "8"
+      }
+    ]
+  },
+  {
+    "id": "linear-approximation",
+    "title": "Linear approximation: the tangent line as a shortcut",
+    "body": "Near a point $a$, a smooth function is almost its tangent line: $f(x) \\approx L(x) = f(a) + f'(a)(x - a)$. That's the [[derivative]] used as a multiplier: a small change in input times the slope gives the change in output.\n\nEstimate $\\sqrt{16.5}$. At $a = 16$, $\\sqrt{16} = 4$ and the slope is $\\frac{1}{2\\sqrt{16}} = \\frac{1}{8}$, so $\\sqrt{16.5} \\approx 4 + \\frac{0.5}{8} = 4.0625$. The true value is $4.06202$. The estimate is a little high because $\\sqrt{x}$ bends downward (its [[second-derivative|second derivative]] is negative), so the tangent line sits above the curve.",
+    "math": [
+      "L(x) = f(a) + f'(a)(x - a)",
+      "\\sqrt{16.5} \\approx 4 + \\frac{0.5}{8} = 4.0625"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "approx",
+      "f": "sqrt",
+      "a": 9,
+      "b": 25,
+      "x0": 16,
+      "prompt": "Move x away from 16: the tangent line stays close at first, and it's always above the curve."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "second-derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "4 + Rational(1, 2)*Rational(1, 8)",
+        "equals": "65/16"
+      },
+      {
+        "sympy": "sqrt(Rational(33, 2))",
+        "approx": 4.06202,
+        "tol": 1e-05
+      },
+      {
+        "sympy": "diff(sqrt(x), x).subs(x, 16)",
+        "equals": "1/8"
+      }
+    ]
+  },
+  {
+    "id": "mean-value-theorem",
+    "title": "The Mean Value Theorem",
+    "body": "If $f$ is [[continuity|continuous]] on $[a, b]$ and differentiable inside, then somewhere strictly between $a$ and $b$ the instantaneous rate equals the average rate: $f'(c) = \\frac{f(b) - f(a)}{b - a}$ for some $c$ in $(a, b)$. Geometrically, some tangent line is parallel to the chord.\n\nDrive 120 km in 1.5 hours and your average speed is 80 km/h. The theorem says that at some instant your speedometer read exactly 80. It doesn't say when. For $x^2$ on $[1, 3]$ the average slope is 4, and $2c = 4$ gives $c = 2$. For a parabola $c$ is always the midpoint, but that's special: for $x^3$ on $[0, 3]$, $c = \\sqrt{3} \\approx 1.73$.",
+    "math": [
+      "f'(c) = \\frac{f(b) - f(a)}{b - a}"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "chord": true,
+      "f": "square",
+      "a": 1,
+      "b": 3,
+      "prompt": "Slide the tangent until it's parallel to the dashed chord: that x is c."
+    },
+    "deeper": [
+      "derivative",
+      "continuity"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(3**2 - 1**2)/(3 - 1)",
+        "equals": "4"
+      },
+      {
+        "sympy": "solve(3*x**2 - 9, x)",
+        "equals": "[-sqrt(3), sqrt(3)]"
+      },
+      {
+        "sympy": "Rational(120, 1)/Rational(3, 2)",
+        "equals": "80"
+      }
+    ]
+  },
+  {
+    "id": "critical-points",
+    "title": "Critical points and the extreme values",
+    "body": "A smooth function's highest and lowest points on an interval can only be where the slope is zero (critical points) or at the ends of the interval. So on a closed interval $[a, b]$: find where $f' = 0$, keep the ones inside the interval, add both endpoints, and compare the values.\n\nFor $f(x) = x^3 - 3x$ on $[-2, 3]$, $f'(x) = 3x^2 - 3 = 0$ at $x = \\pm 1$. The candidates are $-2, -1, 1, 3$, with values $-2, 2, -2, 18$. The maximum is 18 at the endpoint $x = 3$, and the minimum $-2$ happens twice. The [[second-derivative|second derivative]] tells you the shape at each critical point: $f''(-1) = -6 < 0$ is a local peak and $f''(1) = 6 > 0$ is a local valley. Both are local only; the [[derivative]] at the ends doesn't need to be 0.",
+    "math": [
+      "\\text{candidates} = \\{x : f'(x) = 0,\\ a \\le x \\le b\\} \\cup \\{a, b\\}"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "f": "crit3",
+      "a": -2,
+      "b": 3,
+      "prompt": "Slide along x³ − 3x: the tangent goes flat at x = −1 and x = 1."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "second-derivative",
+      "optimization"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(diff(x**3 - 3*x, x), x)",
+        "equals": "[-1, 1]"
+      },
+      {
+        "sympy": "[(x**3 - 3*x).subs(x, -2), (x**3 - 3*x).subs(x, -1), (x**3 - 3*x).subs(x, 1), (x**3 - 3*x).subs(x, 3)]",
+        "equals": "[-2, 2, -2, 18]"
+      }
+    ]
+  },
+  {
+    "id": "optimization",
+    "title": "Optimization: build the function, then find its best value",
+    "body": "Most optimization problems are word problems in disguise. Name the quantity to maximize or minimize, write it as a function of one variable (using the constraint to eliminate the others), then use [[critical-points|critical points]].\n\nYou have 100 m of fence to enclose a rectangle against a straight river, fencing only three sides. With $x$ for the two sides perpendicular to the river, the side along the river is $100 - 2x$, so the area is $A(x) = x(100 - 2x)$. $A'(x) = 100 - 4x = 0$ at $x = 25$, giving $A = 25 \\times 50 = 1250$ m². Check it's a maximum: $A'' = -4 < 0$, and at the ends $x = 0$ or $50$ the area is 0.",
+    "math": [
+      "A(x) = x(100 - 2x), \\quad A'(x) = 100 - 4x = 0 \\implies x = 25"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "f": "fencearea",
+      "a": 0,
+      "b": 50,
+      "prompt": "Slide x: the area peaks where the tangent goes flat, at x = 25."
+    },
+    "deeper": [
+      "critical-points"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(diff(x*(100 - 2*x), x), x)",
+        "equals": "[25]"
+      },
+      {
+        "sympy": "(x*(100 - 2*x)).subs(x, 25)",
+        "equals": "1250"
+      }
+    ]
+  },
+  {
+    "id": "lhopital",
+    "title": "L'Hôpital's rule: compare the rates",
+    "body": "When a limit gives $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$, an [[indeterminate-form|indeterminate form]], you can replace the top and bottom by their [[derivative|derivatives]]: $\\lim\\frac{f}{g} = \\lim\\frac{f'}{g'}$, if the new limit exists. Near the point, $f$ and $g$ are almost their tangent lines, so their ratio is almost the ratio of their slopes.\n\n$\\lim_{x\\to 0}\\frac{e^{2x} - 1}{x}$ is $\\frac{0}{0}$. Differentiate top and bottom separately (this is not the quotient rule): $\\frac{2e^{2x}}{1} \\to 2$. Only use it on $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$: $\\frac{\\cos x}{x + 1}$ at 0 is just $\\frac{1}{1} = 1$, while blindly differentiating gives $-\\sin 0 = 0$, which is wrong.",
+    "math": [
+      "\\lim_{x\\to 0}\\frac{e^{2x} - 1}{x} = \\lim_{x\\to 0}\\frac{2e^{2x}}{1} = 2"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "lhop",
+      "at": 0,
+      "limit": 2,
+      "prompt": "Zoom in at 0: the ratio settles on 2, the ratio of the slopes."
+    },
+    "deeper": [
+      "derivative",
+      "indeterminate-form"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((exp(2*x) - 1)/x, x, 0)",
+        "equals": "2"
+      },
+      {
+        "sympy": "limit(cos(x)/(x + 1), x, 0)",
+        "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "domain-and-range",
+    "title": "Domain and range: what goes in, what comes out",
+    "body": "The domain of a [[function]] is every input it accepts; the range is every output it can produce. When a formula is all you're given, the domain is every number the formula can handle, and three operations limit it. You can't take the square root of a negative number, you can't take the log of zero or a negative number, and you can't divide by zero.\n\nSo $\\sqrt{x - 2}$ needs $x - 2 \\ge 0$, which means $x \\ge 2$. Equality is fine, because $\\sqrt{0} = 0$. But $\\ln(x - 2)$ needs $x - 2 > 0$, strictly, and $\\frac{1}{x - 5}$ needs $x \\ne 5$. Watch the direction: $\\sqrt{6 - 2x}$ needs $6 - 2x \\ge 0$, and dividing by $-2$ flips it to $x \\le 3$.",
+    "math": [
+      "\\sqrt{u}: u \\ge 0, \\qquad \\ln u: u > 0, \\qquad \\frac{1}{u}: u \\ne 0"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "sqrt",
+      "x0": 2,
+      "span": 2,
+      "prompt": "Drag along √x: the graph starts at x = 0 and there's nothing to its left."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(6 - 2*x, x)",
+        "equals": "[3]"
+      },
+      {
+        "sympy": "(6 - 2*x).subs(x, 4)",
+        "equals": "-2"
+      },
+      {
+        "sympy": "sqrt(0)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "function-composition",
+    "title": "Composition: feed one function into another",
+    "body": "$(f \\circ g)(x) = f(g(x))$: do $g$ first, then feed its output into $f$. With $f(x) = 2x + 1$ and $g(x) = x^2$, $(f \\circ g)(3) = f(9) = 19$, but $(g \\circ f)(3) = g(7) = 49$. The order matters, and composition isn't multiplication: $f(x)\\,g(x) = (2x + 1)x^2$ is something else entirely.\n\nComplicated [[function|functions]] are often simple ones chained together. $\\sqrt{x^2 + 1}$ is \"square, add 1, take the root\". Seeing that chain is exactly what the chain rule needs later.",
+    "math": [
+      "(f \\circ g)(x) = f(g(x))",
+      "(f\\circ g)(3) = 19 \\ne 49 = (g \\circ f)(3)"
+    ],
+    "widget": {
+      "type": "transform",
+      "base": "square",
+      "a": 2,
+      "h": 3,
+      "k": 1,
+      "prompt": "2(x − 3)² + 1 is a chain: subtract 3, square, double, add 1. Change one link at a time."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(2*x + 1).subs(x, 9)",
+        "equals": "19"
+      },
+      {
+        "sympy": "(x**2).subs(x, 7)",
+        "equals": "49"
+      }
+    ]
+  },
+  {
+    "id": "inverse-function",
+    "title": "Inverse functions undo each other",
+    "body": "If $f$ turns 3 into 7, its inverse $f^{-1}$ turns 7 back into 3. To find a formula, write $y = f(x)$, swap the roles of $x$ and $y$, and solve for $y$. For $f(x) = 2x + 3$: $x = 2y + 3$ gives $f^{-1}(x) = \\frac{x - 3}{2}$. Check: $f(f^{-1}(x)) = x$.\n\nThe $-1$ is not an exponent: $f^{-1}(x)$ is not $\\frac{1}{f(x)}$. Only a [[function]] that never repeats an output has an inverse, and its graph is the mirror image of $f$ across the line $y = x$, since swapping $x$ and $y$ reflects every point. That mirroring is also why slopes of inverses are reciprocals ([[inverse-function-derivative|the inverse-function rule]]).",
+    "math": [
+      "y = 2x + 3 \\implies x = 2y + 3 \\implies f^{-1}(x) = \\frac{x - 3}{2}"
+    ],
+    "widget": {
+      "type": "mirror",
+      "f": "cubeplus",
+      "x0": 1,
+      "prompt": "Move the point along x³ + x: its mirror image across y = x traces the inverse."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [
+      "inverse-function-derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(Eq(x, 2*y + 3), y)",
+        "equals": "[x/2 - 3/2]"
+      },
+      {
+        "sympy": "simplify(2*((x - 3)/2) + 3)",
+        "equals": "x"
+      }
+    ]
+  },
+  {
+    "id": "graph-transformations",
+    "title": "Transforming graphs: shift, stretch, flip",
+    "body": "Start from a known graph, like $y = x^2$, and change its formula in small ways.\n- **Shifts:** $y = (x - 3)^2$ is the same parabola shifted right by 3. Inside the function, $x - 3$ means \"what used to happen at 0 now happens at 3\". $y = x^2 + 1$ shifts it up by 1.\n- **Stretches:** $y = 2x^2$ stretches it vertically by 2.\n- **Flips:** $y = -x^2$ flips it upside down.\n\nPut together, $y = 2(x - 3)^2 + 1$ has its vertex at $(3, 1)$ and climbs twice as steeply. The sign inside the bracket is the one people trip on: $(x + 3)^2$ shifts *left*. Changes inside the [[function]] act on $x$, horizontally and backwards; changes outside act on $y$, vertically and as written.",
+    "math": [
+      "y = a\\,f(x - h) + k: \\text{ shift right } h,\\ \\text{up } k,\\ \\text{stretch by } a"
+    ],
+    "widget": {
+      "type": "transform",
+      "base": "square",
+      "a": 2,
+      "h": 3,
+      "k": 1,
+      "prompt": "Slide h and k to move the vertex; change a to stretch or flip. The gold curve is the original x²."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 3)",
+        "equals": "1"
+      },
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 4)",
+        "equals": "3"
+      }
+    ]
+  },
+  {
+    "id": "logarithm",
+    "title": "Logarithms undo exponentials",
+    "body": "$\\log_2 16$ asks: what power of 2 gives 16? The answer is 4, since $2^4 = 16$. So $\\log_b x = y$ means exactly $b^y = x$, and the logarithm is the [[function]] that undoes $b^x$. The natural log, $\\ln$, uses base $e$.\n\nThe laws all come from the exponent rules:\n- $\\log(AB) = \\log A + \\log B$, because exponents add when you multiply;\n- $\\log(A^n) = n\\log A$.\n\nThat's how logs solve equations where the unknown is in an exponent: $3\\cdot 2^x = 48$ gives $2^x = 16$, so $x = \\log_2 16 = 4$. Logs only accept positive inputs, so check every answer: a solution that makes a log's argument zero or negative is extraneous. The [[derivative-of-ln|derivative of ln]] comes from the same undoing.",
+    "math": [
+      "\\log_b x = y \\iff b^y = x",
+      "\\log(AB) = \\log A + \\log B, \\quad \\log(A^n) = n\\log A"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "ln",
+      "x0": 2,
+      "span": 1.5,
+      "prompt": "Drag along ln x: it crosses 0 at x = 1 and only exists for x > 0."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [
+      "derivative-of-ln"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "log(16, 2)",
+        "equals": "4"
+      },
+      {
+        "sympy": "solve(3*2**x - 48, x)",
+        "equals": "[4]"
+      },
+      {
+        "sympy": "expand_log(log(a*b), force=True)",
+        "equals": "log(a) + log(b)"
+      }
+    ]
+  },
+  {
+    "id": "reverse-power-rule",
+    "title": "The power rule, run backwards",
+    "body": "The [[power-rule|power rule]] lowers the exponent and multiplies by the old one: $(x^4)' = 4x^3$. To undo it, raise the exponent by one and divide by the new one: an antiderivative of $x^3$ is $\\frac{x^4}{4}$. Check by differentiating: $\\frac{4x^3}{4} = x^3$.\n\nTerm by term, $\\int (3x^2 + 4x - 5)\\,dx = x^3 + 2x^2 - 5x + C$. It works for fractional and negative powers too ($\\int x^{1/2}\\,dx = \\frac{2}{3}x^{3/2}$), with one exception: $x^{-1}$ would need dividing by 0, and its antiderivative is $\\ln|x|$ instead. The $+ C$ is there because [[antiderivative-plus-c|every antiderivative has one]].",
+    "math": [
+      "\\int x^n\\,dx = \\frac{x^{n+1}}{n + 1} + C \\quad (n \\ne -1)"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "square",
+      "a": 0,
+      "b": 2,
+      "prompt": "Sweep x: the area under x² grows like x³/3, whose slope is x²."
+    },
+    "deeper": [
+      "power-rule",
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(3*x**2 + 4*x - 5, x)",
+        "equals": "x**3 + 2*x**2 - 5*x"
+      },
+      {
+        "sympy": "integrate(sqrt(x), x)",
+        "equals": "2*x**Rational(3, 2)/3"
+      }
+    ]
+  },
+  {
+    "id": "basic-antiderivatives",
+    "title": "Antiderivatives of sin, cos, sec², eˣ and 1/x",
+    "body": "Every derivative you know, read backwards, is an antiderivative. Since $(\\sin x)' = \\cos x$, $\\int\\cos x\\,dx = \\sin x + C$. Since $(\\cos x)' = -\\sin x$, $\\int\\sin x\\,dx = -\\cos x + C$: the minus sign comes along. Since $(\\tan x)' = \\sec^2 x$, $\\int\\sec^2 x\\,dx = \\tan x + C$. And $\\int e^x\\,dx = e^x + C$, $\\int\\frac{1}{x}\\,dx = \\ln|x| + C$ (the one power the power rule can't handle) ([[derivative-of-sin-cos|why sin′ = cos]], [[derivative-of-exp|why eˣ is its own derivative]]).\n\nWith an inside multiple, undo the chain rule by dividing: $\\int\\cos(3x)\\,dx = \\frac{\\sin(3x)}{3} + C$, because differentiating $\\sin(3x)$ brings out a 3 you need to cancel. Multiplying by 3 instead is the classic slip. Always check by differentiating, and keep the [[antiderivative-plus-c|+ C]].",
+    "math": [
+      "\\int\\cos kx\\,dx = \\frac{\\sin kx}{k} + C, \\quad \\int\\sin kx\\,dx = -\\frac{\\cos kx}{k} + C",
+      "\\int\\sec^2 kx\\,dx = \\frac{\\tan kx}{k} + C, \\quad \\int e^{kx}\\,dx = \\frac{e^{kx}}{k} + C, \\quad \\int\\frac{1}{x}\\,dx = \\ln|x| + C"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "prompt": "Sweep x: the area under cos x traces sin x."
+    },
+    "deeper": [
+      "derivative-of-sin-cos",
+      "derivative-of-exp",
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(cos(3*x), x)",
+        "equals": "sin(3*x)/3"
+      },
+      {
+        "sympy": "integrate(sin(x), x)",
+        "equals": "-cos(x)"
+      },
+      {
+        "sympy": "integrate(exp(2*x), x)",
+        "equals": "exp(2*x)/2"
+      },
+      {
+        "sympy": "diff(tan(3*x)/3, x)",
+        "equals": "sec(3*x)**2"
+      },
+      {
+        "sympy": "integrate(1/x, x)",
+        "equals": "log(x)"
+      }
+    ]
+  },
+  {
+    "id": "initial-value-problem",
+    "title": "Initial-value problems: pinning down the + C",
+    "body": "Knowing $f'$ gives a whole family of functions, $F(x) + C$, all the same shape and shifted up or down ([[antiderivative-plus-c|why the + C]]). One known value picks out the single member that passes through it.\n\nIf $f'(x) = 6x^2 - 2$, then $f(x) = 2x^3 - 2x + C$. Told that $f(1) = 5$: $2 - 2 + C = 5$, so $C = 5$ and $f(x) = 2x^3 - 2x + 5$. Motion works the same way twice over: integrate acceleration to get velocity (using the starting velocity for the constant), then integrate velocity to get position (using the starting position).",
+    "math": [
+      "f(x) = 2x^3 - 2x + C, \\quad f(1) = 5 \\implies C = 5"
+    ],
+    "widget": {
+      "type": "accumulator",
+      "f": "cos",
+      "mode": "shift",
+      "prompt": "Shift the family up and down: only one member passes through a given point."
+    },
+    "deeper": [
+      "antiderivative-plus-c"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "integrate(6*x**2 - 2, x)",
+        "equals": "2*x**3 - 2*x"
+      },
+      {
+        "sympy": "solve(2 - 2 + u - 5, u)",
+        "equals": "[5]"
       }
     ]
   }

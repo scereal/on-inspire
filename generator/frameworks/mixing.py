@@ -3,6 +3,8 @@
 Moves (one mark each): add concentrate, add water, pour one mark into the other cup, empty a cup.
 Level 1: ratio → fraction, then build it.   Level 2: a strength that needs dilution.   Level 3: weighted average.
 """
+import json as _json
+import zlib
 from collections import deque
 from fractions import Fraction
 from functools import lru_cache
@@ -86,6 +88,11 @@ def describe(path):
              "empty": "empty {}"}
     return "; ".join(words[a].format(f"cup {NAMES[i]}") for a, i in path)
 
+
+
+def variant(p, n=2):
+    """A stable choice among n phrasings, so the right answer's length doesn't give it away."""
+    return zlib.crc32(_json.dumps(p, sort_keys=True, default=str).encode()) % n
 
 class Mixing(Framework):
     id = "mixing"
@@ -181,8 +188,8 @@ class Mixing(Framework):
                            feedback="True if you only start from pure concentrate. But you can dilute a drink that's already diluted.", value="no"),
                 ], explain="Dilute, then dilute part of the result again: each round multiplies the strength."),
                 build,
-                Step("When you mix a drink with an equal amount of water, its strength:", "choice", "Halves", options=[
-                    Option("Halves", correct=True, value="halves"),
+                Step("When you mix a drink with an equal amount of water, its strength:", "choice", ["Halves", "Is cut in half, exactly"][variant(p)], options=[
+                    Option(["Halves", "Is cut in half, exactly"][variant(p)], correct=True, value="halves"),
                     Option("Drops by a fixed amount", misconception="dilution-subtracts",
                            feedback="Diluting scales the strength: equal water doubles the volume, so strength is cut in half.", value="minus"),
                     Option("Stays the same", misconception="dilution-no-change",

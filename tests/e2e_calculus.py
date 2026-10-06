@@ -4,6 +4,7 @@
 """
 import functools
 import re
+from fractions import Fraction
 import http.server
 import sys
 import threading
@@ -48,9 +49,16 @@ def map_tests(page, base, c, label):
     c.ok(page.locator("[data-outcome='140.3.1'] [data-subtopic]").count() == 3, f"{label}: 140.3.1 lists its 3 subtopics")
     page.click("[data-subtopic='140.3.1.rate'] a[data-target='140.2.1']")
     c.ok(is_open(page, "140.2.1"), f"{label}: a chip to an unbuilt outcome opens it")
-    c.ok("coming soon" in page.inner_text("[data-outcome='140.2.1']").lower(), f"{label}: unbuilt outcome says coming soon")
-    page.click("[data-outcome='140.3.1'] > button")
-    c.ok(not is_open(page, "140.3.1"), f"{label}: an outcome closes again")
+    c.ok(page.locator("[data-outcome='140.2.1'] [data-subtopic]").count() == 2, f"{label}: 140.2.1 lists its 2 subtopics")
+    page.goto("about:blank")
+    page.goto(f"{base}/calculus/math-140/#140.6.1")
+    page.wait_for_selector("[data-outcome='140.6.1']")
+    c.ok(is_open(page, "140.6.1"), f"{label}: a deep link to an outcome opens it")
+    c.ok(page.locator("[data-outcome='140.6.1'] [data-subtopic]").count() == 2, f"{label}: 140.6.1 lists its 2 subtopics")
+    rendered = page.evaluate("() => document.querySelector('main').textContent.toLowerCase()")
+    c.ok("coming soon" not in rendered, f"{label}: every MATH 140 outcome is built (nothing says coming soon)")
+    page.click("[data-outcome='140.6.1'] > button")
+    c.ok(not is_open(page, "140.6.1"), f"{label}: an outcome closes again")
     page.goto(f"{base}/calculus/math-140/#140.3.2")
     page.wait_for_selector("[data-outcome]")
     page.wait_for_timeout(200)
@@ -90,6 +98,7 @@ def main():
             learn_tests(page, base, c, name)
             play_all_walkthroughs(page, base, c, name)
             practice_tests(page, base, c, name)
+            shuffle_test(page, base, c, name)
             page.close()
         no_speech_test(browser, base, c)
         browser.close()
@@ -184,13 +193,13 @@ def play_all_walkthroughs(page, base, c, label):
             gate = page.locator(".learn-step button").filter(has_text=re.compile(r"^(Next step|Finish)$"))
             c.ok(not gate.is_visible(), f"{label}: {w['id']} step {i + 1} hides Next until answered")
             if ask["format"] == "choice":
-                buttons = page.locator(".learn-step .choices button")
+                pick = lambda j: page.locator(f".learn-step .choices button[data-index='{j}']")
                 wrong = next((j for j, o in enumerate(ask["options"]) if not o.get("correct")), None)
                 right = next(j for j, o in enumerate(ask["options"]) if o.get("correct"))
                 if wrong is not None:
-                    buttons.nth(wrong).click()
+                    pick(wrong).click()
                     c.ok("bad" in (page.get_attribute(".learn-step .feedback", "class") or ""), f"{label}: {w['id']} step {i + 1} wrong-answer feedback")
-                buttons.nth(right).click()
+                pick(right).click()
             else:
                 field = page.locator(".learn-step #answer")
                 c.ok(field.get_attribute("inputmode") != "decimal", f"{label}: {w['id']} step {i + 1} keyboard can type a minus sign")
@@ -198,7 +207,10 @@ def play_all_walkthroughs(page, base, c, label):
                 page.click(".learn-step button:text-is('Check')")
                 c.ok("$" not in page.inner_text(".learn-step .feedback"), f"{label}: {w['id']} step {i + 1} hint renders its math")
                 # a phone keyboard may type the typographic minus
-                field.fill(str(ask["answer"]).replace("-", "\u2212"))
+                # exact answers can be typed as fractions (3/2), and a phone may type the typographic minus
+                frac = Fraction(ask["answer"]).limit_denominator(1000)
+                typed = str(ask["answer"]) if frac.denominator == 1 else f"{frac.numerator}/{frac.denominator}"
+                field.fill(typed.replace("-", "\u2212"))
                 page.click(".learn-step button:text-is('Check')")
             ok = page.is_visible(".learn-narration")
             c.ok(ok, f"{label}: {w['id']} step {i + 1} reveals its narration")
@@ -206,7 +218,7 @@ def play_all_walkthroughs(page, base, c, label):
                 break
             if step.get("widget"):
                 c.ok(page.locator(".learn-step .why-widget svg").count() == 1, f"{label}: {w['id']} step {i + 1} widget renders")
-                if step["widget"]["type"] == "secant" and ask["format"] == "number":
+                if step["widget"]["type"] == "secant" and step["widget"].get("mode") != "trace" and ask["format"] == "number":
                     page.eval_on_selector(".learn-step .why-widget input[type=range]", "e => { e.value = 100; e.dispatchEvent(new Event('input')); }")
                     m = re.search(r"slope of secant = (-?[\d.]+)", page.inner_text(".learn-step .why-widget"))
                     c.ok(m and abs(float(m.group(1)) - ask["answer"]) < 0.01, f"{label}: {w['id']} step {i + 1} widget settles on the answer {ask['answer']} ({m and m.group(1)})")
@@ -218,6 +230,17 @@ def play_all_walkthroughs(page, base, c, label):
         else:
             c.failures.append(f"{label}: {w['id']} finish screen missing Practice link")
 
+
+
+def shuffle_test(page, base, c, label):
+    """The right answer must not always be the first button (learn-factor's first step has it first in the data)."""
+    seen = set()
+    for _ in range(10):
+        page.goto(f"{base}/calculus/learn/?id=learn-factor")
+        page.wait_for_selector(".learn-step .choices button")
+        order = page.eval_on_selector_all(".learn-step .choices button", "bs => bs.map(b => b.dataset.index)")
+        seen.add(order.index("0") if "0" in order else -1)
+    c.ok(len(seen) > 1 and -1 not in seen, f"{label}: walkthrough options are shuffled (right answer seen at {sorted(seen)})")
 
 
 def practice_tests(page, base, c, label):

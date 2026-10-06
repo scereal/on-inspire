@@ -18,6 +18,28 @@
     abs: Math.abs,
     sqrt: (x) => (x >= 0 ? Math.sqrt(x) : NaN),
     recip: (x) => 1 / x,
+    // Unit 140.2: limits and continuity
+    jump: (x) => (x < 0 ? 1 : 3),
+    parking: (t) => 4 * Math.ceil(t),
+    x2sin: (x) => (x === 0 ? 0 : x * x * Math.sin(1 / x)),
+    negsquare: (x) => -x * x,
+    line21: (x) => 2 * x + 1,
+    ivtcubic: (x) => x * x * x + x - 1,
+    avgcost: (n) => (5000 + 3 * n) / n,
+    asym: (x) => (x + 1) / (x - 2),
+    rootdiff: (x) => (Math.sqrt(x + 4) - 2) / x,
+    hole3: (x) => (x * x - 9) / (x - 3),
+    // Unit 140.4: elementary functions
+    ln: (x) => (x > 0 ? Math.log(x) : NaN),
+    atan: Math.atan,
+    tan: (x) => (Math.abs(Math.cos(x)) < 1e-9 ? NaN : Math.tan(x)),
+    xpowx: (x) => (x > 0 ? Math.pow(x, x) : NaN),
+    // Unit 140.5: applications
+    crit3: (x) => x * x * x - 3 * x,
+    fencearea: (x) => x * (100 - 2 * x),
+    lhop: (x) => (Math.exp(2 * x) - 1) / x,
+    // Unit 140.1: functions and graphs
+    cubeplus: (x) => x * x * x + x,
   };
 
   const WidgetMath = {
@@ -26,6 +48,26 @@
       return FUNCTIONS[name];
     },
     secantSlope: (f, x0, h) => (f(x0 + h) - f(x0)) / h,
+    // Draw a curve point only if it's finite and not far outside the window (clips blow-ups near asymptotes)
+    // secant widget: h shrinks from 1.5 (or 3/4 of a narrower window) as the slider moves
+    secantH: (s, span) => Math.min(1.5, 0.75 * span) * Math.pow(10, -s / 30),
+    circleSlope: (x, y) => -x / y,
+    transformed: (base, a, h, k) => (x) => a * base(x - h) + k,
+    mirrorPoint: ([x, y]) => [y, x],
+    slopeAt: (f, x, h = 1e-5) => (f(x + h) - f(x - h)) / (2 * h),
+    // a ladder of length L with its foot x from the wall, foot moving out at dxdt: x² + y² = L² gives y' = −x x'/y
+    ladder: (L, x, dxdt) => { const y = Math.sqrt(L * L - x * x); return { y, dydt: (-x * dxdt) / y }; },          // implicit differentiation of x² + y² = r²
+    farLabel: (X) => (X >= 1e4 ? X.toExponential(0) : String(Math.round(X))),
+    plottable: (y, ymin, ymax) => Number.isFinite(y) && y >= ymin - 3 * (ymax - ymin) && y <= ymax + 3 * (ymax - ymin),
+    // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
+    farValues(f, mode, at, t) {
+      if (mode === "infinity") {
+        const X = Math.pow(10, 1 + 6 * t);
+        return [X / 100, X / 10, X].map((x) => [x, f(x)]);
+      }
+      const d = Math.pow(10, -4 * t);
+      return [at - d, at + d].map((x) => [x, f(x)]);
+    },
     riemann(f, a, b, n, rule = "mid") {
       const dx = (b - a) / n;
       let sum = 0;
@@ -148,12 +190,15 @@
     const curve = (f, a = xmin, b = xmax, cls = "w-curve", n = 240) => {
       let d = "";
       let pen = false;
+      let prev = null;
       for (let i = 0; i <= n; i++) {
         const x = a + ((b - a) * i) / n;
         const y = f(x);
-        if (!Number.isFinite(y) || y > ymax * 4 + 10 || y < ymin * 4 - 10) { pen = false; continue; }
+        if (!WidgetMath.plottable(y, ymin, ymax)) { pen = false; continue; }
+        if (pen && Math.abs(y - prev) > (ymax - ymin) / 2) pen = false;   // a jump, not a wall: lift the pen
         d += `${pen ? "L" : "M"}${X(x).toFixed(1)} ${Y(y).toFixed(1)} `;
         pen = true;
+        prev = y;
       }
       return el("path", { d, class: cls }, svg);
     };
@@ -190,7 +235,7 @@
         ui.readout.textContent = `input x = ${fmt(x, 2)} → output f(x) = ${fmt(f(x), 3)}`;
         return;
       }
-      const h = 1.5 * Math.pow(10, -state.s / 30);
+      const h = WidgetMath.secantH(state.s, span);
       const m = WidgetMath.secantSlope(f, x0, h);
       const ext = span;
       line.setAttribute("x1", P.X(x0 - ext)); line.setAttribute("y1", P.Y(f(x0) - m * ext));
@@ -220,21 +265,27 @@
   W["limit-zoom"] = function (box, cfg) {
     const g = WidgetMath.fn(cfg.g || "sinh_over_h");
     const at = cfg.at ?? 0;
-    const L = cfg.limit ?? g(at + 1e-7);
+    const sided = cfg.left !== undefined && cfg.right !== undefined;
+    const L = sided ? (cfg.left + cfg.right) / 2 : cfg.limit ?? g(at + 1e-7);
     const ui = shell(box, cfg.prompt || "Zoom in toward the point and watch the values settle.");
     let state;
     const draw = () => {
       ui.svg.innerHTML = "";
       const w = Math.pow(10, -state.z / 25);
-      const yr = cfg.epsilon ? Math.max(state.eps * 2.5, 1e-4) : Math.max(w * 2, 1e-4);
+      const yr = cfg.epsilon ? Math.max(state.eps * 2.5, 1e-4) : sided ? Math.abs(cfg.right - cfg.left) * 0.9 + 0.2 : Math.max(w * 2, 1e-4);
       const P = plotArea(ui.svg, at - w, at + w, L - yr, L + yr);
       if (cfg.epsilon) {
         el("rect", { x: P.L, width: P.R - P.L, y: P.Y(L + state.eps), height: Math.max(1, P.Y(L - state.eps) - P.Y(L + state.eps)), class: "w-band" }, ui.svg);
       }
+      for (const b of cfg.bounds || []) P.curve(WidgetMath.fn(b), at - w, at + w, "w-curve alt");
       P.curve(g, at - w, at - w * 1e-3);
       P.curve(g, at + w * 1e-3, at + w);
-      el("circle", { cx: P.X(at), cy: P.Y(L), r: 5, class: "w-hole" }, ui.svg);
+      for (const y of sided ? [cfg.left, cfg.right] : [L]) el("circle", { cx: P.X(at), cy: P.Y(y), r: 5, class: "w-hole" }, ui.svg);
       let text = `window ±${fmt(w, 4)}:  g(${fmt(at + w / 2, 4)}) = ${fmt(g(at + w / 2), 6)},  approaching ${fmt(L, 4)}`;
+      if (sided) {
+        const d = w / 2;
+        text = `from the left: g(${fmt(at - d, 4)}) = ${fmt(g(at - d), 4)} → ${fmt(cfg.left, 4)};  from the right: g(${fmt(at + d, 4)}) = ${fmt(g(at + d), 4)} → ${fmt(cfg.right, 4)}`;
+      }
       if (cfg.epsilon) {
         let delta = w;
         for (let i = 1; i <= 400; i++) {
@@ -838,6 +889,190 @@
     const init = () => { state = { a: 1 }; ai.value = 1; draw(); };
     const ai = slider(ui.controls, "Height a", 0, 2.4, 0.005, 1, (v) => { state.a = v; draw(); });
     ui.reset.addEventListener("click", init); init();
+    return { reset: init };
+  };
+
+  // Far out: x → ∞ (the window grows) or x → a vertical asymptote (both sides close in)
+  W["far-out"] = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "avgcost");
+    const at = cfg.at ?? 0;
+    const infinity = cfg.mode === "infinity";
+    const ui = shell(box, cfg.prompt || (infinity ? "Push x further out and watch the curve flatten toward its asymptote." : "Close in on the asymptote from both sides."));
+    let t = 0;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const pts = WidgetMath.farValues(f, infinity ? "infinity" : "asymptote", at, t);
+      if (infinity) {
+        const X = pts[pts.length - 1][0], A = cfg.asymptote ?? pts[pts.length - 1][1];
+        let lo = A, hi = A;
+        for (let i = 0; i <= 120; i++) { const y = f(X / 20 + ((X - X / 20) * i) / 120); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+        const pad = (hi - lo) * 0.15 || 1;
+        const P = plotArea(ui.svg, 0, X, lo - pad, hi + pad);
+        el("line", { x1: P.L, x2: P.R, y1: P.Y(A), y2: P.Y(A), class: "w-delta" }, ui.svg);
+        P.curve(f, X / 20, X);
+        el("circle", { cx: P.X(X), cy: P.Y(f(X)), r: 5, class: "w-point" }, ui.svg);
+        ui.readout.textContent = `x = ${WidgetMath.farLabel(X)}:  f(x) = ${fmt(f(X), 5)},  asymptote y = ${fmt(A, 3)}`;
+        return;
+      }
+      const [[xl, yl], [xr, yr]] = pts;
+      const Y = Math.min(Math.max(5, Math.abs(yl), Math.abs(yr)) * 1.15, 1e6);
+      const P = plotArea(ui.svg, at - 1.5, at + 1.5, -Y, Y);
+      el("line", { x1: P.X(at), x2: P.X(at), y1: P.T, y2: P.B, class: "w-delta" }, ui.svg);
+      P.curve(f, at - 1.5, xl, "w-curve", 600);
+      P.curve(f, xr, at + 1.5, "w-curve", 600);
+      for (const [x, y] of pts) el("circle", { cx: P.X(x), cy: P.Y(Math.max(-Y, Math.min(Y, y))), r: 5, class: "w-point" }, ui.svg);
+      ui.readout.textContent = `f(${fmt(xl, 5)}) = ${fmt(yl, 1)},  f(${fmt(xr, 5)}) = ${fmt(yr, 1)}`;
+    };
+    const input = slider(ui.controls, infinity ? "Push x out" : "Close in", 0, 100, 1, 0, (v) => { t = v / 100; draw(); });
+    const init = () => { t = 0; input.value = 0; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Circle tangent: implicit differentiation on x² + y² = r²
+  W["circle-tangent"] = function (box, cfg) {
+    const r = cfg.r ?? 5;
+    const ui = shell(box, cfg.prompt || "Move the point around the circle and watch the tangent's slope, −x/y.");
+    let deg;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const yr = r * 1.35, xr = yr * (434 / 226);
+      const P = plotArea(ui.svg, -xr, xr, -yr, yr);
+      const k = (P.B - P.T) / (2 * yr);
+      el("circle", { cx: P.X(0), cy: P.Y(0), r: r * k, class: "w-circle" }, ui.svg);
+      const th = (deg * Math.PI) / 180, x = r * Math.cos(th), y = r * Math.sin(th);
+      const ext = r * 0.9, dx = -Math.sin(th) * ext, dy = Math.cos(th) * ext;
+      el("line", { x1: P.X(x - dx), y1: P.Y(y - dy), x2: P.X(x + dx), y2: P.Y(y + dy), class: "w-secant" }, ui.svg);
+      el("circle", { cx: P.X(x), cy: P.Y(y), r: 6, class: "w-point" }, ui.svg);
+      ui.readout.textContent = Math.abs(y) < 1e-9
+        ? `point (${fmt(x, 2)}, 0): the tangent is vertical, since −x/y divides by 0`
+        : `point (${fmt(x, 2)}, ${fmt(y, 2)}): slope = −x/y = ${fmt(WidgetMath.circleSlope(x, y), 3)}`;
+    };
+    const start = cfg.deg ?? 53.13;
+    const input = slider(ui.controls, "Move the point", 0, 359, 1, Math.round(start), (v) => { deg = v; draw(); });
+    const init = () => { deg = start; input.value = Math.round(start); draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Tangent point: slide a tangent along f (optionally against the chord, for the MVT),
+  // or hold the tangent at x0 and compare it with f nearby (linear approximation)
+  W["tangent-point"] = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "crit3");
+    const a = cfg.a ?? -2, b = cfg.b ?? 2, x0 = cfg.x0 ?? (a + b) / 2;
+    const approx = cfg.mode === "approx";
+    const ui = shell(box, cfg.prompt || (approx ? "Move x away from the tangent point: the tangent line stays close at first, then drifts." : "Slide the tangent along the curve and read its slope."));
+    let ys = [Infinity, -Infinity];
+    for (let i = 0; i <= 200; i++) { const y = f(a + ((b - a) * i) / 200); if (Number.isFinite(y)) ys = [Math.min(ys[0], y), Math.max(ys[1], y)]; }
+    const pad = (ys[1] - ys[0]) * 0.15 || 1;
+    let x;
+    const chordSlope = (f(b) - f(a)) / (b - a);
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, a, b, ys[0] - pad, ys[1] + pad);
+      P.curve(f);
+      const at = approx ? x0 : x, m = WidgetMath.slopeAt(f, at), ext = (b - a) * 0.6;
+      el("line", { x1: P.X(at - ext), y1: P.Y(f(at) - m * ext), x2: P.X(at + ext), y2: P.Y(f(at) + m * ext), class: "w-secant" }, ui.svg);
+      if (cfg.chord) el("line", { x1: P.X(a), y1: P.Y(f(a)), x2: P.X(b), y2: P.Y(f(b)), class: "w-delta" }, ui.svg);
+      el("circle", { cx: P.X(at), cy: P.Y(f(at)), r: 6, class: "w-point" }, ui.svg);
+      if (approx) {
+        const t = f(x0) + m * (x - x0);
+        el("circle", { cx: P.X(x), cy: P.Y(f(x)), r: 5, class: "w-point alt" }, ui.svg);
+        el("circle", { cx: P.X(x), cy: P.Y(t), r: 5, class: "w-hole" }, ui.svg);
+        ui.readout.textContent = `x = ${fmt(x, 3)}: f(x) = ${fmt(f(x), 5)}, tangent line ${fmt(t, 5)}, error ${fmt(t - f(x), 5)}`;
+        return;
+      }
+      ui.readout.textContent = `x = ${fmt(x, 2)}: slope ${fmt(m, 3)}` +
+        (cfg.chord ? `, chord slope ${fmt(chordSlope, 3)}${Math.abs(m - chordSlope) < 0.05 * Math.max(1, Math.abs(chordSlope)) ? " (parallel: here f′(c) equals the average)" : ""}` : "") +
+        (Math.abs(m) < 0.02 * Math.max(1, ys[1] - ys[0]) ? " (flat: a critical point)" : "");
+    };
+    const lo = approx ? Math.max(a, x0 - (b - a) / 2) : a, hi = approx ? Math.min(b, x0 + (b - a) / 2) : b;
+    const start = approx ? x0 + (hi - x0) * 0.3 : a + (b - a) * 0.2;
+    const input = slider(ui.controls, "Move x", lo, hi, (hi - lo) / 400, start, (v) => { x = v; draw(); });
+    const init = () => { x = start; input.value = start; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Ladder: x² + y² = L², the foot slides out at a steady rate
+  W.ladder = function (box, cfg) {
+    const L = cfg.L ?? 10, dxdt = cfg.dxdt ?? 2;
+    const ui = shell(box, cfg.prompt || "Slide the foot of the ladder out: the top falls slowly at first, then faster and faster.");
+    let x;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -0.5, L * 1.6, -0.5, L * 1.05);
+      const { y, dydt } = WidgetMath.ladder(L, x, dxdt);
+      el("line", { x1: P.X(0), y1: P.Y(0), x2: P.X(0), y2: P.Y(L * 1.05), class: "w-axis" }, ui.svg);
+      el("line", { x1: P.X(x), y1: P.Y(0), x2: P.X(0), y2: P.Y(y), class: "w-secant" }, ui.svg);
+      el("circle", { cx: P.X(x), cy: P.Y(0), r: 6, class: "w-point" }, ui.svg);
+      el("circle", { cx: P.X(0), cy: P.Y(y), r: 6, class: "w-point alt" }, ui.svg);
+      ui.readout.textContent = `foot ${fmt(x, 2)} m out, top ${fmt(y, 2)} m up: the top moves at ${fmt(dydt, 3)} m/s while the foot moves at ${dxdt} m/s`;
+    };
+    const input = slider(ui.controls, "Foot distance", 0.5, L - 0.2, 0.01, 6, (v) => { x = v; draw(); });
+    const init = () => { x = Math.min(6, L - 0.2); input.value = x; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Transform: y = a·f(x − h) + k, with the base graph for comparison
+  W.transform = function (box, cfg) {
+    const name = cfg.base || "square";
+    const base = WidgetMath.fn(name);
+    const label = { square: "x²", sqrt: "√x", abs: "|x|", recip: "1/x" }[name] || "f(x)";
+    const ui = shell(box, cfg.prompt || "Move the sliders: h slides the graph sideways, k lifts it, a stretches or flips it.");
+    let st;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -6, 6, -6, 8);
+      P.curve(base, -6, 6, "w-curve alt", 480);
+      P.curve(WidgetMath.transformed(base, st.a, st.h, st.k), -6, 6, "w-curve", 480);
+      const inner = st.h === 0 ? "x" : `x ${st.h > 0 ? "−" : "+"} ${fmt(Math.abs(st.h), 1)}`;
+      const outer = st.k === 0 ? "" : ` ${st.k > 0 ? "+" : "−"} ${fmt(Math.abs(st.k), 1)}`;
+      ui.readout.textContent = `y = ${st.a === 1 ? "" : st.a === -1 ? "−" : fmt(st.a, 1) + "·"}${label.replace("x", `(${inner})`)}${outer}   (gold: the original ${label})`;
+    };
+    const start = { a: cfg.a ?? 1, h: cfg.h ?? 0, k: cfg.k ?? 0 };
+    const sa = slider(ui.controls, "a", -3, 3, 0.5, start.a, (v) => { st.a = v; draw(); });
+    const sh = slider(ui.controls, "h", -5, 5, 0.5, start.h, (v) => { st.h = v; draw(); });
+    const sk = slider(ui.controls, "k", -5, 5, 0.5, start.k, (v) => { st.k = v; draw(); });
+    const init = () => { st = { ...start }; sa.value = st.a; sh.value = st.h; sk.value = st.k; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Mirror: a function and its inverse are reflections across y = x
+  W.mirror = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "cubeplus");
+    const lo = cfg.lo ?? -1.5, hi = cfg.hi ?? 1.5, R = cfg.range ?? 3.5;
+    const ui = shell(box, cfg.prompt || "Move the point along f: its mirror image across y = x traces the inverse.");
+    let t;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -R * 434 / 226, R * 434 / 226, -R, R);
+      el("line", { x1: P.X(-R * 2), y1: P.Y(-R * 2), x2: P.X(R * 2), y2: P.Y(R * 2), class: "w-delta" }, ui.svg);
+      P.curve(f, lo, hi, "w-curve", 300);
+      let d = "";
+      for (let i = 0; i <= 300; i++) {
+        const u = lo + ((hi - lo) * i) / 300, [mx, my] = WidgetMath.mirrorPoint([u, f(u)]);
+        if (Math.abs(mx) > R * 2 || Math.abs(my) > R * 2) continue;
+        d += `${d ? "L" : "M"}${P.X(mx).toFixed(1)} ${P.Y(my).toFixed(1)} `;
+      }
+      el("path", { d, class: "w-curve alt" }, ui.svg);
+      const [mx, my] = WidgetMath.mirrorPoint([t, f(t)]);
+      el("line", { x1: P.X(t), y1: P.Y(f(t)), x2: P.X(mx), y2: P.Y(my), class: "w-delta" }, ui.svg);
+      el("circle", { cx: P.X(t), cy: P.Y(f(t)), r: 6, class: "w-point" }, ui.svg);
+      el("circle", { cx: P.X(mx), cy: P.Y(my), r: 6, class: "w-point alt" }, ui.svg);
+      ui.readout.textContent = `(${fmt(t, 2)}, ${fmt(f(t), 3)}) on f  ↔  (${fmt(f(t), 3)}, ${fmt(t, 2)}) on the inverse`;
+    };
+    const input = slider(ui.controls, "Move the point", lo, hi, (hi - lo) / 300, cfg.x0 ?? 1, (v) => { t = v; draw(); });
+    const init = () => { t = cfg.x0 ?? 1; input.value = t; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
     return { reset: init };
   };
 

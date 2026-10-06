@@ -16,19 +16,94 @@ window.CURRICULUM = {
           "id": "140.1.1",
           "title": "Work with domain, range, composition and inverse functions",
           "summary": "Read what a function accepts and returns, chain functions together, and undo them.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.1.domain",
+              "title": "Finding the domain from a formula",
+              "learn": "learn-domain",
+              "practice": {
+                "framework": "functions",
+                "level": 1
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.1.1.composition",
+              "title": "Composing functions",
+              "learn": "learn-composition",
+              "practice": {
+                "framework": "functions",
+                "level": 2
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.1.1.inverse",
+              "title": "Inverse functions",
+              "learn": "learn-inverse-fn",
+              "practice": {
+                "framework": "functions",
+                "level": 3
+              },
+              "builds_on": [
+                "140.1.1.composition"
+              ]
+            }
+          ]
         },
         {
           "id": "140.1.2",
           "title": "Transform graphs by shifting, stretching and reflecting",
           "summary": "Predict how a graph moves when you change its formula.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.2.transform",
+              "title": "Shifts, stretches and reflections",
+              "learn": "learn-transform",
+              "practice": {
+                "framework": "functions",
+                "level": 4
+              },
+              "builds_on": [
+                "foundation:function"
+              ]
+            }
+          ]
         },
         {
           "id": "140.1.3",
           "title": "Recognize and use the elementary functions",
           "summary": "Polynomials, rational functions, powers and roots, exponentials, logarithms, trig and inverse trig.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.1.3.exp-log",
+              "title": "Exponentials and logarithms",
+              "learn": "learn-exp-log-eq",
+              "practice": {
+                "framework": "functions",
+                "level": 5
+              },
+              "builds_on": [
+                "140.1.1.inverse"
+              ]
+            },
+            {
+              "id": "140.1.3.trig-values",
+              "title": "Exact trig values on the unit circle",
+              "learn": "learn-trig-values",
+              "practice": {
+                "framework": "functions",
+                "level": 6
+              },
+              "builds_on": [
+                "foundation:unit-circle"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -40,31 +115,161 @@ window.CURRICULUM = {
           "id": "140.2.1",
           "title": "Find limits from graphs and tables, including one-sided limits",
           "summary": "See what value a function settles toward, from each side.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.1.table",
+              "title": "Limits from a table of values",
+              "learn": "learn-table",
+              "practice": {
+                "framework": "limits",
+                "level": 1
+              },
+              "builds_on": [
+                "foundation:limit",
+                "foundation:function"
+              ]
+            },
+            {
+              "id": "140.2.1.one-sided",
+              "title": "One-sided limits",
+              "learn": "learn-one-sided",
+              "practice": {
+                "framework": "limits",
+                "level": 2
+              },
+              "builds_on": [
+                "140.2.1.table"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.2",
           "title": "Compute limits with limit laws, algebra and the squeeze theorem",
           "summary": "Turn 0/0 into an answer by factoring, rationalizing or squeezing.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.2.factor",
+              "title": "Factor and cancel",
+              "learn": "learn-factor",
+              "practice": {
+                "framework": "limits",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.1.table"
+              ]
+            },
+            {
+              "id": "140.2.2.rationalize",
+              "title": "Rationalize with the conjugate",
+              "learn": "learn-rationalize",
+              "practice": {
+                "framework": "limits",
+                "level": 4
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "foundation:conjugate-trick"
+              ]
+            },
+            {
+              "id": "140.2.2.squeeze",
+              "title": "The squeeze theorem",
+              "learn": "learn-squeeze",
+              "practice": {
+                "framework": "limits",
+                "level": 5
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "foundation:unit-circle"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.3",
           "title": "Find limits at infinity and asymptotes",
           "summary": "Describe what a function does far out and near its blow-ups.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.3.infinity",
+              "title": "Limits at infinity and horizontal asymptotes",
+              "learn": "learn-infinity",
+              "practice": {
+                "framework": "limits",
+                "level": 6
+              },
+              "builds_on": [
+                "140.2.2.factor"
+              ]
+            },
+            {
+              "id": "140.2.3.asymptotes",
+              "title": "Vertical asymptotes",
+              "learn": "learn-asymptote",
+              "practice": {
+                "framework": "limits",
+                "level": 7
+              },
+              "builds_on": [
+                "140.2.1.one-sided",
+                "140.2.3.infinity"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.4",
           "title": "Decide continuity and use the Intermediate Value Theorem",
           "summary": "Know when a graph has no breaks, and what that guarantees.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.4.continuity",
+              "title": "What continuity means",
+              "learn": "learn-continuous",
+              "practice": {
+                "framework": "continuity",
+                "level": 1
+              },
+              "builds_on": [
+                "140.2.1.one-sided"
+              ]
+            },
+            {
+              "id": "140.2.4.ivt",
+              "title": "The Intermediate Value Theorem",
+              "learn": "learn-ivt",
+              "practice": {
+                "framework": "continuity",
+                "level": 2
+              },
+              "builds_on": [
+                "140.2.4.continuity"
+              ]
+            }
+          ]
         },
         {
           "id": "140.2.5",
           "title": "Use the epsilon–delta definition of a limit",
           "summary": "Say exactly what \"approaches\" means, and prove simple limits.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.2.5.epsilon-delta",
+              "title": "Finding δ for a given ε",
+              "learn": "learn-epsilon-delta",
+              "practice": {
+                "framework": "continuity",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.1.table",
+                "foundation:limit"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -205,25 +410,118 @@ window.CURRICULUM = {
           "id": "140.4.1",
           "title": "Differentiate trig, exponential and logarithmic functions",
           "summary": "Why sin′ = cos, (eˣ)′ = eˣ and (ln x)′ = 1/x.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.1.trig",
+              "title": "Derivatives of sin, cos and tan",
+              "learn": "learn-trig-derivs",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 1
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "foundation:unit-circle"
+              ]
+            },
+            {
+              "id": "140.4.1.exp-log",
+              "title": "Derivatives of exponentials and logarithms",
+              "learn": "learn-exp-log",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 2
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "140.4.2.inverse"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.2",
           "title": "Differentiate inverse functions and inverse trig",
           "summary": "Flip the graph, flip the slope.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.2.inverse",
+              "title": "The derivative of an inverse function",
+              "learn": "learn-inverse",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 3
+              },
+              "builds_on": [
+                "140.3.2.chain",
+                "140.1.1"
+              ]
+            },
+            {
+              "id": "140.4.2.inverse-trig",
+              "title": "Derivatives of inverse trig functions",
+              "learn": "learn-inverse-trig",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 4
+              },
+              "builds_on": [
+                "140.4.2.inverse",
+                "140.4.1.trig"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.3",
           "title": "Use implicit and logarithmic differentiation",
           "summary": "Differentiate curves that aren't written as y = f(x), and tame products of powers.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.3.implicit",
+              "title": "Implicit differentiation",
+              "learn": "learn-implicit",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 5
+              },
+              "builds_on": [
+                "140.3.2.chain"
+              ]
+            },
+            {
+              "id": "140.4.3.log-diff",
+              "title": "Logarithmic differentiation",
+              "learn": "learn-log-diff",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 6
+              },
+              "builds_on": [
+                "140.4.1.exp-log",
+                "140.4.3.implicit"
+              ]
+            }
+          ]
         },
         {
           "id": "140.4.4",
           "title": "Find and interpret higher derivatives",
           "summary": "Acceleration, concavity and beyond.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.4.4.higher",
+              "title": "Second derivatives: acceleration and concavity",
+              "learn": "learn-higher",
+              "practice": {
+                "framework": "elementary-derivatives",
+                "level": 7
+              },
+              "builds_on": [
+                "140.3.2.power"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -235,37 +533,132 @@ window.CURRICULUM = {
           "id": "140.5.1",
           "title": "Solve related-rates problems",
           "summary": "Connect how fast linked quantities change.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.1.related-rates",
+              "title": "Related rates",
+              "learn": "learn-related-rates",
+              "practice": {
+                "framework": "applications",
+                "level": 1
+              },
+              "builds_on": [
+                "140.4.3.implicit"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.2",
           "title": "Use linear approximation and differentials",
           "summary": "Estimate values with the tangent line, and judge the error.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.2.linear-approx",
+              "title": "The tangent line as an approximation",
+              "learn": "learn-linear-approx",
+              "practice": {
+                "framework": "applications",
+                "level": 2
+              },
+              "builds_on": [
+                "140.3.1.definition",
+                "140.4.4.higher"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.3",
           "title": "Apply the Mean Value Theorem",
           "summary": "Somewhere, the instantaneous rate equals the average rate.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.3.mvt",
+              "title": "The Mean Value Theorem",
+              "learn": "learn-mvt",
+              "practice": {
+                "framework": "applications",
+                "level": 3
+              },
+              "builds_on": [
+                "140.2.4.ivt",
+                "140.3.1.definition"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.4",
           "title": "Find extrema and sketch curves",
           "summary": "Use the first and second derivatives to read a graph's shape.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.4.extrema",
+              "title": "Absolute extrema on a closed interval",
+              "learn": "learn-extrema",
+              "practice": {
+                "framework": "applications",
+                "level": 4
+              },
+              "builds_on": [
+                "140.2.4.ivt",
+                "140.3.2.power"
+              ]
+            },
+            {
+              "id": "140.5.4.sketch",
+              "title": "Reading a graph's shape from f′ and f″",
+              "learn": "learn-sketch",
+              "practice": {
+                "framework": "applications",
+                "level": 5
+              },
+              "builds_on": [
+                "140.4.4.higher",
+                "140.5.4.extrema"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.5",
           "title": "Solve optimization problems",
           "summary": "Build the function, then find its best value.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.5.optimization",
+              "title": "Optimization problems",
+              "learn": "learn-optimization",
+              "practice": {
+                "framework": "applications",
+                "level": 6
+              },
+              "builds_on": [
+                "140.5.4.extrema"
+              ]
+            }
+          ]
         },
         {
           "id": "140.5.6",
           "title": "Evaluate indeterminate limits with L'Hôpital's rule",
           "summary": "When 0/0 or ∞/∞ appears, compare rates instead.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.5.6.lhopital",
+              "title": "L'Hôpital's rule",
+              "learn": "learn-lhopital",
+              "practice": {
+                "framework": "applications",
+                "level": 7
+              },
+              "builds_on": [
+                "140.2.2.factor",
+                "140.4.1.exp-log"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -277,13 +670,65 @@ window.CURRICULUM = {
           "id": "140.6.1",
           "title": "Find antiderivatives, with the + C",
           "summary": "Run differentiation backwards, and see why the constant is always there.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.6.1.power",
+              "title": "The power rule backwards",
+              "learn": "learn-antiderivative-power",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 1
+              },
+              "builds_on": [
+                "140.3.2.power"
+              ]
+            },
+            {
+              "id": "140.6.1.basic",
+              "title": "Antiderivatives of trig and exponential functions",
+              "learn": "learn-antiderivative-basic",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 2
+              },
+              "builds_on": [
+                "140.4.1.trig",
+                "140.4.1.exp-log"
+              ]
+            }
+          ]
         },
         {
           "id": "140.6.2",
           "title": "Solve initial-value problems",
           "summary": "Pin down the constant from one known value, e.g. position from velocity.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.6.2.ivp",
+              "title": "Finding the constant from a known value",
+              "learn": "learn-ivp",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 3
+              },
+              "builds_on": [
+                "140.6.1.power"
+              ]
+            },
+            {
+              "id": "140.6.2.motion",
+              "title": "From acceleration to position",
+              "learn": "learn-motion",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 4
+              },
+              "builds_on": [
+                "140.6.2.ivp",
+                "140.4.4.higher"
+              ]
+            }
+          ]
         }
       ]
     }

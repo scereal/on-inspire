@@ -64,5 +64,55 @@ check("|x| left-hand slope at 0 is −1", near(M.secantSlope(M.fn("abs"), 0, -1e
 check("√x slope at 4 → 1/4", near(M.secantSlope(M.fn("sqrt"), 4, 1e-6), 0.25, 1e-5));
 check("unknown function names are refused", (() => { try { M.fn("alert"); return false; } catch (e) { return true; } })());
 
+// Unit 140.2: limits and continuity
+{
+  const far = M.farValues(M.fn("avgcost"), "infinity", 0, 1);
+  check("far-out: average cost settles toward 3 as n grows", near(far[far.length - 1][1], 3, 0.01), JSON.stringify(far));
+  const [[xl, yl], [xr, yr]] = M.farValues(M.fn("asym"), "asymptote", 2, 1);
+  check("far-out: (x + 1)/(x − 2) blows up with opposite signs either side of 2", xl < 2 && xr > 2 && yl < -1000 && yr > 1000, `${yl}, ${yr}`);
+  check("far-out: asymptote samples move toward the line as t grows",
+    Math.abs(M.farValues(M.fn("asym"), "asymptote", 2, 0.8)[1][0] - 2) < Math.abs(M.farValues(M.fn("asym"), "asymptote", 2, 0.2)[1][0] - 2));
+  let squeezed = true;
+  for (let i = 1; i <= 200; i++) { const x = (i - 100.5) / 400; const y = M.fn("x2sin")(x); if (y > x * x + 1e-12 || y < -x * x - 1e-12) squeezed = false; }
+  check("x² sin(1/x) stays between −x² and x²", squeezed);
+  check("negsquare is −x²", M.fn("negsquare")(3) === -9);
+  check("parking: 4 dollars per started hour (8 just before 2 h, 12 just after)", M.fn("parking")(1.999) === 8 && M.fn("parking")(2.001) === 12);
+  check("jump: 1 on the left of 0, 3 on the right", M.fn("jump")(-0.001) === 1 && M.fn("jump")(0.001) === 3);
+  check("far-out labels whole x values without stripping zeros", M.farLabel(10) === "10" && M.farLabel(100) === "100" && M.farLabel(1e6) === "1e+6");
+  check("line21(1) = 3", M.fn("line21")(1) === 3);
+  check("plots above the axis keep their points (parking: y = 8 in a 6.2–13.8 window)", M.plottable(8, 6.2, 13.8));
+  check("plots below the axis keep their points", M.plottable(-8, -13.8, -6.2));
+  check("runaway values are still clipped", !M.plottable(1e9, 0, 10) && !M.plottable(-1e9, 0, 10) && !M.plottable(NaN, 0, 10));
+  check("hole3 settles on 6 near x = 3", near(M.fn("hole3")(3.0001), 6, 1e-3) && near(M.fn("hole3")(2.9999), 6, 1e-3));
+  check("rootdiff settles on 1/4 near 0", near(M.fn("rootdiff")(1e-6), 0.25, 1e-4));
+  check("ivtcubic changes sign on [0, 1]", M.fn("ivtcubic")(0) < 0 && M.fn("ivtcubic")(1) > 0);
+}
+
+// Unit 140.4: differentiating elementary functions
+check("ln: slope at 2 → 1/2", near(M.secantSlope(M.fn("ln"), 2, 1e-6), 0.5, 1e-5));
+check("atan: slope at 1 → 1/2", near(M.secantSlope(M.fn("atan"), 1, 1e-6), 0.5, 1e-5));
+check("xpowx: slope at 1 → 1", near(M.secantSlope(M.fn("xpowx"), 1, 1e-6), 1, 1e-5));
+check("tan: slope at 0 → 1", near(M.secantSlope(M.fn("tan"), 0, 1e-6), 1, 1e-5));
+check("secant h starts inside a narrow window (span 0.8)", M.secantH(0, 0.8) <= 0.8 && M.secantH(0, 2) === 1.5 && M.secantH(30, 2) < M.secantH(0, 2));
+check("circle tangent slope at (3, 4) is −3/4", near(M.circleSlope(3, 4), -0.75, 1e-12));
+
+// Unit 140.5: applications
+{
+  const l = M.ladder(10, 6, 2);
+  check("ladder: 10 m, foot 6 m out moving at 2 m/s → top at 8 m falling at 1.5 m/s", near(l.y, 8, 1e-12) && near(l.dydt, -1.5, 1e-12));
+  check("slopeAt(crit3, 1) = 0 (a critical point)", near(M.slopeAt(M.fn("crit3"), 1), 0, 1e-6));
+  check("slopeAt(fencearea, 25) = 0 (the best fence)", near(M.slopeAt(M.fn("fencearea"), 25), 0, 1e-6));
+  check("lhop settles on 2 near 0", near(M.fn("lhop")(1e-6), 2, 1e-4));
+}
+
+// Unit 140.1: functions and graphs
+{
+  const g = M.transformed(M.fn("square"), 2, 3, 1);
+  check("transformed: 2(x − 3)² + 1 has its vertex at (3, 1) and g(4) = 3", g(3) === 1 && g(4) === 3);
+  const [mx, my] = M.mirrorPoint([2, 9]);
+  check("mirrorPoint swaps coordinates across y = x", mx === 9 && my === 2);
+  check("cubeplus(1) = 2 (x³ + x)", M.fn("cubeplus")(1) === 2);
+}
+
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");
 if (failures) throw new Error(`${failures} failed`);

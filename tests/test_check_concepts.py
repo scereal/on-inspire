@@ -118,6 +118,18 @@ class CheckConceptsTest(unittest.TestCase):
         concepts[3]["claims"] = [{"sympy": "integrate(sin(x), (x, 0, pi))", "equals": "3"}]
         self.assertReports(cc.verify_claims(concepts), "base")
 
+    def test_infinite_and_list_claims(self):
+        concepts = copy.deepcopy(VALID)
+        concepts[3]["claims"] = [{"sympy": "limit(1/x, x, 0, '+')", "equals": "oo"},
+                                 {"sympy": "limit(1/x, x, 0, '-')", "equals": "-oo"},
+                                 {"sympy": "solve(x**2 - 4, x)", "equals": "[-2, 2]"}]
+        self.assertEqual(cc.verify_claims(concepts), [])
+
+    def test_false_infinite_claim(self):
+        concepts = copy.deepcopy(VALID)
+        concepts[3]["claims"] = [{"sympy": "limit(1/x, x, 0, '-')", "equals": "oo"}]
+        self.assertReports(cc.verify_claims(concepts), "base")
+
     def test_approximate_claim(self):
         concepts = copy.deepcopy(VALID)
         concepts[3]["claims"] = [{"sympy": "2/pi*Si(pi)", "approx": 1.179, "tol": 0.001}]

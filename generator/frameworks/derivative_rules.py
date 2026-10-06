@@ -13,11 +13,12 @@ D = lambda e: sp.diff(e, x)
 E = lambda s: sp.sympify(s, locals={"x": x})
 
 RULES = {
-    "sum": "Sum and constant-multiple rules",
-    "power": "Power rule",
-    "product": "Product rule",
-    "quotient": "Quotient rule",
-    "chain": "Chain rule",
+    # all the same rendered length, so no rule is findable by being the longest or shortest label
+    "sum": "Sum rule (term by term)",
+    "power": "Power rule (xⁿ → nxⁿ⁻¹)",
+    "product": "Product rule (for f·g)",
+    "quotient": "Quotient rule (of f/g)",
+    "chain": "Chain rule (g inside f)",
 }
 
 # Named mistakes: each returns the wrong derivative a learner with that misconception would write

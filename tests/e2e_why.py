@@ -159,7 +159,7 @@ def ibp(page, base, c, label):
             page.locator(".work button").nth(item["wrong"]).click()
         else:
             right = next(j for j, o in enumerate(item["options"]) if o.get("right"))
-            page.locator(".choices button").nth(right).click()
+            page.locator(".choices button").nth(right).click()   # hand-built page: options keep their order
         why = page.locator(".task .why-open")
         c.ok(why.count() == 1, f"{label}: IBP problem {i + 1} offers Why?")
         if why.count():

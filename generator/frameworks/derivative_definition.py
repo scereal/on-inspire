@@ -199,9 +199,9 @@ class DerivativeDefinition(Framework):
             ]),
             Step("Now let $h \\to 0$. What is $f'(" + str(pt) + ")$?", "choice", num(value), options=[
                 Option(f"${num(value)}$", correct=True, value=float(value)),
-                Option("$0$ (put $h = 0$ in first)", misconception="early-substitution",
+                Option("$0$", misconception="early-substitution",
                        feedback="Putting $h = 0$ into the original fraction gives $0/0$. Simplify first, then let $h$ shrink.", value=0.0),
-                Option("Undefined: it's $0/0$", misconception="zero-over-zero",
+                Option("Undefined", misconception="zero-over-zero",
                        feedback="$0/0$ only means \"simplify first\". After simplifying, the $h$ in the denominator is gone.", value="undefined"),
             ], explain=f"Every term with $h$ vanishes, leaving ${num(value)}$."),
             Step("Repeat the same steps at any $x$. What is $f'(x)$?", "choice", tex(fprime), options=[

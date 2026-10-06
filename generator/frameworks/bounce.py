@@ -52,6 +52,7 @@ class Bounce(Framework):
         "first-drop-twice": "Counted the first drop as if it went up and down.",
         "infinite-sum-infinite": "Thought infinitely many bounces must add up to an infinite distance.",
         "e-not-squared": "Used e for the height ratio. e is a speed ratio; height goes with speed squared.",
+        "root-not-square": "Used √e: height depends on speed squared, so the fraction is e².",
         "loss-fraction": "Used 1 − e, the fraction of speed lost.",
         "off-by-one": "Counted one bounce too few or too many.",
     }
@@ -134,11 +135,16 @@ class Bounce(Framework):
             e, n = p["e"], p["n"]
             ans = round(h * r**n, 3)
             steps = [
-                Step("What fraction of its height does it keep on each bounce?", "choice", f"{r:.4g}", options=[
-                    Option(f"{r:.4g}", correct=True, value=round(r, 4)),
-                    Option(f"{e:g}", misconception="e-not-squared",
+                # every option to 4 decimal places, so the right one isn't the only long number
+                Step("What fraction of its height does it keep on each bounce?", "choice", f"{r:.4f}", options=[
+                    Option(f"{r:.4f}", correct=True, value=round(r, 4)),
+                    Option(f"{e:.4f}", misconception="e-not-squared",
                            feedback="e compares speeds. Height depends on speed squared, so the height fraction is e².", value=e),
-                    Option(f"{1 - e:.4g}", misconception="loss-fraction", feedback="1 − e is the fraction of speed lost, not height kept.", value=round(1 - e, 4)),
+                    # half the problems swap in √e, so the right value isn't reliably the middle one
+                    (Option(f"{1 - e:.4f}", misconception="loss-fraction", feedback="1 − e is the fraction of speed lost, not height kept.", value=round(1 - e, 4))
+                     if int(round(e * 100)) % 2 == 0 else
+                     Option(f"{math.sqrt(e):.4f}", misconception="root-not-square",
+                            feedback="Height grows with the square of the speed, not its square root: the fraction is e², not √e.", value=round(math.sqrt(e), 4))),
                 ], explain=f"Rise height ∝ (launch speed)², so each bounce keeps e² = {r:.4g} of the height."),
                 Step(f"How high does it rise after bounce number {n}? (in metres)", "number", ans,
                      tolerance=max(0.001, 0.01 * ans), unit="m", explain=f"{h:g} × ({e:g}²)^{n} ≈ {ans:g} m."),
@@ -152,11 +158,13 @@ class Bounce(Framework):
         if n < 2:
             raise NoSolution("drops below on the first bounce")
         story += f" How many bounces until it no longer rises to {T:g} m?"
+        # vary which side the wrong counts sit on, so the answer isn't always the middle number
+        offsets = [(-1, 1), (1, 2), (-2, -1)][n % 3] if n > 2 else (1, 2)
+        wrong_count = lambda k: (Option(str(k), misconception="off-by-one", feedback=f"After {k} bounces it still reaches {m(h * r**k)}.", value=k)
+                                 if k < n else Option(str(k), misconception="off-by-one",
+                                                      feedback=f"It already falls short after {n} bounces ({m(h * r**n)}).", value=k))
         steps = [Step(f"After how many bounces does it first fail to reach {T:g} m?", "choice", str(n), options=[
-            Option(str(n), correct=True, value=n),
-            Option(str(n - 1), misconception="off-by-one", feedback=f"After {n - 1} bounces it still reaches {m(h * r**(n - 1))}.", value=n - 1),
-            Option(str(n + 1), misconception="off-by-one", feedback=f"It already falls short after {n} bounces ({m(h * r**n)}).", value=n + 1),
-        ], explain=f"Solve {h:g}·{r:g}ⁿ < {T:g}: n > ln({T:g}/{h:g}) / ln({r:g}) ≈ {math.log(T / h) / math.log(r):.2f}, so n = {n}.")]
+            Option(str(n), correct=True, value=n)] + [wrong_count(n + o) for o in offsets], explain=f"Solve {h:g}·{r:g}ⁿ < {T:g}: n > ln({T:g}/{h:g}) / ln({r:g}) ≈ {math.log(T / h) / math.log(r):.2f}, so n = {n}.")]
         checks = [("clean", edge > EDGE, f"a bounce lands within {edge:.1%} of {T:g} m")]
         return Solution(steps, story, scene, ["power", "logarithm"], {"n": n, "_checks": checks})
 

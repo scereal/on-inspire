@@ -1,4 +1,60 @@
 {
+ "antiderivatives": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "The power rule backwards"
+   },
+   "2": {
+    "count": 100,
+    "name": "Trig and exponential antiderivatives"
+   },
+   "3": {
+    "count": 100,
+    "name": "Initial-value problems"
+   },
+   "4": {
+    "count": 100,
+    "name": "Motion: acceleration to position"
+   }
+  },
+  "outcome": "Find antiderivatives with their + C, and use a known value to solve initial-value problems.",
+  "title": "Antiderivatives"
+ },
+ "applications": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Related rates"
+   },
+   "2": {
+    "count": 100,
+    "name": "Linear approximation"
+   },
+   "3": {
+    "count": 100,
+    "name": "The Mean Value Theorem"
+   },
+   "4": {
+    "count": 100,
+    "name": "Absolute extrema"
+   },
+   "5": {
+    "count": 100,
+    "name": "Curve sketching"
+   },
+   "6": {
+    "count": 100,
+    "name": "Optimization"
+   },
+   "7": {
+    "count": 100,
+    "name": "L'H\u00f4pital's rule"
+   }
+  },
+  "outcome": "Use derivatives for related rates, approximation, the Mean Value Theorem, extrema, optimization and L'H\u00f4pital's rule.",
+  "title": "Applications of the derivative"
+ },
  "bounce": {
   "levels": {
    "1": {
@@ -20,6 +76,24 @@
   },
   "outcome": "Each bounce keeps the same fraction of the height, a geometric sequence, and infinitely many bounces cover a finite distance.",
   "title": "Bouncing ball"
+ },
+ "continuity": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Make it continuous"
+   },
+   "2": {
+    "count": 100,
+    "name": "The Intermediate Value Theorem"
+   },
+   "3": {
+    "count": 100,
+    "name": "Epsilon and delta"
+   }
+  },
+  "outcome": "Decide and enforce continuity, use the Intermediate Value Theorem, and work with the epsilon\u2013delta definition.",
+  "title": "Continuity"
  },
  "derivative-definition": {
   "levels": {
@@ -69,6 +143,70 @@
   "outcome": "Differentiate using the sum, constant-multiple, power, product, quotient and chain rules.",
   "title": "Differentiation rules"
  },
+ "elementary-derivatives": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Trig functions"
+   },
+   "2": {
+    "count": 100,
+    "name": "Exponentials and logarithms"
+   },
+   "3": {
+    "count": 100,
+    "name": "Inverse functions"
+   },
+   "4": {
+    "count": 100,
+    "name": "Inverse trig"
+   },
+   "5": {
+    "count": 100,
+    "name": "Implicit differentiation"
+   },
+   "6": {
+    "count": 100,
+    "name": "Logarithmic differentiation"
+   },
+   "7": {
+    "count": 100,
+    "name": "Higher derivatives"
+   }
+  },
+  "outcome": "Differentiate trig, exponential, logarithmic and inverse functions, implicitly defined curves, and higher derivatives.",
+  "title": "Derivatives of elementary functions"
+ },
+ "functions": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Domain"
+   },
+   "2": {
+    "count": 100,
+    "name": "Composition"
+   },
+   "3": {
+    "count": 100,
+    "name": "Inverse functions"
+   },
+   "4": {
+    "count": 100,
+    "name": "Transforming graphs"
+   },
+   "5": {
+    "count": 100,
+    "name": "Exponential and log equations"
+   },
+   "6": {
+    "count": 100,
+    "name": "Exact trig values"
+   }
+  },
+  "outcome": "Work with domains, compositions and inverses, transform graphs, and use exponentials, logarithms and trig values.",
+  "title": "Functions and graphs"
+ },
  "ibp": {
   "levels": {
    "1": {
@@ -90,6 +228,40 @@
   },
   "outcome": "Choose u so the integral gets simpler, know when repeated parts ends, and handle the loop.",
   "title": "Integration by parts"
+ },
+ "limits": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Limits from a table"
+   },
+   "2": {
+    "count": 100,
+    "name": "One-sided limits"
+   },
+   "3": {
+    "count": 100,
+    "name": "Factor and cancel"
+   },
+   "4": {
+    "count": 100,
+    "name": "Rationalize with the conjugate"
+   },
+   "5": {
+    "count": 100,
+    "name": "The squeeze theorem"
+   },
+   "6": {
+    "count": 100,
+    "name": "Limits at infinity"
+   },
+   "7": {
+    "count": 100,
+    "name": "Vertical asymptotes"
+   }
+  },
+  "outcome": "Find limits from tables and graphs, compute them with algebra, and handle infinity.",
+  "title": "Limits"
  },
  "mixing": {
   "levels": {

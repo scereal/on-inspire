@@ -103,6 +103,14 @@ for path in sorted((ROOT / "docs/math/bank").glob("*-[0-9]*.json")):
     types = {p["scene"]["type"] for p in json.loads(path.read_text())["problems"]}
     check(f"{path.name}: every scene type has a renderer", types <= renderers, f"missing {sorted(types - renderers)}")
 
+# Answer patterns ----------------------------------------------------------------
+print("Answer patterns")
+result = subprocess.run([sys.executable, "tests/check_patterns.py"], cwd=ROOT, capture_output=True, text=True)
+print("  " + (result.stdout.strip().splitlines() or [""])[-1])
+if result.returncode:
+    print(result.stdout)
+check("no choice step answerable by option shape", result.returncode == 0)
+
 # Problem generator --------------------------------------------------------------
 print("Problem generator")
 try:
