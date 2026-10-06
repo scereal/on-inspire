@@ -320,7 +320,7 @@
   "tried": 1271
  },
  "functions": {
-  "acceptance_rate": 0.6303,
+  "acceptance_rate": 0.578,
   "accepted": 600,
   "framework": "functions",
   "levels": {
@@ -335,49 +335,50 @@
    "2": {
     "accepted": 100,
     "rejected": {
+     "duplicate": 4,
      "exists": 2
     },
     "target": 100,
-    "tried": 102
+    "tried": 106
    },
    "3": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 4,
-     "exists": 22
+     "duplicate": 60,
+     "exists": 30
     },
     "target": 100,
-    "tried": 126
+    "tried": 190
    },
    "4": {
     "accepted": 100,
     "rejected": {
      "duplicate": 2,
-     "exists": 2
+     "exists": 12
     },
     "target": 100,
-    "tried": 104
+    "tried": 114
    },
    "5": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 53,
-     "exists": 49
+     "duplicate": 54,
+     "exists": 43
     },
     "target": 100,
-    "tried": 202
+    "tried": 197
    },
    "6": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 164
+     "duplicate": 177
     },
     "target": 100,
-    "tried": 264
+    "tried": 277
    }
   },
   "seed": 1,
-  "tried": 952
+  "tried": 1038
  },
  "ibp": {
   "acceptance_rate": 0.4042,

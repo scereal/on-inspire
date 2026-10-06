@@ -142,6 +142,7 @@ class Functions(Framework):
         "forgot-denominator": "Forgot that the bottom can't be zero.",
         "order-swapped": "Composed in the wrong order: f(g(x)) means do g first.",
         "composition-is-product": "Multiplied the functions. Composition feeds one into the other.",
+        "forgot-to-distribute": "Multiplied only part of g(x) by f's coefficient.",
         "inverse-is-reciprocal": "Took 1/f(x). The −1 in f⁻¹ means 'undo', not a power.",
         "solved-wrong": "Slipped a sign while solving for y.",
         "shift-sign": "Shifted the wrong way: (x − h) moves the graph right by h.",
@@ -196,7 +197,8 @@ class Functions(Framework):
         return {"family": family, "a": nz(-5, 5) if family == "linear" else 1, "b": rng.randint(-8, 8), "d": 0, "u": rng.randint(-3, 3)}
 
     def canonical(self, p, level):
-        return f"{level}:" + ",".join(f"{k}={p[k]}" for k in sorted(p))
+        # The evaluation point (u, t) doesn't make a new problem: the same function would read the same
+        return f"{level}:" + ",".join(f"{k}={p[k]}" for k in sorted(p) if k not in ("u", "t"))
 
     def checks(self, p, level, theme, solution):
         return solution.answers.get("_checks", [])
@@ -232,10 +234,16 @@ class Functions(Framework):
             up = a > 0
             op, flip = ((("\\ge" if weak else ">"), ("\\le" if weak else "<")) if up else (("\\le" if weak else "<"), ("\\ge" if weak else ">")))
             strict_op = (">" if up else "<") if weak else ("\\ge" if up else "\\le")
-            wrongs = [("forgot-to-flip" if not up else "inequality-flip", ineq(flip, c), "flip",
-                       (f"Dividing by ${a}$, a negative number, flips the inequality." if not up else "Dividing by a positive number keeps the inequality's direction.")),
-                      ("strict-for-root" if weak else "log-of-zero", ineq(strict_op, c), "strict",
-                       "$x = " + L(c) + "$ makes the inside 0, " + ("which is allowed under a root." if weak else "which a log can't take."))]
+            both_op = {"\\ge": "<", "\\le": ">", ">": "\\le", "<": "\\ge"}[op]          # flipped and with the wrong strictness
+            flip_name = "forgot-to-flip" if not up else "inequality-flip"
+            flip_fb = (f"Dividing by ${a}$, a negative number, flips the inequality." if not up else
+                       ("Dividing by a positive number keeps the inequality's direction." if a != 1 else "Moving the constant across doesn't change the inequality's direction."))
+            strict_name = "strict-for-root" if weak else "log-of-zero"
+            strict_fb = "$x = " + L(c) + "$ makes the inside 0, " + ("which is allowed under a root." if weak else "which a log can't take.")
+            flip_w = (flip_name, ineq(flip, c), "flip", flip_fb)
+            strict_w = (strict_name, ineq(strict_op, c), "strict", strict_fb)
+            both_w = (flip_name, ineq(both_op, c), "both", flip_fb + " " + strict_fb)
+            wrongs = [[flip_w, strict_w], [flip_w, both_w], [strict_w, both_w]][(a + b) % 3]
             dom = self._choice("So what is the domain?", ineq(op, c), "right", wrongs)
             checks = [("clean", clean(c), "boundary isn't clean")]
         elif fam == "recip":
@@ -272,8 +280,12 @@ class Functions(Framework):
         fg, gf, prod = sp.expand(f.subs(x, g)), sp.expand(g.subs(x, f)), sp.expand(f * g)
         gt = g.subs(x, t)
         fgt = f.subs(x, gt)
-        wrongs = pick(fg, [("order-swapped", gf, "That's $g(f(x))$: it does $f$ first. $f(g(x))$ puts $g(x)$ inside $f$."),
-                           ("composition-is-product", prod, "That's $f(x)\\cdot g(x)$. Composition feeds $g(x)$ into $f$.")])
+        undistributed = a * c * x**2 + d + b
+        swapped = ("order-swapped", gf, "That's $g(f(x))$: it does $f$ first. $f(g(x))$ puts $g(x)$ inside $f$.")
+        product = ("composition-is-product", prod, "That's $f(x)\\cdot g(x)$. Composition feeds $g(x)$ into $f$.")
+        forgot = ("forgot-to-distribute", undistributed, f"${a}$ multiplies all of $g(x)$, including the ${d}$: ${a}({L(g)}){plus(b)}$.")
+        order = [forgot, swapped, product] if (a + b + c + d) % 2 else [forgot, product, swapped]
+        wrongs = pick(fg, order)
         formula = self._choice("Which is the formula for $(f \\circ g)(x)$?", f"${L(fg)}$", "right",
                                [(m, f"${L(e)}$", f"w{i}", fb) for i, (m, e, fb) in enumerate(wrongs)])
         steps = [
@@ -364,10 +376,11 @@ class Functions(Framework):
             if n < 1 or b**n > 100000:
                 raise NoSolution("the right side must be a modest whole power")
             power = f"{b}^{{{L(pp * x + q)}}}"
+            offsets = [(-1, 1), (1, 2), (-2, -1)][(b + n) % 3]
+            if n + min(offsets) < 0:
+                offsets = (1, 2)
             rewrite = self._choice(f"Write {b**n} as a power of {b}:", f"${b}^{{{n}}}$", "right", [
-                ("miscounted-power", f"${b}^{{{n + 1}}}$", "up", f"${b}^{{{n + 1}}} = {b**(n + 1)}$, not {b**n}."),
-                ("miscounted-power", f"${b}^{{{n - 1}}}$", "down", f"${b}^{{{n - 1}}} = {b**(n - 1)}$, not {b**n}."),
-            ])
+                ("miscounted-power", f"${b}^{{{n + o}}}$", f"o{o}", f"${b}^{{{n + o}}} = {b**(n + o)}$, not {b**n}.") for o in offsets])
             steps = [rewrite,
                      Step("Set the exponents equal. What is $x$?", "number", float(x0), tolerance=0.01,
                           explain=f"${L(pp * x + q)} = {n}$, so $x = {x0}$.")]
@@ -405,15 +418,23 @@ class Functions(Framework):
         quad = int(frac * 2) + 1
         sign = "positive" if v > 0 else "negative"
         other = lambda s_: "negative" if s_ == "positive" else "positive"
-        q2 = quad % 4 + 1
-        v2 = sp.nsimplify(F[fname](sp.pi * (sp.Rational(2 * q2 - 1, 4))))
+        reflected = {1: 4, 4: 1, 2: 3, 3: 2}[quad]                 # where the angle lands if measured the wrong way round
+        other_q = next(q for q in (quad % 4 + 1, (quad + 1) % 4 + 1) if q not in (quad, reflected))
+        sign_of = lambda q: "positive" if F[fname](sp.pi * sp.Rational(2 * q - 1, 4)) > 0 else "negative"
+        norm = sp.Rational(num, den) % 2
+        if sp.Rational(num, den) < 0:
+            where = f"${L(theta)} + {'2' if norm == sp.Rational(num, den) + 2 else str(int(norm - sp.Rational(num, den)))}\\pi = {L(norm * sp.pi)}$"
+        elif sp.Rational(num, den) >= 2:
+            where = f"${L(theta)} - 2\\pi = {L(norm * sp.pi)}$"
+        else:
+            where = f"${L(theta)}$ is between ${L(sp.Rational(quad - 1, 2) * sp.pi)}$ and ${L(sp.Rational(quad, 2) * sp.pi)}$"
         roman = {1: "I", 2: "II", 3: "III", 4: "IV"}
         quad_step = self._choice(f"Which quadrant is ${L(theta)}$ in, and what sign does $\\{fname}$ have there?",
                                  f"Quadrant {roman[quad]}, where $\\{fname}$ is {sign}", "right", [
-            ("quadrant-sign", f"Quadrant {roman[quad]}, where $\\{fname}$ is {other(sign)}", "sign",
-             "Recall the signs by quadrant: all positive in I, only sine in II, only tangent in III, only cosine in IV."),
-            ("wrong-quadrant", f"Quadrant {roman[q2]}, where $\\{fname}$ is {'positive' if v2 > 0 else 'negative'}", "quad",
-             f"${L(theta)}$ is ${L(sp.Rational(num, den))}$ of a half-turn: measure from the positive $x$-axis, counterclockwise for positive angles."),
+            ("wrong-quadrant", f"Quadrant {roman[reflected]}, where $\\{fname}$ is {sign_of(reflected)}", "reflected",
+             f"Positive angles turn counterclockwise from the positive $x$-axis and negative ones clockwise. {where}, in quadrant {roman[quad]}."),
+            ("wrong-quadrant", f"Quadrant {roman[other_q]}, where $\\{fname}$ is {sign_of(other_q)}", "other",
+             f"{where}, which is in quadrant {roman[quad]}."),
         ])
         co = {"sin": sp.cos, "cos": sp.sin, "tan": lambda u: 1 / sp.tan(u)}[fname]
         refang = sp.Abs(sp.Rational(num, den) - sp.Rational(round(float(sp.Rational(num, den))), 1)) * sp.pi

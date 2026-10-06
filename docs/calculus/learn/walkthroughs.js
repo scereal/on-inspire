@@ -3683,7 +3683,7 @@ window.WALKTHROUGHS = [
         }
       }
     ],
-    "summary": "$y = 2(x - 3)^2 + 1$ is $x^2$ shifted **right 3** and **up 1**, then stretched vertically by 2: vertex $(3, 1)$, twice as steep.",
+    "summary": "$y = 2(x - 3)^2 + 1$ is $x^2$ **stretched vertically by 2**, then shifted **right 3** and **up 1**: vertex $(3, 1)$, twice as steep. (Shifting up first and then stretching would double the 1 as well.)",
     "claims": [
       {
         "sympy": "(2*(x - 3)**2 + 1).subs(x, 3)",
@@ -3781,9 +3781,32 @@ window.WALKTHROUGHS = [
           ]
         },
         "narration": "$\\log_2 32 = 5 = 3 + 2$. Exponents add when you multiply, so logs of products add."
+      },
+      {
+        "ask": {
+          "prompt": "Last one: $\\log_2 x + \\log_2(x - 2) = 3$ becomes $x(x - 2) = 8$, with roots $x = 4$ and $x = -2$. Which are solutions?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Only $x = 4$",
+              "correct": true
+            },
+            {
+              "label": "Both $x = 4$ and $x = -2$",
+              "misconception": "kept-extraneous",
+              "feedback": "At $x = -2$, $\\log_2(-2)$ is undefined. Check every root in every log."
+            },
+            {
+              "label": "Only $x = -2$",
+              "misconception": "picked-wrong-root",
+              "feedback": "At $x = 4$: $\\log_2 4 + \\log_2 2 = 2 + 1 = 3$. It works; $x = -2$ doesn't."
+            }
+          ]
+        },
+        "narration": "Combining logs can create roots the original equation doesn't allow. Substitute each one back: every log's argument must be positive. $x = -2$ makes both $x$ and $x - 2$ negative, so it's extraneous; $x = 4$ gives $2 + 1 = 3$. A root can fail even when it's positive: always check, not just for minus signs."
       }
     ],
-    "summary": "Dividing by 3 gives $2^x = 16$, so $x = \\log_2 16 = $ **4**. A log is the exponent that undoes the exponential.",
+    "summary": "Dividing by 3 gives $2^x = 16$, so $x = \\log_2 16 = $ **4**. Logs turn products into sums, and every root of a log equation must be checked: $\\log_2 x + \\log_2(x - 2) = 3$ has only $x = 4$.",
     "claims": [
       {
         "sympy": "solve(3*2**x - 48, x)",
@@ -3796,6 +3819,14 @@ window.WALKTHROUGHS = [
       {
         "sympy": "log(32, 2)",
         "equals": "5"
+      },
+      {
+        "sympy": "solve(x*(x - 2) - 8, x)",
+        "equals": "[-2, 4]"
+      },
+      {
+        "sympy": "log(4, 2) + log(2, 2)",
+        "equals": "3"
       }
     ]
   },
@@ -3904,9 +3935,55 @@ window.WALKTHROUGHS = [
           ]
         },
         "narration": "$\\cos\\frac{\\pi}{6} = \\frac{\\sqrt{3}}{2}$, and in quadrant II cosine is negative: $-\\frac{\\sqrt{3}}{2}$. Reference angle for the size, quadrant for the sign."
+      },
+      {
+        "ask": {
+          "prompt": "Now $\\tan\\left(\\frac{5\\pi}{6}\\right) = \\frac{\\sin}{\\cos}$. What is it?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-\\frac{\\sqrt{3}}{3}$",
+              "correct": true
+            },
+            {
+              "label": "$-\\sqrt{3}$",
+              "misconception": "reference-slip",
+              "feedback": "That's $\\tan\\frac{\\pi}{3}$ with a minus sign. Here $\\frac{1/2}{-\\sqrt{3}/2} = -\\frac{1}{\\sqrt{3}} = -\\frac{\\sqrt{3}}{3}$."
+            },
+            {
+              "label": "$\\frac{\\sqrt{3}}{3}$",
+              "misconception": "quadrant-sign",
+              "feedback": "Sine is positive and cosine negative in quadrant II, so their ratio is negative."
+            }
+          ]
+        },
+        "narration": "$\\tan = \\frac{\\sin}{\\cos} = \\frac{1/2}{-\\sqrt{3}/2} = -\\frac{\\sqrt{3}}{3}$. Tangent is positive only where sine and cosine share a sign: quadrants I and III."
+      },
+      {
+        "ask": {
+          "prompt": "Negative angles turn clockwise. What is $\\sin\\left(-\\frac{\\pi}{6}\\right)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$-\\frac{1}{2}$",
+              "correct": true
+            },
+            {
+              "label": "$\\frac{1}{2}$",
+              "misconception": "quadrant-sign",
+              "feedback": "Turning clockwise by $\\frac{\\pi}{6}$ lands below the axis (quadrant IV), where sine is negative."
+            },
+            {
+              "label": "$-\\frac{\\sqrt{3}}{2}$",
+              "misconception": "reference-slip",
+              "feedback": "The reference angle is $\\frac{\\pi}{6}$, so the size is $\\frac{1}{2}$."
+            }
+          ]
+        },
+        "narration": "Clockwise by $\\frac{\\pi}{6}$ lands in quadrant IV, the same point as $-\\frac{\\pi}{6} + 2\\pi = \\frac{11\\pi}{6}$: height $-\\frac{1}{2}$. Adding or subtracting a full turn, $2\\pi$, never changes the point, so $\\frac{13\\pi}{6}$ is just $\\frac{\\pi}{6}$ again."
       }
     ],
-    "summary": "Reference angle $\\frac{\\pi}{6}$, quadrant II: $\\sin\\frac{5\\pi}{6} = $ **1/2** and $\\cos\\frac{5\\pi}{6} = $ **−√3/2**.",
+    "summary": "Reference angle $\\frac{\\pi}{6}$, quadrant II: $\\sin\\frac{5\\pi}{6} = $ **1/2**, $\\cos\\frac{5\\pi}{6} = $ **−√3/2** and $\\tan\\frac{5\\pi}{6} = -\\frac{\\sqrt{3}}{3}$. Negative angles turn clockwise, and adding $2\\pi$ lands on the same point.",
     "claims": [
       {
         "sympy": "sin(5*pi/6)",
@@ -3919,6 +3996,18 @@ window.WALKTHROUGHS = [
       {
         "sympy": "pi - 5*pi/6",
         "equals": "pi/6"
+      },
+      {
+        "sympy": "tan(5*pi/6)",
+        "equals": "-sqrt(3)/3"
+      },
+      {
+        "sympy": "sin(-pi/6)",
+        "equals": "-1/2"
+      },
+      {
+        "sympy": "sin(13*pi/6)",
+        "equals": "1/2"
       }
     ]
   }

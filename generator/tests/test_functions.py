@@ -130,6 +130,58 @@ class FunctionsTest(unittest.TestCase):
                     self.assertEqual(plain.count("("), plain.count(")"), f"L{level} {p['id']}: {t}")
                     self.assertEqual(t.count("{"), t.count("}"), f"L{level} {p['id']}: {t}")
 
+    # Pattern giveaways and repeats (unit 140.1 review) ---------------------------------
+    def test_level5_power_answer_is_not_always_the_middle(self):
+        problems, _ = built()
+        exps = []
+        for p in problems[5]:
+            if p["params"]["family"] != "exp":
+                continue
+            opts = p["steps"][0]["options"]
+            vals = sorted(int(re.search(r"\^\{(-?\d+)\}", o["label"]).group(1)) for o in opts)
+            right = int(re.search(r"\^\{(-?\d+)\}", next(o for o in opts if o["correct"])["label"]).group(1))
+            exps.append(right == vals[1])
+        self.assertLess(sum(exps) / len(exps), 0.6, f"{sum(exps)}/{len(exps)} have the answer in the middle")
+
+    def test_level6_correct_quadrant_is_not_the_repeated_one(self):
+        problems, _ = built()
+        for p in problems[6]:
+            quads = [re.match(r"Quadrant (\w+)", o["label"]).group(1) for o in p["steps"][0]["options"]]
+            self.assertEqual(len(set(quads)), 3, f"{p['id']}: {quads}")
+
+    def test_level1_domain_answer_is_not_always_the_median(self):
+        problems, _ = built()
+        med = tot = 0
+        for p in problems[1]:
+            if p["params"]["family"] not in ("sqrt", "ln"):
+                continue
+            feats = []
+            for o in p["steps"][1]["options"]:
+                m = re.search(r"x (\\ge|\\le|>|<) (.+)\$", o["label"])
+                feats.append(((m.group(1) in ("\\ge", ">")), (m.group(1) in ("\\ge", "\\le")), m.group(2), o["correct"]))
+            right = next(f for f in feats if f[3]); wrong = [f for f in feats if not f[3]]
+            share = lambda u, v: u[0] == v[0] or u[1] == v[1]       # direction or strictness (all share the boundary)
+            tot += 1
+            med += share(right, wrong[0]) and share(right, wrong[1]) and not share(wrong[0], wrong[1])
+        self.assertLess(med / tot, 0.6, f"{med}/{tot} answers are the median option")
+
+    def test_level2_answer_is_not_always_the_shortest(self):
+        problems, _ = built()
+        terms = lambda lbl: len(re.findall(r"(?<!^)(?<![\^{(])[+-]", lbl.strip("$").strip()))
+        short = 0
+        for p in problems[2]:
+            opts = p["steps"][2]["options"]
+            n = {o["label"]: terms(o["label"]) for o in opts}
+            right = next(o["label"] for o in opts if o["correct"])
+            short += all(n[right] < n[o["label"]] for o in opts if not o["correct"])
+        self.assertLess(short / len(problems[2]), 0.6, f"{short} answers are uniquely the shortest")
+
+    def test_no_repeated_stories_in_levels_2_to_4(self):
+        problems, _ = built()
+        for level in (2, 3, 4):
+            stories = [p["story"] for p in problems[level]]
+            self.assertEqual(len(stories), len(set(stories)), f"L{level} repeats a story")
+
     def test_bank(self):
         problems, report = built()
         for level in FW.levels:
