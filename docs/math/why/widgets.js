@@ -34,6 +34,10 @@
     atan: Math.atan,
     tan: (x) => (Math.abs(Math.cos(x)) < 1e-9 ? NaN : Math.tan(x)),
     xpowx: (x) => (x > 0 ? Math.pow(x, x) : NaN),
+    // Unit 140.5: applications
+    crit3: (x) => x * x * x - 3 * x,
+    fencearea: (x) => x * (100 - 2 * x),
+    lhop: (x) => (Math.exp(2 * x) - 1) / x,
   };
 
   const WidgetMath = {
@@ -45,7 +49,10 @@
     // Draw a curve point only if it's finite and not far outside the window (clips blow-ups near asymptotes)
     // secant widget: h shrinks from 1.5 (or 3/4 of a narrower window) as the slider moves
     secantH: (s, span) => Math.min(1.5, 0.75 * span) * Math.pow(10, -s / 30),
-    circleSlope: (x, y) => -x / y,          // implicit differentiation of x² + y² = r²
+    circleSlope: (x, y) => -x / y,
+    slopeAt: (f, x, h = 1e-5) => (f(x + h) - f(x - h)) / (2 * h),
+    // a ladder of length L with its foot x from the wall, foot moving out at dxdt: x² + y² = L² gives y' = −x x'/y
+    ladder: (L, x, dxdt) => { const y = Math.sqrt(L * L - x * x); return { y, dydt: (-x * dxdt) / y }; },          // implicit differentiation of x² + y² = r²
     farLabel: (X) => (X >= 1e4 ? X.toExponential(0) : String(Math.round(X))),
     plottable: (y, ymin, ymax) => Number.isFinite(y) && y >= ymin - 3 * (ymax - ymin) && y <= ymax + 3 * (ymax - ymin),
     // far-out widget samples, t in [0, 1]. "infinity": x grows from 10 to 10⁷. "asymptote": x closes in on `at` from both sides.
@@ -941,6 +948,68 @@
     const start = cfg.deg ?? 53.13;
     const input = slider(ui.controls, "Move the point", 0, 359, 1, Math.round(start), (v) => { deg = v; draw(); });
     const init = () => { deg = start; input.value = Math.round(start); draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Tangent point: slide a tangent along f (optionally against the chord, for the MVT),
+  // or hold the tangent at x0 and compare it with f nearby (linear approximation)
+  W["tangent-point"] = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "crit3");
+    const a = cfg.a ?? -2, b = cfg.b ?? 2, x0 = cfg.x0 ?? (a + b) / 2;
+    const approx = cfg.mode === "approx";
+    const ui = shell(box, cfg.prompt || (approx ? "Move x away from the tangent point: the tangent line stays close at first, then drifts." : "Slide the tangent along the curve and read its slope."));
+    let ys = [Infinity, -Infinity];
+    for (let i = 0; i <= 200; i++) { const y = f(a + ((b - a) * i) / 200); if (Number.isFinite(y)) ys = [Math.min(ys[0], y), Math.max(ys[1], y)]; }
+    const pad = (ys[1] - ys[0]) * 0.15 || 1;
+    let x;
+    const chordSlope = (f(b) - f(a)) / (b - a);
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, a, b, ys[0] - pad, ys[1] + pad);
+      P.curve(f);
+      const at = approx ? x0 : x, m = WidgetMath.slopeAt(f, at), ext = (b - a) * 0.6;
+      el("line", { x1: P.X(at - ext), y1: P.Y(f(at) - m * ext), x2: P.X(at + ext), y2: P.Y(f(at) + m * ext), class: "w-secant" }, ui.svg);
+      if (cfg.chord) el("line", { x1: P.X(a), y1: P.Y(f(a)), x2: P.X(b), y2: P.Y(f(b)), class: "w-delta" }, ui.svg);
+      el("circle", { cx: P.X(at), cy: P.Y(f(at)), r: 6, class: "w-point" }, ui.svg);
+      if (approx) {
+        const t = f(x0) + m * (x - x0);
+        el("circle", { cx: P.X(x), cy: P.Y(f(x)), r: 5, class: "w-point alt" }, ui.svg);
+        el("circle", { cx: P.X(x), cy: P.Y(t), r: 5, class: "w-hole" }, ui.svg);
+        ui.readout.textContent = `x = ${fmt(x, 3)}: f(x) = ${fmt(f(x), 5)}, tangent line ${fmt(t, 5)}, error ${fmt(t - f(x), 5)}`;
+        return;
+      }
+      ui.readout.textContent = `x = ${fmt(x, 2)}: slope ${fmt(m, 3)}` +
+        (cfg.chord ? `, chord slope ${fmt(chordSlope, 3)}${Math.abs(m - chordSlope) < 0.05 * Math.max(1, Math.abs(chordSlope)) ? " (parallel: here f′(c) equals the average)" : ""}` : "") +
+        (Math.abs(m) < 0.02 * Math.max(1, ys[1] - ys[0]) ? " (flat: a critical point)" : "");
+    };
+    const lo = approx ? Math.max(a, x0 - (b - a) / 2) : a, hi = approx ? Math.min(b, x0 + (b - a) / 2) : b;
+    const start = approx ? x0 + (hi - x0) * 0.3 : a + (b - a) * 0.2;
+    const input = slider(ui.controls, "Move x", lo, hi, (hi - lo) / 400, start, (v) => { x = v; draw(); });
+    const init = () => { x = start; input.value = start; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Ladder: x² + y² = L², the foot slides out at a steady rate
+  W.ladder = function (box, cfg) {
+    const L = cfg.L ?? 10, dxdt = cfg.dxdt ?? 2;
+    const ui = shell(box, cfg.prompt || "Slide the foot of the ladder out: the top falls slowly at first, then faster and faster.");
+    let x;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -0.5, L * 1.6, -0.5, L * 1.05);
+      const { y, dydt } = WidgetMath.ladder(L, x, dxdt);
+      el("line", { x1: P.X(0), y1: P.Y(0), x2: P.X(0), y2: P.Y(L * 1.05), class: "w-axis" }, ui.svg);
+      el("line", { x1: P.X(x), y1: P.Y(0), x2: P.X(0), y2: P.Y(y), class: "w-secant" }, ui.svg);
+      el("circle", { cx: P.X(x), cy: P.Y(0), r: 6, class: "w-point" }, ui.svg);
+      el("circle", { cx: P.X(0), cy: P.Y(y), r: 6, class: "w-point alt" }, ui.svg);
+      ui.readout.textContent = `foot ${fmt(x, 2)} m out, top ${fmt(y, 2)} m up: the top moves at ${fmt(dydt, 3)} m/s while the foot moves at ${dxdt} m/s`;
+    };
+    const input = slider(ui.controls, "Foot distance", 0.5, L - 0.2, 0.01, 6, (v) => { x = v; draw(); });
+    const init = () => { x = Math.min(6, L - 0.2); input.value = x; draw(); };
     ui.reset.addEventListener("click", init);
     init();
     return { reset: init };

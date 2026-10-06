@@ -499,7 +499,9 @@ window.CONCEPTS = [
       "average-vs-instantaneous-rate",
       "differentiable-implies-continuous",
       "sum-and-constant-rules",
-      "second-derivative"
+      "second-derivative",
+      "linear-approximation",
+      "critical-points"
     ],
     "foundation": false,
     "claims": [
@@ -1812,7 +1814,8 @@ window.CONCEPTS = [
       "limit"
     ],
     "related": [
-      "conjugate-trick"
+      "conjugate-trick",
+      "lhopital"
     ],
     "foundation": false,
     "claims": [
@@ -1976,7 +1979,8 @@ window.CONCEPTS = [
       "one-sided-limit"
     ],
     "related": [
-      "intermediate-value-theorem"
+      "intermediate-value-theorem",
+      "mean-value-theorem"
     ],
     "foundation": false,
     "claims": [
@@ -2175,7 +2179,9 @@ window.CONCEPTS = [
     "deeper": [
       "chain-rule"
     ],
-    "related": [],
+    "related": [
+      "related-rates"
+    ],
     "foundation": false,
     "claims": [
       {
@@ -2251,6 +2257,209 @@ window.CONCEPTS = [
       {
         "sympy": "diff(20*t - Rational(49, 10)*t**2, t).subs(t, 1)",
         "equals": "51/5"
+      }
+    ]
+  },
+  {
+    "id": "related-rates",
+    "title": "Related rates: linked quantities change together",
+    "body": "When two quantities are tied by an equation, their rates of change are tied too. A 10 m ladder leans on a wall: the foot is $x$ m out and the top is $y$ m up, with $x^2 + y^2 = 100$. Both change with time $t$, so differentiate with respect to $t$, using the [[chain-rule]] on each: $2x\\,\\frac{dx}{dt} + 2y\\,\\frac{dy}{dt} = 0$.\n\nAt the moment $x = 6$ (so $y = 8$), if the foot slides out at 2 m/s, then $12 + 16\\,\\frac{dy}{dt} = 0$ and $\\frac{dy}{dt} = -1.5$ m/s. The minus sign says the top is falling. This is [[implicit-differentiation|implicit differentiation]] with $t$ in place of $x$. Plug in numbers only after differentiating: the relation must hold at every moment, not just one.",
+    "math": [
+      "x^2 + y^2 = 100 \\implies 2x\\,\\frac{dx}{dt} + 2y\\,\\frac{dy}{dt} = 0"
+    ],
+    "widget": {
+      "type": "ladder",
+      "L": 10,
+      "dxdt": 2,
+      "prompt": "Slide the foot out: the top's speed grows as the ladder flattens."
+    },
+    "deeper": [
+      "implicit-differentiation",
+      "chain-rule"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(2*6*2 + 2*8*u, u)",
+        "equals": "[Rational(-3, 2)]"
+      },
+      {
+        "sympy": "sqrt(100 - 36)",
+        "equals": "8"
+      }
+    ]
+  },
+  {
+    "id": "linear-approximation",
+    "title": "Linear approximation: the tangent line as a shortcut",
+    "body": "Near a point $a$, a smooth function is almost its tangent line: $f(x) \\approx L(x) = f(a) + f'(a)(x - a)$. That's the [[derivative]] used as a multiplier: a small change in input times the slope gives the change in output.\n\nEstimate $\\sqrt{16.5}$. At $a = 16$, $\\sqrt{16} = 4$ and the slope is $\\frac{1}{2\\sqrt{16}} = \\frac{1}{8}$, so $\\sqrt{16.5} \\approx 4 + \\frac{0.5}{8} = 4.0625$. The true value is $4.06202$. The estimate is a little high because $\\sqrt{x}$ bends downward (its [[second-derivative|second derivative]] is negative), so the tangent line sits above the curve.",
+    "math": [
+      "L(x) = f(a) + f'(a)(x - a)",
+      "\\sqrt{16.5} \\approx 4 + \\frac{0.5}{8} = 4.0625"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "approx",
+      "f": "sqrt",
+      "a": 9,
+      "b": 25,
+      "x0": 16,
+      "prompt": "Move x away from 16: the tangent line stays close at first, and it's always above the curve."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "second-derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "4 + Rational(1, 2)*Rational(1, 8)",
+        "equals": "65/16"
+      },
+      {
+        "sympy": "sqrt(Rational(33, 2))",
+        "approx": 4.06202,
+        "tol": 1e-05
+      },
+      {
+        "sympy": "diff(sqrt(x), x).subs(x, 16)",
+        "equals": "1/8"
+      }
+    ]
+  },
+  {
+    "id": "mean-value-theorem",
+    "title": "The Mean Value Theorem",
+    "body": "If $f$ is [[continuity|continuous]] on $[a, b]$ and differentiable inside, then somewhere strictly between $a$ and $b$ the instantaneous rate equals the average rate: $f'(c) = \\frac{f(b) - f(a)}{b - a}$ for some $c$ in $(a, b)$. Geometrically, some tangent line is parallel to the chord.\n\nDrive 120 km in 1.5 hours and your average speed is 80 km/h. The theorem says that at some instant your speedometer read exactly 80. It doesn't say when. For $x^2$ on $[1, 3]$ the average slope is 4, and $2c = 4$ gives $c = 2$. For a parabola $c$ is always the midpoint, but that's special: for $x^3$ on $[0, 3]$, $c = \\sqrt{3} \\approx 1.73$.",
+    "math": [
+      "f'(c) = \\frac{f(b) - f(a)}{b - a}"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "chord": true,
+      "f": "square",
+      "a": 1,
+      "b": 3,
+      "prompt": "Slide the tangent until it's parallel to the dashed chord: that x is c."
+    },
+    "deeper": [
+      "derivative",
+      "continuity"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(3**2 - 1**2)/(3 - 1)",
+        "equals": "4"
+      },
+      {
+        "sympy": "solve(3*x**2 - 9, x)",
+        "equals": "[-sqrt(3), sqrt(3)]"
+      },
+      {
+        "sympy": "Rational(120, 1)/Rational(3, 2)",
+        "equals": "80"
+      }
+    ]
+  },
+  {
+    "id": "critical-points",
+    "title": "Critical points and the extreme values",
+    "body": "A smooth function's highest and lowest points on an interval can only be where the slope is zero (critical points) or at the ends of the interval. So on a closed interval $[a, b]$: find where $f' = 0$, keep the ones inside the interval, add both endpoints, and compare the values.\n\nFor $f(x) = x^3 - 3x$ on $[-2, 3]$, $f'(x) = 3x^2 - 3 = 0$ at $x = \\pm 1$. The candidates are $-2, -1, 1, 3$, with values $-2, 2, -2, 18$. The maximum is 18 at the endpoint $x = 3$, and the minimum $-2$ happens twice. The [[second-derivative|second derivative]] tells you the shape at each critical point: $f''(-1) = -6 < 0$ is a local peak and $f''(1) = 6 > 0$ is a local valley. Both are local only; the [[derivative]] at the ends doesn't need to be 0.",
+    "math": [
+      "\\text{candidates} = \\{x : f'(x) = 0,\\ a \\le x \\le b\\} \\cup \\{a, b\\}"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "f": "crit3",
+      "a": -2,
+      "b": 3,
+      "prompt": "Slide along x³ − 3x: the tangent goes flat at x = −1 and x = 1."
+    },
+    "deeper": [
+      "derivative"
+    ],
+    "related": [
+      "second-derivative",
+      "optimization"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(diff(x**3 - 3*x, x), x)",
+        "equals": "[-1, 1]"
+      },
+      {
+        "sympy": "[(x**3 - 3*x).subs(x, -2), (x**3 - 3*x).subs(x, -1), (x**3 - 3*x).subs(x, 1), (x**3 - 3*x).subs(x, 3)]",
+        "equals": "[-2, 2, -2, 18]"
+      }
+    ]
+  },
+  {
+    "id": "optimization",
+    "title": "Optimization: build the function, then find its best value",
+    "body": "Most optimization problems are word problems in disguise. Name the quantity to maximize or minimize, write it as a function of one variable (using the constraint to eliminate the others), then use [[critical-points|critical points]].\n\nYou have 100 m of fence to enclose a rectangle against a straight river, fencing only three sides. With $x$ for the two sides perpendicular to the river, the side along the river is $100 - 2x$, so the area is $A(x) = x(100 - 2x)$. $A'(x) = 100 - 4x = 0$ at $x = 25$, giving $A = 25 \\times 50 = 1250$ m². Check it's a maximum: $A'' = -4 < 0$, and at the ends $x = 0$ or $50$ the area is 0.",
+    "math": [
+      "A(x) = x(100 - 2x), \\quad A'(x) = 100 - 4x = 0 \\implies x = 25"
+    ],
+    "widget": {
+      "type": "tangent-point",
+      "mode": "slide",
+      "f": "fencearea",
+      "a": 0,
+      "b": 50,
+      "prompt": "Slide x: the area peaks where the tangent goes flat, at x = 25."
+    },
+    "deeper": [
+      "critical-points"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(diff(x*(100 - 2*x), x), x)",
+        "equals": "[25]"
+      },
+      {
+        "sympy": "(x*(100 - 2*x)).subs(x, 25)",
+        "equals": "1250"
+      }
+    ]
+  },
+  {
+    "id": "lhopital",
+    "title": "L'Hôpital's rule: compare the rates",
+    "body": "When a limit gives $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$, an [[indeterminate-form|indeterminate form]], you can replace the top and bottom by their [[derivative|derivatives]]: $\\lim\\frac{f}{g} = \\lim\\frac{f'}{g'}$, if the new limit exists. Near the point, $f$ and $g$ are almost their tangent lines, so their ratio is almost the ratio of their slopes.\n\n$\\lim_{x\\to 0}\\frac{e^{2x} - 1}{x}$ is $\\frac{0}{0}$. Differentiate top and bottom separately (this is not the quotient rule): $\\frac{2e^{2x}}{1} \\to 2$. Only use it on $\\frac{0}{0}$ or $\\frac{\\infty}{\\infty}$: $\\frac{\\cos x}{x + 1}$ at 0 is just $\\frac{1}{1} = 1$, while blindly differentiating gives $-\\sin 0 = 0$, which is wrong.",
+    "math": [
+      "\\lim_{x\\to 0}\\frac{e^{2x} - 1}{x} = \\lim_{x\\to 0}\\frac{2e^{2x}}{1} = 2"
+    ],
+    "widget": {
+      "type": "limit-zoom",
+      "g": "lhop",
+      "at": 0,
+      "limit": 2,
+      "prompt": "Zoom in at 0: the ratio settles on 2, the ratio of the slopes."
+    },
+    "deeper": [
+      "derivative",
+      "indeterminate-form"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "limit((exp(2*x) - 1)/x, x, 0)",
+        "equals": "2"
+      },
+      {
+        "sympy": "limit(cos(x)/(x + 1), x, 0)",
+        "equals": "1"
       }
     ]
   }

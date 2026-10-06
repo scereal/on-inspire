@@ -96,5 +96,14 @@ check("tan: slope at 0 → 1", near(M.secantSlope(M.fn("tan"), 0, 1e-6), 1, 1e-5
 check("secant h starts inside a narrow window (span 0.8)", M.secantH(0, 0.8) <= 0.8 && M.secantH(0, 2) === 1.5 && M.secantH(30, 2) < M.secantH(0, 2));
 check("circle tangent slope at (3, 4) is −3/4", near(M.circleSlope(3, 4), -0.75, 1e-12));
 
+// Unit 140.5: applications
+{
+  const l = M.ladder(10, 6, 2);
+  check("ladder: 10 m, foot 6 m out moving at 2 m/s → top at 8 m falling at 1.5 m/s", near(l.y, 8, 1e-12) && near(l.dydt, -1.5, 1e-12));
+  check("slopeAt(crit3, 1) = 0 (a critical point)", near(M.slopeAt(M.fn("crit3"), 1), 0, 1e-6));
+  check("slopeAt(fencearea, 25) = 0 (the best fence)", near(M.slopeAt(M.fn("fencearea"), 25), 0, 1e-6));
+  check("lhop settles on 2 near 0", near(M.fn("lhop")(1e-6), 2, 1e-4));
+}
+
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");
 if (failures) throw new Error(`${failures} failed`);
