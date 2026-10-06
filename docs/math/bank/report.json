@@ -320,8 +320,8 @@
   "tried": 1271
  },
  "functions": {
-  "acceptance_rate": 0.7853,
-  "accepted": 300,
+  "acceptance_rate": 0.6303,
+  "accepted": 600,
   "framework": "functions",
   "levels": {
    "1": {
@@ -348,10 +348,36 @@
     },
     "target": 100,
     "tried": 126
+   },
+   "4": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 2,
+     "exists": 2
+    },
+    "target": 100,
+    "tried": 104
+   },
+   "5": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 53,
+     "exists": 49
+    },
+    "target": 100,
+    "tried": 202
+   },
+   "6": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 164
+    },
+    "target": 100,
+    "tried": 264
    }
   },
   "seed": 1,
-  "tried": 382
+  "tried": 952
  },
  "ibp": {
   "acceptance_rate": 0.4042,
