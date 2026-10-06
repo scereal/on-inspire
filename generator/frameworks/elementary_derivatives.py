@@ -130,6 +130,7 @@ FEEDBACK = {
     "arcsin-no-chain": "The chain rule multiplies by the derivative of the inside, $mx$, and the inside is squared under the root.",
     "forgot-chain-on-y": "$y$ depends on $x$, so the chain rule applies: $(y^2)' = 2y\\,y'$, not $2y$.",
     "chain-dropped-outer": "The chain rule keeps the outer derivative too: $(y^2)' = 2y\\cdot y'$, not just $2y'$.",
+    "treated-y-as-x": "$y$ changes with $x$, so its derivative is $y'$, not 1: $(xy)' = y + x\\,y'$, and every $y$-term picks up a factor $y'$.",
     "forgot-product-rule": "$xy$ is a product of two things that change with $x$: $(xy)' = y + x\\,y'$.",
     "implicit-sign-slip": "Moving the $x$-terms to the other side flips their sign.",
     "implicit-swapped": "Solve for $y'$: it's the $x$-derivative over the $y$-derivative, with a minus sign, not the other way up.",
@@ -213,12 +214,13 @@ class ElementaryDerivatives(Framework):
                 self._implicit, self._log_diff, self._higher][level](p)
 
     # Shared: a "which derivative" step from the right answer and named mistakes
-    def _derivative_step(self, prompt, right, candidates):
+    def _derivative_step(self, prompt, right, candidates, overrides=None):
         wrongs = pick(right, candidates)
-        if not wrongs:
-            raise NoSolution("every named mistake coincides with the answer")
+        if len(wrongs) < 2:
+            raise NoSolution("fewer than two distinct named mistakes: the step would be a coin flip")
+        fb = {**FEEDBACK, **(overrides or {})}
         return Step(prompt, "choice", tex(right), options=[Option(tex(right), correct=True, value=key(right))] +
-                    [Option(tex(e), misconception=m, feedback=FEEDBACK[m], value=key(e)) for m, e in wrongs])
+                    [Option(tex(e), misconception=m, feedback=fb[m], value=key(e)) for m, e in wrongs])
 
     # Level 1 ----------------------------------------------------------------------------
     def _trig(self, p):
@@ -226,9 +228,10 @@ class ElementaryDerivatives(Framework):
         right = sp.diff(f, x)
         if p["family"] == "tan":
             c = p["c"]
-            right = sp.Mul(c * k, sp.sec(k * x) ** 2, evaluate=False)     # same function, written as sec²
+            right = sp.Mul(c * k, sp.sec(k * x) ** 2, evaluate=abs(c * k) == 1)     # same function, written as sec²
             cands = [("sec-not-squared", c * k * sp.sec(k * x)), ("dropped-inner", c * sp.sec(k * x) ** 2),
                      ("tan-sign", -c * k * sp.sec(k * x) ** 2)]
+            overrides = {"tan-sign": f"$\\sec^2$ is always positive, so $f'$ has the sign of its coefficient ${c * k}$."}
         else:
             a, b = p["a"], p["b"]
             cands = [("cos-sign", a * k * sp.cos(k * x) + b * k * sp.sin(k * x)),
@@ -238,7 +241,7 @@ class ElementaryDerivatives(Framework):
         value = sp.nsimplify(right.subs(x, point))
         where = L(point)
         steps = [
-            self._derivative_step("What is $f'(x)$?", right, cands),
+            self._derivative_step("What is $f'(x)$?", right, cands, overrides if p["family"] == "tan" else None),
             Step(f"Evaluate $f'({where})$.", "number", float(value), tolerance=0.01,
                  explain=f"$f'({where}) = {L(value)}$"),
         ]
@@ -356,11 +359,11 @@ class ElementaryDerivatives(Framework):
             rhs = sp.Integer(p["r"] ** 2)
         elif p["family"] == "hyperbola":
             show = x * y
-            cands = [("forgot-product-rule", x * yp), ("forgot-chain-on-y", y + x)]
+            cands = [("forgot-product-rule", x * yp), ("treated-y-as-x", y + x)]
             rhs = sp.Integer(p["c"])
         else:
             show = x**2 + x * y + y**2
-            cands = [("forgot-product-rule", 2 * x + x * yp + 2 * y * yp), ("forgot-chain-on-y", 2 * x + y + x + 2 * y),
+            cands = [("forgot-product-rule", 2 * x + x * yp + 2 * y * yp), ("treated-y-as-x", 2 * x + y + x + 2 * y),
                      ("chain-dropped-outer", 2 * x + y + x * yp + 2 * yp)]
             rhs = show.subs(point)
         lw = pick(left, cands)
@@ -406,6 +409,8 @@ class ElementaryDerivatives(Framework):
             raise NoSolution("y(1) = 1 hides the forgot-y mistake in the number step")
         lw = pick(ln_y, ln_cands)
         dw = pick(right, d_cands)
+        if len(lw) < 2 or len(dw) < 2:
+            raise NoSolution("a step would be a coin flip")
         steps = [
             Step("Take the natural log of both sides. $\\ln y = $", "choice", tex(ln_y),
                  options=[Option(tex(ln_y), correct=True, value=key(ln_y))] +
@@ -432,6 +437,8 @@ class ElementaryDerivatives(Framework):
         vw = pick(v, [("constant-not-zero", v + d), ("exponent-unchanged", 3 * a * t**3 + 2 * b * t**2 + c * t),
                       ("dropped-coefficient", a * t**2 + b * t + c)])
         aw = pick(acc, [("acceleration-is-velocity", v), ("forgot-to-double", 6 * a * t + b)])
+        if len(vw) < 2 or len(aw) < 2:
+            raise NoSolution("a step would be a coin flip")
         up = at > 0
         steps = [
             Step("What is the velocity $v(t) = s'(t)$?", "choice", tex(v),

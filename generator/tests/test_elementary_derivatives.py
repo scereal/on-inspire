@@ -86,7 +86,8 @@ class ElementaryDerivativesTest(unittest.TestCase):
             self.assertEqual(curve.subs({x: p["px"], y: p["py"]}), 0)
             slope = sp.idiff(curve, y, x).subs({x: p["px"], y: p["py"]})
             self.assertAlmostEqual(sol.steps[2].answer, float(slope))
-            self.assertFalse(by_misconception(sol.steps[0], "forgot-chain-on-y").correct)
+            slip = by_misconception(sol.steps[0], "forgot-chain-on-y") or by_misconception(sol.steps[0], "treated-y-as-x")
+            self.assertFalse(slip.correct)
 
     def test_level5_rejects_points_off_the_curve(self):
         ok, _, _, _ = validate(FW, {"family": "circle", "r": 5, "px": 3, "py": 3}, 5, None)
@@ -133,10 +134,33 @@ class ElementaryDerivativesTest(unittest.TestCase):
             self.assertTrue(ok, why)
             self.assertEqual(len(sol.steps[0].options), 3, p)
 
+    def test_level5_hyperbola_feedback_talks_about_xy(self):
+        ok, why, sol, _ = validate(FW, {"family": "hyperbola", "c": 6, "px": 2, "py": 3}, 5, None)
+        self.assertTrue(ok, why)
+        for o in sol.steps[0].options:
+            if not o.correct:
+                self.assertNotIn("y^2", o.feedback, o.label)
+                self.assertIn("xy", o.feedback.replace(" ", ""), o.label)
+
+    def test_level1_tan_sign_feedback_matches_a_negative_coefficient(self):
+        ok, why, sol, _ = validate(FW, {"family": "tan", "c": -2, "k": 1, "at": "0"}, 1, None)
+        self.assertTrue(ok, why)
+        fb = by_misconception(sol.steps[0], "tan-sign").feedback
+        self.assertIn("-2", fb)
+
+    def test_level1_no_unit_coefficient_in_labels(self):
+        ok, why, sol, _ = validate(FW, {"family": "tan", "c": 1, "k": 1, "at": "0"}, 1, None)
+        self.assertTrue(ok, why)
+        self.assertIsNone(re.search(r"(?<![\d.])1 \\sec", correct(sol.steps[0]).label), correct(sol.steps[0]).label)
+
+    def test_steps_never_fall_to_a_coin_flip(self):
+        self.assertFalse(validate(FW, {"family": "product", "a": 1, "b": 1, "c": 1}, 6, None)[0])
+        self.assertFalse(validate(FW, {"a": 1, "b": 0, "c": 2, "d": 1, "t0": 1}, 7, None)[0])
+
     def test_no_sign_glitches_in_text(self):
         problems, _ = bank.build(FW, seed=1)
         # also: write ln (not log), arctan (not atan), and tan's derivative as sec², matching its distractors
-        bad = re.compile(r"- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname|tan\^\{2\}")
+        bad = re.compile(r"(?<![\d.])1 \\(sec|cos|sin|tan)|- -|\+ -|x - 0\b|\$(negative|positive)\$|\+ 0\b|\\log|operatorname|tan\^\{2\}")
         for level, items in problems.items():
             for p in items:
                 texts = [p["story"]] + [t for st in p["steps"] for t in [st["prompt"], st.get("explain", "")] +
