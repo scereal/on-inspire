@@ -114,7 +114,10 @@ def main():
             page.wait_for_selector(".topics li")
             for fw, info in index.items():
                 for level in info["levels"]:
-                    play(page, base, fw, int(level), failures)
+                    try:
+                        play(page, base, fw, int(level), failures)
+                    except Exception as e:   # record and keep going, so one stuck level doesn't hide the rest
+                        failures.append(f"{name}: {fw}-{level} problem {page.get_attribute('#stage', 'data-problem')} stuck: {str(e).splitlines()[0]}")
             positions = correct_positions(page, base, "limits", 3)
             if positions <= {0} or -1 in positions:
                 failures.append(f"{name}: the right answer always sits in the same place ({positions}), so position gives it away")

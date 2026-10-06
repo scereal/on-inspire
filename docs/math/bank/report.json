@@ -319,6 +319,40 @@
   "seed": 1,
   "tried": 1271
  },
+ "functions": {
+  "acceptance_rate": 0.7853,
+  "accepted": 300,
+  "framework": "functions",
+  "levels": {
+   "1": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 54
+    },
+    "target": 100,
+    "tried": 154
+   },
+   "2": {
+    "accepted": 100,
+    "rejected": {
+     "exists": 2
+    },
+    "target": 100,
+    "tried": 102
+   },
+   "3": {
+    "accepted": 100,
+    "rejected": {
+     "duplicate": 4,
+     "exists": 22
+    },
+    "target": 100,
+    "tried": 126
+   }
+  },
+  "seed": 1,
+  "tried": 382
+ },
  "ibp": {
   "acceptance_rate": 0.4042,
   "accepted": 310,

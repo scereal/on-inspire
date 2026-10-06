@@ -155,6 +155,24 @@
   "outcome": "Differentiate trig, exponential, logarithmic and inverse functions, implicitly defined curves, and higher derivatives.",
   "title": "Derivatives of elementary functions"
  },
+ "functions": {
+  "levels": {
+   "1": {
+    "count": 100,
+    "name": "Domain"
+   },
+   "2": {
+    "count": 100,
+    "name": "Composition"
+   },
+   "3": {
+    "count": 100,
+    "name": "Inverse functions"
+   }
+  },
+  "outcome": "Work with domains, compositions and inverses, transform graphs, and use exponentials, logarithms and trig values.",
+  "title": "Functions and graphs"
+ },
  "ibp": {
   "levels": {
    "1": {
