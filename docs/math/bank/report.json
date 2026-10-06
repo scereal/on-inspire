@@ -1,6 +1,6 @@
 {
  "antiderivatives": {
-  "acceptance_rate": 0.6957,
+  "acceptance_rate": 0.6723,
   "accepted": 400,
   "framework": "antiderivatives",
   "levels": {
@@ -15,20 +15,20 @@
    "2": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 23,
-     "exists": 7
+     "duplicate": 36,
+     "exists": 9
     },
     "target": 100,
-    "tried": 130
+    "tried": 145
    },
    "3": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 1,
-     "exists": 27
+     "duplicate": 2,
+     "exists": 31
     },
     "target": 100,
-    "tried": 128
+    "tried": 133
    },
    "4": {
     "accepted": 100,
@@ -40,7 +40,7 @@
    }
   },
   "seed": 1,
-  "tried": 575
+  "tried": 595
  },
  "applications": {
   "acceptance_rate": 0.5587,
@@ -111,7 +111,7 @@
   "tried": 1253
  },
  "bounce": {
-  "acceptance_rate": 0.6904,
+  "acceptance_rate": 0.6513,
   "accepted": 310,
   "framework": "bounce",
   "levels": {
@@ -135,24 +135,24 @@
    "3": {
     "accepted": 70,
     "rejected": {
-     "distinct": 5,
-     "duplicate": 3
+     "distinct": 29,
+     "duplicate": 7
     },
     "target": 70,
-    "tried": 78
+    "tried": 106
    },
    "4": {
     "accepted": 80,
     "rejected": {
-     "clean": 12,
-     "duplicate": 10
+     "clean": 13,
+     "duplicate": 8
     },
     "target": 80,
-    "tried": 102
+    "tried": 101
    }
   },
   "seed": 1,
-  "tried": 449
+  "tried": 476
  },
  "continuity": {
   "acceptance_rate": 0.9772,
@@ -469,7 +469,7 @@
   "tried": 767
  },
  "limits": {
-  "acceptance_rate": 0.8403,
+  "acceptance_rate": 0.8424,
   "accepted": 700,
   "framework": "limits",
   "levels": {
@@ -484,12 +484,11 @@
    "2": {
     "accepted": 100,
     "rejected": {
-     "distinct": 1,
      "duplicate": 1,
      "exists": 8
     },
     "target": 100,
-    "tried": 110
+    "tried": 109
    },
    "3": {
     "accepted": 100,
@@ -512,32 +511,32 @@
    "5": {
     "accepted": 100,
     "rejected": {
-     "duplicate": 21
+     "duplicate": 20
     },
     "target": 100,
-    "tried": 121
+    "tried": 120
    },
    "6": {
     "accepted": 100,
     "rejected": {
      "distinct": 1,
-     "exists": 6
+     "exists": 7
     },
     "target": 100,
-    "tried": 107
+    "tried": 108
    },
    "7": {
     "accepted": 100,
     "rejected": {
      "duplicate": 2,
-     "exists": 11
+     "exists": 10
     },
     "target": 100,
-    "tried": 113
+    "tried": 112
    }
   },
   "seed": 1,
-  "tried": 833
+  "tried": 831
  },
  "mixing": {
   "acceptance_rate": 0.2129,
@@ -581,7 +580,7 @@
   "tried": 1456
  },
  "projectile": {
-  "acceptance_rate": 0.3596,
+  "acceptance_rate": 0.4244,
   "accepted": 320,
   "framework": "projectile",
   "levels": {
@@ -609,26 +608,27 @@
    "3": {
     "accepted": 70,
     "rejected": {
-     "clean": 15,
-     "distinct": 141,
-     "duplicate": 11,
-     "plausible": 15
+     "clean": 17,
+     "distinct": 1,
+     "duplicate": 7,
+     "plausible": 11
     },
     "target": 70,
-    "tried": 252
+    "tried": 106
    },
    "4": {
     "accepted": 80,
     "rejected": {
-     "distinct": 4,
+     "distinct": 10,
+     "duplicate": 1,
      "exists": 4,
-     "plausible": 15
+     "plausible": 18
     },
     "target": 80,
-    "tried": 103
+    "tried": 113
    }
   },
   "seed": 1,
-  "tried": 890
+  "tried": 754
  }
 }

@@ -4172,7 +4172,7 @@ window.WALKTHROUGHS = [
             }
           ]
         },
-        "narration": "$(e^{2x})' = 2e^{2x}$ by the chain rule, so to get plain $e^{2x}$ you need $\\frac{1}{2}e^{2x}$. Undoing the chain rule means dividing by the inside's coefficient.",
+        "narration": "$(e^{2x})' = 2e^{2x}$ by the chain rule, so to get plain $e^{2x}$ you need $\\frac{1}{2}e^{2x}$. Undoing the chain rule means dividing by the inside's coefficient. The same move gives $\\int\\sec^2(3x)\\,dx = \\frac{\\tan(3x)}{3} + C$, and $\\int\\frac{1}{x}\\,dx = \\ln|x| + C$ fills the one gap in the power rule.",
         "builds_on": [
           "140.4.1.exp-log"
         ]
@@ -4215,6 +4215,10 @@ window.WALKTHROUGHS = [
       {
         "sympy": "diff(sin(x) + exp(2*x)/2, x)",
         "equals": "cos(x) + exp(2*x)"
+      },
+      {
+        "sympy": "diff(tan(3*x)/3, x)",
+        "equals": "sec(3*x)**2"
       }
     ]
   },

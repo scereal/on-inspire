@@ -65,6 +65,8 @@ def basic_parts(p):
         return p["a"] * sp.cos(k * x) + p["b"] * sp.sin(k * x), sp.pi / (2 * k)
     if p["family"] == "exp":
         return p["a"] * sp.exp(k * x), sp.log(2) / k
+    if p["family"] == "log":
+        return sp.Integer(p["c"]) / x, sp.E
     return p["c"] * sp.sec(k * x) ** 2, sp.pi / (4 * k)
 
 
@@ -75,6 +77,11 @@ FEEDBACK = {
     "multiplied-by-k": "Differentiating sin(kx) brings out a factor k, so the antiderivative of cos(kx) must divide by k, not multiply.",
     "sin-sign": "(cos x)′ = −sin x, so the antiderivative of sin x is −cos x: the minus sign comes along.",
     "power-rule-on-trig": "sec² isn't a power of a variable. Read the derivative table backwards: (tan x)′ = sec² x.",
+    "integrated-twice": "That antidifferentiates twice. One antiderivative raises each exponent by one, not two.",
+    "position-not-velocity": "That's the shape of the position formula. Velocity needs only one integration of the acceleration.",
+    "divided-by-old-exponent": "Divide by the new exponent, n + 1, not the old one: then differentiating gives back the original coefficient.",
+    "divided-not-raised": "Raise the exponent by one as well as dividing: the antiderivative of xⁿ is xⁿ⁺¹/(n + 1).",
+    "constant-inside-log": "The constant multiplies the log; it doesn't go inside it. (ln|cx|)′ = 1/x, not c/x.",
     "power-rule-on-exp": "e^{kx} isn't x to a power, so the power rule doesn't apply. Undo the chain rule: divide by k.",
     "forgot-v0": "Integrating gives a constant too: here it's the starting velocity v(0).",
     "integrated-twice": "That integrates the acceleration twice. Velocity needs one integration; position needs two.",
@@ -108,7 +115,9 @@ class Antiderivatives(Framework):
             a = rng.randint(1, 2) if neg else rng.randint(0, 2)
             return {"terms": terms, "a": a, "b": a + rng.randint(1, 2)}
         if level == 2:
-            family = rng.choice(["trig", "trig", "exp", "sec"])
+            family = rng.choice(["trig", "trig", "exp", "sec", "log"])
+            if family == "log":
+                return {"family": family, "a": 0, "b": 0, "k": 1, "c": rng.choice([v for v in range(-6, 9) if v not in (0, 1, -1)])}
             if family == "trig":
                 return {"family": family, "a": rng.randint(-4, 5), "b": rng.randint(-4, 5), "k": rng.randint(1, 4), "c": 0}
             if family == "exp":
@@ -116,7 +125,7 @@ class Antiderivatives(Framework):
             return {"family": family, "a": 0, "b": 0, "k": rng.randint(1, 4), "c": nz(-5, 6)}
         if level == 3:
             return {"a": rng.choice([3, 6, -3, 6, 12, 0]), "b": rng.choice([2, 4, -2, 0, 6]), "c": rng.randint(-5, 5),
-                    "x0": rng.choice([0, 1, -1, 2]), "y0": rng.randint(-6, 9), "x1": rng.choice([1, 2, 3, -1, 0])}
+                    "x0": rng.choice([0, 1, -1, 2]), "y0": rng.randint(-6, 9), "x1": rng.choice([1, 2, 3, -1, -2])}
         return {"a0": nz(-10, 8), "j": rng.choice([0, 0, 6, -6, 12]), "v0": rng.randint(-5, 20), "s0": rng.randint(0, 20), "T": rng.randint(1, 4)}
 
     def canonical(self, p, level):
@@ -139,9 +148,32 @@ class Antiderivatives(Framework):
         return Step(prompt, "choice", right_label, options=[Option(right_label, correct=True, value=right_value)] +
                     [Option(lbl, misconception=m, value=v, feedback=fb) for m, lbl, v, fb in wrongs])
 
-    def _anti_step(self, prompt, F, cands, seed):
-        wrongs = pick(F, rotate(cands, seed))
-        return self._choice(prompt, withc(F), key(F), [(m, withc(e), key(e), FEEDBACK[m]) for m, e in wrongs])
+    def _anti_step(self, prompt, F, cands, seed, feedback=None, pairs=None):
+        if pairs:                                   # a chosen pair first, the rest as fallbacks if one collapses
+            names = pairs[seed % len(pairs)]
+            cands = [c for c in cands if c[0] in names] + [c for c in cands if c[0] not in names]
+        else:
+            cands = rotate(cands, seed)
+        wrongs = pick(F, cands)
+        fb = {**FEEDBACK, **(feedback or {})}
+        return self._choice(prompt, withc(F), key(F), [(m, withc(e), key(e), fb[m]) for m, e in wrongs])
+
+    # Three of five pairs include a mistake with the same coefficients as the answer, so "the smallest
+    # numbers" doesn't single out the answer, and no single mistake is always on screen.
+    POWER_PAIRS = [("divided-not-raised", "forgot-to-divide"), ("divided-not-raised", "multiplied-by-n"),
+                   ("divided-not-raised", "differentiated-instead"), ("integrated-twice", "forgot-to-divide"),
+                   ("divided-by-old-exponent", "multiplied-by-n")]
+
+    def _power_mistakes(self, terms):
+        """Named mistakes for a sum of c·x^e terms; two of them also shrink the coefficients, like the answer."""
+        up = lambda f: sum(f(c, e) for c, e in terms)
+        # ordered so most neighbouring pairs include a mistake with the same or smaller numbers than the answer
+        return [("forgot-to-divide", up(lambda c, e: c * x ** (e + 1))),
+                ("divided-not-raised", up(lambda c, e: sp.Rational(c) / (e + 1) * x**e)),
+                ("multiplied-by-n", up(lambda c, e: c * (e + 1) * x ** (e + 1))),
+                ("integrated-twice", up(lambda c, e: sp.Rational(c) / ((e + 1) * (e + 2)) * x ** (e + 2) if e != -2 else 0)),
+                ("divided-by-old-exponent", up(lambda c, e: (sp.Rational(c) / e if e != 0 else c) * x ** (e + 1))),
+                ("differentiated-instead", up(lambda c, e: c * e * x ** (e - 1) if e != 0 else 0))]
 
     # Level 1 ----------------------------------------------------------------------------
     def _power(self, p):
@@ -150,12 +182,10 @@ class Antiderivatives(Framework):
             raise NoSolution("x^-1 belongs to ln, not the power rule")
         f = sum(c * x**e for c, e in terms)
         F = sum(sp.Rational(c) / (e + 1) * x ** (e + 1) for c, e in terms)
-        cands = [("forgot-to-divide", sum(c * x ** (e + 1) for c, e in terms)),
-                 ("multiplied-by-n", sum(c * (e + 1) * x ** (e + 1) for c, e in terms)),
-                 ("differentiated-instead", sp.diff(f, x))]
+        cands = self._power_mistakes(terms)
         a, b = p["a"], p["b"]
         diff = F.subs(x, b) - F.subs(x, a)
-        steps = [self._anti_step("Find the general antiderivative $F(x)$.", F, cands, sum(c for c, _ in terms)),
+        steps = [self._anti_step("Find the general antiderivative $F(x)$.", F, cands, sum(c for c, _ in terms), pairs=self.POWER_PAIRS),
                  Step(f"What is $F({b}) - F({a})$? (The $C$ cancels.)", "number", float(diff), tolerance=0.01,
                       explain=f"$F({b}) - F({a}) = {L(F.subs(x, b))} - ({L(F.subs(x, a))}) = {L(diff)}$")]
         checks = [("exists", same(sp.diff(F, x), f), "F doesn't differentiate to f"), ("clean", clean(diff), "difference isn't clean")]
@@ -170,36 +200,50 @@ class Antiderivatives(Framework):
             raise NoSolution("nothing to integrate")
         k = p["k"]
         fam = p["family"]
-        F = p["c"] * sp.tan(k * x) / k if fam == "sec" else sp.integrate(f, x)   # SymPy writes sin/cos; the course writes tan
+        F = (p["c"] * sp.tan(k * x) / k if fam == "sec" else              # SymPy writes sin/cos; the course writes tan
+             p["c"] * sp.log(sp.Abs(x)) if fam == "log" else sp.integrate(f, x))
+        kk = "" if k == 1 else str(k)
+        feedback = {}
         if fam == "trig":
             a, b = p["a"], p["b"]
+            feedback = {"multiplied-by-k": f"Differentiating $\\sin({kk}x)$ brings out a factor {k}, so the antiderivative divides by {k} instead of multiplying.",
+                        "sin-sign": "$(\\cos u)' = -\\sin u$, so the antiderivative of sine carries a minus sign: $\\int\\sin(" + kk + "x)\\,dx = -\\frac{\\cos(" + kk + "x)}{" + str(k) + "}$."}
             cands = [("multiplied-by-k", k * (a * sp.sin(k * x) - b * sp.cos(k * x))),
                      ("sin-sign", (a * sp.sin(k * x) + b * sp.cos(k * x)) / k),
                      ("differentiated-instead", sp.diff(f, x))]
         elif fam == "exp":
             a = p["a"]
+            feedback = {"multiplied-by-k": f"$(e^{{{kk}x}})' = {k}e^{{{kk}x}}$, so to undo it divide by {k}, don't multiply.",
+                        "forgot-to-divide": f"Differentiate it: $(e^{{{kk}x}})' = {k}e^{{{kk}x}}$, which is {k} times too big. Divide by {k}."}
             cands = [("multiplied-by-k", a * k * sp.exp(k * x)),
                      ("power-rule-on-exp", a * sp.exp(k * x + 1) / (k * x + 1)),
                      ("forgot-to-divide", a * sp.exp(k * x))]
+        elif fam == "log":
+            c = p["c"]
+            cands = [("constant-inside-log", sp.log(sp.Abs(c * x))), ("differentiated-instead", sp.diff(f, x)),
+                     ("divided-by-old-exponent", c * sp.log(sp.Abs(x)) / x)]
+            feedback = {"divided-by-old-exponent": "$\\frac{1}{x}$ is the one power the power rule can't handle (it would divide by 0). Its antiderivative is $\\ln|x|$."}
         else:
             c = p["c"]
+            feedback = {"multiplied-by-k": f"$(\\tan({kk}x))' = {k}\\sec^2({kk}x)$, so divide by {k}, don't multiply."}
             cands = [("multiplied-by-k", c * k * sp.tan(k * x)),
                      ("power-rule-on-trig", c * sp.sec(k * x) ** 3 / 3),
                      ("differentiated-instead", sp.diff(f, x))]
-        diff = sp.nsimplify(F.subs(x, x1) - F.subs(x, 0))
-        steps = [self._anti_step("Find the general antiderivative $F(x)$.", F, cands, k + p["a"] + p["b"] + p["c"]),
-                 Step(f"What is $F\\left({L(x1)}\\right) - F(0)$?", "number", float(diff), tolerance=0.01,
-                      explain=f"$F\\left({L(x1)}\\right) - F(0) = {L(diff)}$")]
-        checks = [("exists", same(sp.diff(F, x), f), "F doesn't differentiate to f"), ("clean", clean(diff), "difference isn't clean")]
+        x0 = sp.Integer(1) if fam == "log" else sp.Integer(0)
+        diff = sp.nsimplify(F.subs(x, x1) - F.subs(x, x0))
+        steps = [self._anti_step("Find the general antiderivative $F(x)$.", F, cands, k + p["a"] + p["b"] + p["c"], feedback),
+                 Step(f"What is $F\\left({L(x1)}\\right) - F({x0})$?", "number", float(diff), tolerance=0.01,
+                      explain=f"$F\\left({L(x1)}\\right) - F({x0}) = {L(diff)}$")]
+        checks = [("exists", same(sp.diff(F.subs(sp.Abs(x), x), x), f), "F doesn't differentiate to f"), ("clean", clean(diff), "difference isn't clean")]
         story = f"Find the antiderivatives of $f(x) = {L(f)}$."
-        scene = {"type": "integral", "tex": f"\\int {L(f)}\\,dx", "rule": "\\text{read the derivative table backwards; divide by the inside's } k"}
+        scene = {"type": "integral", "tex": f"\\int \\left({L(f)}\\right)dx", "rule": "\\text{read the derivative table backwards; divide by the inside's } k"}
         return Solution(steps, story, scene, ["antidifferentiate", "difference"], {"_checks": checks})
 
     # Level 3 ----------------------------------------------------------------------------
     def _ivp(self, p):
         a, b, c, x0, y0, x1 = p["a"], p["b"], p["c"], p["x0"], p["y0"], p["x1"]
-        if x1 == x0:
-            raise NoSolution("evaluate somewhere new")
+        if x1 == x0 or x1 == 0:
+            raise NoSolution("evaluate somewhere new (at 0 the answer would just be C)")
         fp = a * x**2 + b * x + c
         if sp.degree(fp, x) < 1:
             raise NoSolution("needs a non-constant derivative")
@@ -208,10 +252,10 @@ class Antiderivatives(Framework):
         if C == 0:
             raise NoSolution("C = 0 would make forgetting C give the right value")
         val = F.subs(x, x1) + C
-        cands = [("forgot-to-divide", sum(cf * x ** (e + 1) for (e,), cf in sp.Poly(fp, x).terms())),
-                 ("multiplied-by-n", sum(cf * (e + 1) * x ** (e + 1) for (e,), cf in sp.Poly(fp, x).terms())),
-                 ("differentiated-instead", sp.diff(fp, x))]
-        steps = [self._anti_step("Find the general antiderivative of $f'(x)$.", F, cands, a + b + c),
+        if val in (C, y0):
+            raise NoSolution("the last answer would repeat C or the given value")
+        cands = self._power_mistakes([(cf, sp.Integer(e)) for (e,), cf in sp.Poly(fp, x).terms()])
+        steps = [self._anti_step("Find the general antiderivative of $f'(x)$.", F, cands, a + b + c + y0, pairs=self.POWER_PAIRS),
                  Step(f"Use $f({x0}) = {y0}$. What is $C$?", "number", float(C), tolerance=0.01,
                       explain=f"$f({x0}) = {L(F.subs(x, x0))} + C = {y0}$, so $C = {L(C)}$."),
                  Step(f"So what is $f({x1})$?", "number", float(val), tolerance=0.01,
@@ -228,8 +272,10 @@ class Antiderivatives(Framework):
         v = v0 + sp.integrate(acc, t)
         s = s0 + sp.integrate(v, t)
         others = [("integrated-twice", v0 + sp.integrate(sp.integrate(acc, t), t)),
+                  ("position-not-velocity", v0 * t + sp.integrate(sp.integrate(acc, t), t)),
                   ("differentiated-a", v0 + sp.diff(acc, t) * t), ("forgot-to-divide", v0 + a0 * t + j * t**2)]
-        wrongs = pick(v, [("forgot-v0", v - v0)] + rotate(others, a0 + j + v0))   # forgetting v(0) is the key slip: always offered
+        # forgot-v0 rotates with the rest: always offering it made "the option with the constant" a giveaway
+        wrongs = pick(v, rotate([("forgot-v0", v - v0)] + others, a0 + j + v0))
         v_step = self._choice("What is the velocity $v(t)$?", f"$v(t) = {L(v)}$", key(v),
                               [(m, f"$v(t) = {L(e)}$", key(e), FEEDBACK[m]) for m, e in wrongs])
         vT, sT = v.subs(t, T), s.subs(t, T)

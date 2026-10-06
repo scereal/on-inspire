@@ -73,7 +73,8 @@ class AntiderivativesTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertAlmostEqual(sol.steps[1].answer, 5)
         self.assertAlmostEqual(sol.steps[2].answer, 2 + 15 - 5)
-        self.assertFalse(by_misconception(sol.steps[0], "forgot-v0").correct)
+        opt = by_misconception(sol.steps[0], "forgot-v0")
+        self.assertTrue(opt is None or not opt.correct)
 
     def test_answers_are_not_findable_by_shape(self):
         problems, _ = built()
@@ -86,6 +87,46 @@ class AntiderivativesTest(unittest.TestCase):
                 right = next(o["label"] for o in opts if o["correct"])
                 short += all(n[right] < n[o["label"]] for o in opts if not o["correct"])
             self.assertLess(short / len(items), 0.6, f"L{level}: {short} answers are uniquely the shortest")
+
+    # From the unit 140.6 review ------------------------------------------------------
+    def test_level4_forgot_v0_is_not_always_on_screen(self):
+        problems, _ = built()
+        shown = sum(any(o.get("misconception") == "forgot-v0" for o in p["steps"][0]["options"]) for p in problems[4])
+        self.assertLess(shown, 60, f"forgot-v0 in {shown}/100")
+
+    def test_smallest_numbers_dont_give_the_answer(self):
+        problems, _ = built()
+        nums = lambda lbl: sum(abs(float(v)) for v in re.findall(r"\d+(?:\.\d+)?", re.sub(r"\^\{?-?\d+(/\d+)?\}?", "", lbl)))
+        for level in (1, 3):
+            hits = 0
+            for p in problems[level]:
+                opts = p["steps"][0]["options"]
+                right = next(o for o in opts if o["correct"])
+                hits += all(nums(right["label"]) < nums(o["label"]) for o in opts if not o["correct"])
+            self.assertLess(hits / len(problems[level]), 0.6, f"L{level}: smallest numbers win {hits}")
+
+    def test_level3_last_answer_is_new(self):
+        problems, _ = built()
+        for p in problems[3]:
+            c, val = p["steps"][1]["answer"], p["steps"][2]["answer"]
+            self.assertNotEqual(c, val, p["id"])
+            self.assertNotEqual(val, p["params"]["y0"], p["id"])
+            self.assertNotEqual(p["params"]["x1"], 0, p["id"])
+
+    def test_level2_feedback_uses_the_problem(self):
+        ok, why, sol, _ = validate(FW, {"family": "exp", "a": -2, "b": 0, "k": 4, "c": 0}, 2, None)
+        self.assertTrue(ok, why)
+        for o in sol.steps[0].options:
+            if not o.correct and o.misconception in ("multiplied-by-k", "forgot-to-divide"):
+                self.assertIn("4", o.feedback)
+                self.assertNotIn("cos", o.feedback)
+                self.assertNotIn("power", o.feedback)
+
+    def test_level2_reciprocal_family(self):
+        ok, why, sol, _ = validate(FW, {"family": "log", "a": 0, "b": 0, "k": 1, "c": 3}, 2, None)
+        self.assertTrue(ok, why)
+        self.assertIn("\\ln", correct(sol.steps[0]).label)
+        self.assertAlmostEqual(sol.steps[1].answer, 3)
 
     def test_bank_text_is_clean(self):
         problems, _ = built()

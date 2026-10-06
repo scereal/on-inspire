@@ -2671,10 +2671,11 @@ window.CONCEPTS = [
   },
   {
     "id": "basic-antiderivatives",
-    "title": "Antiderivatives of sin, cos, eˣ and 1/x",
-    "body": "Every derivative you know, read backwards, is an antiderivative. Since $(\\sin x)' = \\cos x$, $\\int\\cos x\\,dx = \\sin x + C$. Since $(\\cos x)' = -\\sin x$, $\\int\\sin x\\,dx = -\\cos x + C$: the minus sign comes along. And $\\int e^x\\,dx = e^x + C$, $\\int\\frac{1}{x}\\,dx = \\ln|x| + C$ ([[derivative-of-sin-cos|why sin′ = cos]], [[derivative-of-exp|why eˣ is its own derivative]]).\n\nWith an inside multiple, undo the chain rule by dividing: $\\int\\cos(3x)\\,dx = \\frac{\\sin(3x)}{3} + C$, because differentiating $\\sin(3x)$ brings out a 3 you need to cancel. Multiplying by 3 instead is the classic slip. Always check by differentiating, and keep the [[antiderivative-plus-c|+ C]].",
+    "title": "Antiderivatives of sin, cos, sec², eˣ and 1/x",
+    "body": "Every derivative you know, read backwards, is an antiderivative. Since $(\\sin x)' = \\cos x$, $\\int\\cos x\\,dx = \\sin x + C$. Since $(\\cos x)' = -\\sin x$, $\\int\\sin x\\,dx = -\\cos x + C$: the minus sign comes along. Since $(\\tan x)' = \\sec^2 x$, $\\int\\sec^2 x\\,dx = \\tan x + C$. And $\\int e^x\\,dx = e^x + C$, $\\int\\frac{1}{x}\\,dx = \\ln|x| + C$ (the one power the power rule can't handle) ([[derivative-of-sin-cos|why sin′ = cos]], [[derivative-of-exp|why eˣ is its own derivative]]).\n\nWith an inside multiple, undo the chain rule by dividing: $\\int\\cos(3x)\\,dx = \\frac{\\sin(3x)}{3} + C$, because differentiating $\\sin(3x)$ brings out a 3 you need to cancel. Multiplying by 3 instead is the classic slip. Always check by differentiating, and keep the [[antiderivative-plus-c|+ C]].",
     "math": [
-      "\\int\\cos kx\\,dx = \\frac{\\sin kx}{k} + C, \\quad \\int\\sin kx\\,dx = -\\frac{\\cos kx}{k} + C, \\quad \\int e^{kx}\\,dx = \\frac{e^{kx}}{k} + C"
+      "\\int\\cos kx\\,dx = \\frac{\\sin kx}{k} + C, \\quad \\int\\sin kx\\,dx = -\\frac{\\cos kx}{k} + C",
+      "\\int\\sec^2 kx\\,dx = \\frac{\\tan kx}{k} + C, \\quad \\int e^{kx}\\,dx = \\frac{e^{kx}}{k} + C, \\quad \\int\\frac{1}{x}\\,dx = \\ln|x| + C"
     ],
     "widget": {
       "type": "accumulator",
@@ -2700,6 +2701,14 @@ window.CONCEPTS = [
       {
         "sympy": "integrate(exp(2*x), x)",
         "equals": "exp(2*x)/2"
+      },
+      {
+        "sympy": "diff(tan(3*x)/3, x)",
+        "equals": "sec(3*x)**2"
+      },
+      {
+        "sympy": "integrate(1/x, x)",
+        "equals": "log(x)"
       }
     ]
   },
