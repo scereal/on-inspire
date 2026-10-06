@@ -17,7 +17,12 @@ window.CONCEPTS = [
     },
     "deeper": [],
     "related": [
-      "limit"
+      "limit",
+      "domain-and-range",
+      "function-composition",
+      "inverse-function",
+      "graph-transformations",
+      "logarithm"
     ],
     "foundation": true,
     "claims": [
@@ -2460,6 +2465,173 @@ window.CONCEPTS = [
       {
         "sympy": "limit(cos(x)/(x + 1), x, 0)",
         "equals": "1"
+      }
+    ]
+  },
+  {
+    "id": "domain-and-range",
+    "title": "Domain and range: what goes in, what comes out",
+    "body": "The domain of a [[function]] is every input it accepts; the range is every output it can produce. When a formula is all you're given, the domain is every number the formula can handle, and three operations limit it. You can't take the square root of a negative number, you can't take the log of zero or a negative number, and you can't divide by zero.\n\nSo $\\sqrt{x - 2}$ needs $x - 2 \\ge 0$, which means $x \\ge 2$. Equality is fine, because $\\sqrt{0} = 0$. But $\\ln(x - 2)$ needs $x - 2 > 0$, strictly, and $\\frac{1}{x - 5}$ needs $x \\ne 5$. Watch the direction: $\\sqrt{6 - 2x}$ needs $6 - 2x \\ge 0$, and dividing by $-2$ flips it to $x \\le 3$.",
+    "math": [
+      "\\sqrt{u}: u \\ge 0, \\qquad \\ln u: u > 0, \\qquad \\frac{1}{u}: u \\ne 0"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "sqrt",
+      "x0": 2,
+      "span": 2,
+      "prompt": "Drag along √x: the graph starts at x = 0 and there's nothing to its left."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(6 - 2*x, x)",
+        "equals": "[3]"
+      },
+      {
+        "sympy": "(6 - 2*x).subs(x, 4)",
+        "equals": "-2"
+      },
+      {
+        "sympy": "sqrt(0)",
+        "equals": "0"
+      }
+    ]
+  },
+  {
+    "id": "function-composition",
+    "title": "Composition: feed one function into another",
+    "body": "$(f \\circ g)(x) = f(g(x))$: do $g$ first, then feed its output into $f$. With $f(x) = 2x + 1$ and $g(x) = x^2$, $(f \\circ g)(3) = f(9) = 19$, but $(g \\circ f)(3) = g(7) = 49$. The order matters, and composition isn't multiplication: $f(x)\\,g(x) = (2x + 1)x^2$ is something else entirely.\n\nComplicated [[function|functions]] are often simple ones chained together. $\\sqrt{x^2 + 1}$ is \"square, add 1, take the root\". Seeing that chain is exactly what the chain rule needs later.",
+    "math": [
+      "(f \\circ g)(x) = f(g(x))",
+      "(f\\circ g)(3) = 19 \\ne 49 = (g \\circ f)(3)"
+    ],
+    "widget": {
+      "type": "transform",
+      "base": "square",
+      "a": 2,
+      "h": 3,
+      "k": 1,
+      "prompt": "2(x − 3)² + 1 is a chain: subtract 3, square, double, add 1. Change one link at a time."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(2*x + 1).subs(x, 9)",
+        "equals": "19"
+      },
+      {
+        "sympy": "(x**2).subs(x, 7)",
+        "equals": "49"
+      }
+    ]
+  },
+  {
+    "id": "inverse-function",
+    "title": "Inverse functions undo each other",
+    "body": "If $f$ turns 3 into 7, its inverse $f^{-1}$ turns 7 back into 3. To find a formula, write $y = f(x)$, swap the roles of $x$ and $y$, and solve for $y$. For $f(x) = 2x + 3$: $x = 2y + 3$ gives $f^{-1}(x) = \\frac{x - 3}{2}$. Check: $f(f^{-1}(x)) = x$.\n\nThe $-1$ is not an exponent: $f^{-1}(x)$ is not $\\frac{1}{f(x)}$. Only a [[function]] that never repeats an output has an inverse, and its graph is the mirror image of $f$ across the line $y = x$, since swapping $x$ and $y$ reflects every point. That mirroring is also why slopes of inverses are reciprocals ([[inverse-function-derivative|the inverse-function rule]]).",
+    "math": [
+      "y = 2x + 3 \\implies x = 2y + 3 \\implies f^{-1}(x) = \\frac{x - 3}{2}"
+    ],
+    "widget": {
+      "type": "mirror",
+      "f": "cubeplus",
+      "x0": 1,
+      "prompt": "Move the point along x³ + x: its mirror image across y = x traces the inverse."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [
+      "inverse-function-derivative"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "solve(Eq(x, 2*y + 3), y)",
+        "equals": "[x/2 - 3/2]"
+      },
+      {
+        "sympy": "simplify(2*((x - 3)/2) + 3)",
+        "equals": "x"
+      }
+    ]
+  },
+  {
+    "id": "graph-transformations",
+    "title": "Transforming graphs: shift, stretch, flip",
+    "body": "Start from a known graph, like $y = x^2$, and change its formula in small ways.\n- **Shifts:** $y = (x - 3)^2$ is the same parabola shifted right by 3. Inside the function, $x - 3$ means \"what used to happen at 0 now happens at 3\". $y = x^2 + 1$ shifts it up by 1.\n- **Stretches:** $y = 2x^2$ stretches it vertically by 2.\n- **Flips:** $y = -x^2$ flips it upside down.\n\nPut together, $y = 2(x - 3)^2 + 1$ has its vertex at $(3, 1)$ and climbs twice as steeply. The sign inside the bracket is the one people trip on: $(x + 3)^2$ shifts *left*. Changes inside the [[function]] act on $x$, horizontally and backwards; changes outside act on $y$, vertically and as written.",
+    "math": [
+      "y = a\\,f(x - h) + k: \\text{ shift right } h,\\ \\text{up } k,\\ \\text{stretch by } a"
+    ],
+    "widget": {
+      "type": "transform",
+      "base": "square",
+      "a": 2,
+      "h": 3,
+      "k": 1,
+      "prompt": "Slide h and k to move the vertex; change a to stretch or flip. The gold curve is the original x²."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 3)",
+        "equals": "1"
+      },
+      {
+        "sympy": "(2*(x - 3)**2 + 1).subs(x, 4)",
+        "equals": "3"
+      }
+    ]
+  },
+  {
+    "id": "logarithm",
+    "title": "Logarithms undo exponentials",
+    "body": "$\\log_2 16$ asks: what power of 2 gives 16? The answer is 4, since $2^4 = 16$. So $\\log_b x = y$ means exactly $b^y = x$, and the logarithm is the [[function]] that undoes $b^x$. The natural log, $\\ln$, uses base $e$.\n\nThe laws all come from the exponent rules:\n- $\\log(AB) = \\log A + \\log B$, because exponents add when you multiply;\n- $\\log(A^n) = n\\log A$.\n\nThat's how logs solve equations where the unknown is in an exponent: $3\\cdot 2^x = 48$ gives $2^x = 16$, so $x = \\log_2 16 = 4$. Logs only accept positive inputs, so check every answer: a solution that makes a log's argument zero or negative is extraneous. The [[derivative-of-ln|derivative of ln]] comes from the same undoing.",
+    "math": [
+      "\\log_b x = y \\iff b^y = x",
+      "\\log(AB) = \\log A + \\log B, \\quad \\log(A^n) = n\\log A"
+    ],
+    "widget": {
+      "type": "secant",
+      "mode": "trace",
+      "f": "ln",
+      "x0": 2,
+      "span": 1.5,
+      "prompt": "Drag along ln x: it crosses 0 at x = 1 and only exists for x > 0."
+    },
+    "deeper": [
+      "function"
+    ],
+    "related": [
+      "derivative-of-ln"
+    ],
+    "foundation": false,
+    "claims": [
+      {
+        "sympy": "log(16, 2)",
+        "equals": "4"
+      },
+      {
+        "sympy": "solve(3*2**x - 48, x)",
+        "equals": "[4]"
+      },
+      {
+        "sympy": "expand_log(log(a*b), force=True)",
+        "equals": "log(a) + log(b)"
       }
     ]
   }

@@ -105,5 +105,14 @@ check("circle tangent slope at (3, 4) is −3/4", near(M.circleSlope(3, 4), -0.7
   check("lhop settles on 2 near 0", near(M.fn("lhop")(1e-6), 2, 1e-4));
 }
 
+// Unit 140.1: functions and graphs
+{
+  const g = M.transformed(M.fn("square"), 2, 3, 1);
+  check("transformed: 2(x − 3)² + 1 has its vertex at (3, 1) and g(4) = 3", g(3) === 1 && g(4) === 3);
+  const [mx, my] = M.mirrorPoint([2, 9]);
+  check("mirrorPoint swaps coordinates across y = x", mx === 9 && my === 2);
+  check("cubeplus(1) = 2 (x³ + x)", M.fn("cubeplus")(1) === 2);
+}
+
 print(failures ? `\n${failures} failed` : "\nall widget math checks passed");
 if (failures) throw new Error(`${failures} failed`);

@@ -38,6 +38,8 @@
     crit3: (x) => x * x * x - 3 * x,
     fencearea: (x) => x * (100 - 2 * x),
     lhop: (x) => (Math.exp(2 * x) - 1) / x,
+    // Unit 140.1: functions and graphs
+    cubeplus: (x) => x * x * x + x,
   };
 
   const WidgetMath = {
@@ -50,6 +52,8 @@
     // secant widget: h shrinks from 1.5 (or 3/4 of a narrower window) as the slider moves
     secantH: (s, span) => Math.min(1.5, 0.75 * span) * Math.pow(10, -s / 30),
     circleSlope: (x, y) => -x / y,
+    transformed: (base, a, h, k) => (x) => a * base(x - h) + k,
+    mirrorPoint: ([x, y]) => [y, x],
     slopeAt: (f, x, h = 1e-5) => (f(x + h) - f(x - h)) / (2 * h),
     // a ladder of length L with its foot x from the wall, foot moving out at dxdt: x² + y² = L² gives y' = −x x'/y
     ladder: (L, x, dxdt) => { const y = Math.sqrt(L * L - x * x); return { y, dydt: (-x * dxdt) / y }; },          // implicit differentiation of x² + y² = r²
@@ -1010,6 +1014,63 @@
     };
     const input = slider(ui.controls, "Foot distance", 0.5, L - 0.2, 0.01, 6, (v) => { x = v; draw(); });
     const init = () => { x = Math.min(6, L - 0.2); input.value = x; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Transform: y = a·f(x − h) + k, with the base graph for comparison
+  W.transform = function (box, cfg) {
+    const name = cfg.base || "square";
+    const base = WidgetMath.fn(name);
+    const label = { square: "x²", sqrt: "√x", abs: "|x|", recip: "1/x" }[name] || "f(x)";
+    const ui = shell(box, cfg.prompt || "Move the sliders: h slides the graph sideways, k lifts it, a stretches or flips it.");
+    let st;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -6, 6, -6, 8);
+      P.curve(base, -6, 6, "w-curve alt", 480);
+      P.curve(WidgetMath.transformed(base, st.a, st.h, st.k), -6, 6, "w-curve", 480);
+      const inner = st.h === 0 ? "x" : `x ${st.h > 0 ? "−" : "+"} ${fmt(Math.abs(st.h), 1)}`;
+      const outer = st.k === 0 ? "" : ` ${st.k > 0 ? "+" : "−"} ${fmt(Math.abs(st.k), 1)}`;
+      ui.readout.textContent = `y = ${st.a === 1 ? "" : st.a === -1 ? "−" : fmt(st.a, 1) + "·"}${label.replace("x", `(${inner})`)}${outer}   (gold: the original ${label})`;
+    };
+    const start = { a: cfg.a ?? 1, h: cfg.h ?? 0, k: cfg.k ?? 0 };
+    const sa = slider(ui.controls, "a", -3, 3, 0.5, start.a, (v) => { st.a = v; draw(); });
+    const sh = slider(ui.controls, "h", -5, 5, 0.5, start.h, (v) => { st.h = v; draw(); });
+    const sk = slider(ui.controls, "k", -5, 5, 0.5, start.k, (v) => { st.k = v; draw(); });
+    const init = () => { st = { ...start }; sa.value = st.a; sh.value = st.h; sk.value = st.k; draw(); };
+    ui.reset.addEventListener("click", init);
+    init();
+    return { reset: init };
+  };
+
+  // Mirror: a function and its inverse are reflections across y = x
+  W.mirror = function (box, cfg) {
+    const f = WidgetMath.fn(cfg.f || "cubeplus");
+    const lo = cfg.lo ?? -1.5, hi = cfg.hi ?? 1.5, R = cfg.range ?? 3.5;
+    const ui = shell(box, cfg.prompt || "Move the point along f: its mirror image across y = x traces the inverse.");
+    let t;
+    const draw = () => {
+      ui.svg.innerHTML = "";
+      const P = plotArea(ui.svg, -R * 434 / 226, R * 434 / 226, -R, R);
+      el("line", { x1: P.X(-R * 2), y1: P.Y(-R * 2), x2: P.X(R * 2), y2: P.Y(R * 2), class: "w-delta" }, ui.svg);
+      P.curve(f, lo, hi, "w-curve", 300);
+      let d = "";
+      for (let i = 0; i <= 300; i++) {
+        const u = lo + ((hi - lo) * i) / 300, [mx, my] = WidgetMath.mirrorPoint([u, f(u)]);
+        if (Math.abs(mx) > R * 2 || Math.abs(my) > R * 2) continue;
+        d += `${d ? "L" : "M"}${P.X(mx).toFixed(1)} ${P.Y(my).toFixed(1)} `;
+      }
+      el("path", { d, class: "w-curve alt" }, ui.svg);
+      const [mx, my] = WidgetMath.mirrorPoint([t, f(t)]);
+      el("line", { x1: P.X(t), y1: P.Y(f(t)), x2: P.X(mx), y2: P.Y(my), class: "w-delta" }, ui.svg);
+      el("circle", { cx: P.X(t), cy: P.Y(f(t)), r: 6, class: "w-point" }, ui.svg);
+      el("circle", { cx: P.X(mx), cy: P.Y(my), r: 6, class: "w-point alt" }, ui.svg);
+      ui.readout.textContent = `(${fmt(t, 2)}, ${fmt(f(t), 3)}) on f  ↔  (${fmt(f(t), 3)}, ${fmt(t, 2)}) on the inverse`;
+    };
+    const input = slider(ui.controls, "Move the point", lo, hi, (hi - lo) / 300, cfg.x0 ?? 1, (v) => { t = v; draw(); });
+    const init = () => { t = cfg.x0 ?? 1; input.value = t; draw(); };
     ui.reset.addEventListener("click", init);
     init();
     return { reset: init };
