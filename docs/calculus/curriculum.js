@@ -670,13 +670,65 @@ window.CURRICULUM = {
           "id": "140.6.1",
           "title": "Find antiderivatives, with the + C",
           "summary": "Run differentiation backwards, and see why the constant is always there.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.6.1.power",
+              "title": "The power rule backwards",
+              "learn": "learn-antiderivative-power",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 1
+              },
+              "builds_on": [
+                "140.3.2.power"
+              ]
+            },
+            {
+              "id": "140.6.1.basic",
+              "title": "Antiderivatives of trig and exponential functions",
+              "learn": "learn-antiderivative-basic",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 2
+              },
+              "builds_on": [
+                "140.4.1.trig",
+                "140.4.1.exp-log"
+              ]
+            }
+          ]
         },
         {
           "id": "140.6.2",
           "title": "Solve initial-value problems",
           "summary": "Pin down the constant from one known value, e.g. position from velocity.",
-          "subtopics": []
+          "subtopics": [
+            {
+              "id": "140.6.2.ivp",
+              "title": "Finding the constant from a known value",
+              "learn": "learn-ivp",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 3
+              },
+              "builds_on": [
+                "140.6.1.power"
+              ]
+            },
+            {
+              "id": "140.6.2.motion",
+              "title": "From acceleration to position",
+              "learn": "learn-motion",
+              "practice": {
+                "framework": "antiderivatives",
+                "level": 4
+              },
+              "builds_on": [
+                "140.6.2.ivp",
+                "140.4.4.higher"
+              ]
+            }
+          ]
         }
       ]
     }

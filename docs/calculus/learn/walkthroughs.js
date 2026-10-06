@@ -4010,5 +4010,413 @@ window.WALKTHROUGHS = [
         "equals": "1/2"
       }
     ]
+  },
+  {
+    "id": "learn-antiderivative-power",
+    "subtopic": "140.6.1.power",
+    "title": "Running the power rule backwards",
+    "problem": "Find the antiderivatives of $f(x) = 3x^2 + 4x - 5$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Which function has derivative $3x^2$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$x^3$",
+              "correct": true
+            },
+            {
+              "label": "$6x$",
+              "misconception": "differentiated-instead",
+              "feedback": "That's the derivative of $3x^2$. We want the function whose derivative is $3x^2$."
+            },
+            {
+              "label": "$3x^3$",
+              "misconception": "forgot-to-divide",
+              "feedback": "$(3x^3)' = 9x^2$. Raise the power, then divide by the new exponent: $\\frac{3x^3}{3} = x^3$."
+            }
+          ]
+        },
+        "narration": "Raise the exponent by one and divide by the new exponent: $\\frac{3x^3}{3} = x^3$. Check: $(x^3)' = 3x^2$. That's the [[reverse-power-rule|power rule run backwards]].",
+        "builds_on": [
+          "140.3.2.power"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Now the rest: which function has derivative $4x - 5$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2x^2 - 5x$",
+              "correct": true
+            },
+            {
+              "label": "$4x^2 - 5x$",
+              "misconception": "forgot-to-divide",
+              "feedback": "$(4x^2)' = 8x$. Divide by the new exponent: $\\frac{4x^2}{2} = 2x^2$."
+            },
+            {
+              "label": "$2x^2 - 5$",
+              "misconception": "constant-stays",
+              "feedback": "The constant 5 isn't its own antiderivative: $(5x)' = 5$, so $-5$ comes from $-5x$."
+            }
+          ]
+        },
+        "narration": "$\\frac{4x^2}{2} = 2x^2$, and a constant like $-5$ comes from $-5x$. Together: $x^3 + 2x^2 - 5x$."
+      },
+      {
+        "ask": {
+          "prompt": "Why do we write $x^3 + 2x^2 - 5x + C$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "Any constant has derivative 0, so adding one gives another antiderivative",
+              "correct": true
+            },
+            {
+              "label": "$C$ is the value at $x = 0$, which you compute next",
+              "misconception": "c-is-computed",
+              "feedback": "Without more information there's no single value: every constant works. A known point pins it down later."
+            },
+            {
+              "label": "It's optional notation",
+              "misconception": "c-optional",
+              "feedback": "Leaving it out claims there's only one antiderivative, but $x^3 + 2x^2 - 5x + 7$ works just as well."
+            }
+          ]
+        },
+        "narration": "$(x^3 + 2x^2 - 5x + 7)' = 3x^2 + 4x - 5$ too. The antiderivatives form a whole family, one curve shifted up and down ([[antiderivative-plus-c|why the + C]]).",
+        "widget": {
+          "type": "accumulator",
+          "f": "square",
+          "a": 0,
+          "b": 2,
+          "prompt": "Sweep x: the area under x² grows like x³/3, whose slope is x²."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "With $F(x) = x^3 + 2x^2 - 5x + C$, what is $F(2) - F(1)$?",
+          "format": "number",
+          "answer": 8,
+          "tolerance": 0.001,
+          "hint": "$F(2) = 6 + C$ and $F(1) = -2 + C$."
+        },
+        "narration": "$(6 + C) - (-2 + C) = 8$. The $C$ cancels, so differences of an antiderivative don't depend on which family member you pick. That's why definite integrals work."
+      }
+    ],
+    "summary": "$\\int(3x^2 + 4x - 5)\\,dx = x^3 + 2x^2 - 5x + C$: raise each power, divide by the new exponent, and add $C$. Differences like $F(2) - F(1) = $ **8** don't depend on $C$.",
+    "claims": [
+      {
+        "sympy": "integrate(3*x**2 + 4*x - 5, x)",
+        "equals": "x**3 + 2*x**2 - 5*x"
+      },
+      {
+        "sympy": "(x**3 + 2*x**2 - 5*x).subs(x, 2) - (x**3 + 2*x**2 - 5*x).subs(x, 1)",
+        "equals": "8"
+      }
+    ]
+  },
+  {
+    "id": "learn-antiderivative-basic",
+    "subtopic": "140.6.1.basic",
+    "title": "Reading the derivative table backwards",
+    "problem": "Find the antiderivatives of $f(x) = \\cos x + e^{2x}$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "Which function has derivative $\\cos x$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\sin x$",
+              "correct": true
+            },
+            {
+              "label": "$-\\sin x$",
+              "misconception": "sign-backwards",
+              "feedback": "$(-\\sin x)' = -\\cos x$. Since $(\\sin x)' = \\cos x$, the answer is $\\sin x$."
+            },
+            {
+              "label": "$\\frac{\\cos^2 x}{2}$",
+              "misconception": "power-rule-on-trig",
+              "feedback": "$\\cos x$ isn't a power of $x$. Read the derivative table backwards instead."
+            }
+          ]
+        },
+        "narration": "$(\\sin x)' = \\cos x$, so $\\int\\cos x\\,dx = \\sin x + C$. (And $\\int\\sin x\\,dx = -\\cos x + C$: [[basic-antiderivatives|the minus sign comes along]].)",
+        "builds_on": [
+          "140.4.1.trig"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Which function has derivative $e^{2x}$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\frac{1}{2}e^{2x}$",
+              "correct": true
+            },
+            {
+              "label": "$2e^{2x}$",
+              "misconception": "multiplied-by-k",
+              "feedback": "$(2e^{2x})' = 4e^{2x}$. Differentiating $e^{2x}$ brings out a 2, so divide by 2 to cancel it."
+            },
+            {
+              "label": "$\\frac{e^{2x + 1}}{2x + 1}$",
+              "misconception": "power-rule-on-exp",
+              "feedback": "$e^{2x}$ isn't $x$ to a power, so the power rule doesn't apply."
+            }
+          ]
+        },
+        "narration": "$(e^{2x})' = 2e^{2x}$ by the chain rule, so to get plain $e^{2x}$ you need $\\frac{1}{2}e^{2x}$. Undoing the chain rule means dividing by the inside's coefficient.",
+        "builds_on": [
+          "140.4.1.exp-log"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Check $\\sin x + \\frac{1}{2}e^{2x}$ by differentiating. What do you get?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$\\cos x + e^{2x}$",
+              "correct": true
+            },
+            {
+              "label": "$\\cos x + \\frac{1}{2}e^{2x}$",
+              "misconception": "forgot-chain",
+              "feedback": "The chain rule brings out a 2 from $e^{2x}$, which cancels the $\\frac{1}{2}$."
+            },
+            {
+              "label": "$-\\cos x + e^{2x}$",
+              "misconception": "sign-backwards",
+              "feedback": "$(\\sin x)' = +\\cos x$."
+            }
+          ]
+        },
+        "narration": "Back to $f(x)$ exactly, so $\\int(\\cos x + e^{2x})\\,dx = \\sin x + \\frac{1}{2}e^{2x} + C$. Differentiating your answer is the quickest check there is.",
+        "widget": {
+          "type": "accumulator",
+          "f": "cos",
+          "prompt": "Sweep x: the area under cos x traces sin x."
+        }
+      }
+    ],
+    "summary": "Read the table backwards and undo the chain rule: $\\int(\\cos x + e^{2x})\\,dx = $ **sin x + ½e^{2x} + C**. Check by differentiating.",
+    "claims": [
+      {
+        "sympy": "integrate(cos(x) + exp(2*x), x)",
+        "equals": "sin(x) + exp(2*x)/2"
+      },
+      {
+        "sympy": "diff(sin(x) + exp(2*x)/2, x)",
+        "equals": "cos(x) + exp(2*x)"
+      }
+    ]
+  },
+  {
+    "id": "learn-ivp",
+    "subtopic": "140.6.2.ivp",
+    "title": "Picking one curve from the family",
+    "problem": "Find $f$ if $f'(x) = 6x^2 - 2$ and $f(1) = 5$. Then find $f(2)$.",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is the general antiderivative of $6x^2 - 2$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$2x^3 - 2x + C$",
+              "correct": true
+            },
+            {
+              "label": "$6x^3 - 2x + C$",
+              "misconception": "forgot-to-divide",
+              "feedback": "$(6x^3)' = 18x^2$. Divide by the new exponent: $\\frac{6x^3}{3} = 2x^3$."
+            },
+            {
+              "label": "$12x + C$",
+              "misconception": "differentiated-instead",
+              "feedback": "That's the derivative of $6x^2 - 2$, not its antiderivative."
+            }
+          ]
+        },
+        "narration": "$f(x) = 2x^3 - 2x + C$: a whole family of curves, all the same shape.",
+        "builds_on": [
+          "140.6.1.power"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "Use $f(1) = 5$. What is $C$?",
+          "format": "number",
+          "answer": 5,
+          "tolerance": 0.001,
+          "hint": "$2(1)^3 - 2(1) + C = 5$"
+        },
+        "narration": "$2 - 2 + C = 5$, so $C = 5$ and $f(x) = 2x^3 - 2x + 5$. The known value picks one curve out of the family.",
+        "widget": {
+          "type": "accumulator",
+          "f": "cos",
+          "mode": "shift",
+          "prompt": "Shift the family up and down: only one member passes through a given point."
+        }
+      },
+      {
+        "ask": {
+          "prompt": "What is $f(2)$?",
+          "format": "number",
+          "answer": 17,
+          "tolerance": 0.001
+        },
+        "narration": "$2(8) - 4 + 5 = 17$."
+      },
+      {
+        "ask": {
+          "prompt": "What did the condition $f(1) = 5$ do?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "It picked one function out of the $+ C$ family",
+              "correct": true
+            },
+            {
+              "label": "It checked that the derivative was right",
+              "misconception": "condition-is-check",
+              "feedback": "The derivative was given. The value fixes the constant that integrating can't determine."
+            },
+            {
+              "label": "It gave the slope at $x = 1$",
+              "misconception": "value-vs-slope",
+              "feedback": "$f(1) = 5$ is a height on the graph. The slope is $f'(1) = 4$."
+            }
+          ]
+        },
+        "narration": "That's an [[initial-value-problem|initial-value problem]]: a derivative plus one known value pins down the function completely."
+      }
+    ],
+    "summary": "$f(x) = 2x^3 - 2x + C$, and $f(1) = 5$ gives $C = 5$, so $f(2) = $ **17**.",
+    "claims": [
+      {
+        "sympy": "integrate(6*x**2 - 2, x)",
+        "equals": "2*x**3 - 2*x"
+      },
+      {
+        "sympy": "(2*x**3 - 2*x + 5).subs(x, 2)",
+        "equals": "17"
+      },
+      {
+        "sympy": "diff(2*x**3 - 2*x, x).subs(x, 1)",
+        "equals": "4"
+      }
+    ]
+  },
+  {
+    "id": "learn-motion",
+    "subtopic": "140.6.2.motion",
+    "title": "Tracking a ball from its acceleration",
+    "problem": "A ball is thrown straight up at 15 m/s from 2 m above the ground. Gravity gives $a(t) = -9.8$ m/s². Where is it after 1 second, and when is it highest?",
+    "steps": [
+      {
+        "ask": {
+          "prompt": "What is the velocity $v(t)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$v(t) = 15 - 9.8t$",
+              "correct": true
+            },
+            {
+              "label": "$v(t) = -9.8t$",
+              "misconception": "forgot-v0",
+              "feedback": "Integrating gives a constant too, and here it's the starting velocity, 15 m/s."
+            },
+            {
+              "label": "$v(t) = 15 - 4.9t^2$",
+              "misconception": "integrated-twice",
+              "feedback": "That integrates the acceleration twice. Velocity needs one integration."
+            }
+          ]
+        },
+        "narration": "$v(t) = \\int -9.8\\,dt = -9.8t + C$, and $v(0) = 15$ gives $C = 15$. It's an [[initial-value-problem|initial-value problem]].",
+        "builds_on": [
+          "140.6.2.ivp"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is $v(1)$, in m/s?",
+          "format": "number",
+          "answer": 5.2,
+          "tolerance": 0.01
+        },
+        "narration": "$15 - 9.8 = 5.2$ m/s: still rising, but more slowly."
+      },
+      {
+        "ask": {
+          "prompt": "Integrate again. What is the height $s(t)$?",
+          "format": "choice",
+          "options": [
+            {
+              "label": "$s(t) = 2 + 15t - 4.9t^2$",
+              "correct": true
+            },
+            {
+              "label": "$s(t) = 15t - 4.9t^2$",
+              "misconception": "forgot-s0",
+              "feedback": "The second constant is the starting height, 2 m."
+            },
+            {
+              "label": "$s(t) = 2 + 15t - 9.8t^2$",
+              "misconception": "forgot-to-divide",
+              "feedback": "$\\int 9.8t\\,dt = 4.9t^2$: raise the power and divide by 2."
+            }
+          ]
+        },
+        "narration": "$s(t) = 15t - 4.9t^2 + C$, and $s(0) = 2$ gives $C = 2$. Two integrations, two constants, two starting values.",
+        "builds_on": [
+          "140.4.4.higher"
+        ]
+      },
+      {
+        "ask": {
+          "prompt": "What is $s(1)$, in metres?",
+          "format": "number",
+          "answer": 12.1,
+          "tolerance": 0.01
+        },
+        "narration": "$2 + 15 - 4.9 = 12.1$ m."
+      },
+      {
+        "ask": {
+          "prompt": "When is the ball highest? (Seconds, to 2 decimal places.)",
+          "format": "number",
+          "answer": 1.53,
+          "tolerance": 0.01,
+          "hint": "At the top the ball stops rising: $v(t) = 0$."
+        },
+        "narration": "$15 - 9.8t = 0$ at $t = \\frac{15}{9.8} \\approx 1.53$ s. The highest point is where the velocity, the derivative of height, is zero."
+      }
+    ],
+    "summary": "$v(t) = 15 - 9.8t$ and $s(t) = 2 + 15t - 4.9t^2$, so after 1 s the ball is at **12.1 m**, and it peaks at about **1.53 s**.",
+    "claims": [
+      {
+        "sympy": "15 + integrate(Rational(-49, 5), (t, 0, t))",
+        "equals": "15 - 49*t/5"
+      },
+      {
+        "sympy": "(2 + 15*t - Rational(49, 10)*t**2).subs(t, 1)",
+        "equals": "121/10"
+      },
+      {
+        "sympy": "Rational(15, 1)/Rational(49, 5)",
+        "approx": 1.5306,
+        "tol": 0.0001
+      }
+    ]
   }
 ];
