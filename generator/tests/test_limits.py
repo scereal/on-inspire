@@ -107,7 +107,11 @@ class LimitsTest(unittest.TestCase):
             ok, why, sol, _ = validate(FW, p, 5, None)
             self.assertTrue(ok, why)
             self.assertAlmostEqual(sol.steps[2].answer, p["c"])
-            self.assertFalse(by_misconception(sol.steps[1], "bounds-dont-meet").correct)
+            for name in ("bounds-dont-meet", "lower-bound-too-high", "bounds-too-tight"):
+                opt = by_misconception(sol.steps[1], name)
+                if opt is not None:
+                    self.assertFalse(opt.correct, name)      # rotated distractors are always wrong when offered
+            self.assertIsNotNone(by_misconception(sol.steps[1], "bounds-too-tight"))
             f = lim.squeeze_function(p)
             point = sp.oo if p["family"] == "inf" else 0
             self.assertEqual(sp.limit(f, x, point), p["c"])

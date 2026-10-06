@@ -125,6 +125,8 @@ class Applications(Framework):
         "forgot-endpoints": "Left out the endpoints. On a closed interval the extremes can sit at the ends.",
         "outside-point": "Included a critical point outside the interval.",
         "forgot-critical": "Checked only the endpoints and missed the critical points inside.",
+        "sign-slip": "Slipped a sign when differentiating.",
+        "shift-sign": "Used x + a instead of x − a for the distance from the tangent point.",
         "sign-backwards": "Read the sign of f′ backwards: f is increasing where f′ > 0.",
         "one-critical-point": "Used only one critical point; f′ changes sign at both.",
         "second-derivative-backwards": "Flipped the second-derivative test: f″ < 0 means a peak (local max).",
@@ -216,9 +218,12 @@ class Applications(Framework):
             top = sp.sqrt(Lad**2 - foot**2)
             dy = -foot * rate / top
             relation = "2x\\frac{dx}{dt} + 2y\\frac{dy}{dt} = 0"
+            # a same-shape sign slip is always offered, so the right relation isn't findable by being the longest
+            other = [("forgot-chain-in-t", "$2x + 2y = 0$", "no-chain", "$x$ and $y$ both change with time, so each term picks up its own rate: $(x^2)' = 2x\\frac{dx}{dt}$."),
+                     ("constant-not-zero", f"$2x\\frac{{dx}}{{dt}} + 2y\\frac{{dy}}{{dt}} = {2 * Lad}$", "const", f"The ladder's length doesn't change, so ${Lad**2}$ has rate 0.")][(foot + s) % 2]
             d_step = self._choice(f"Differentiate $x^2 + y^2 = {Lad**2}$ with respect to time $t$:", f"${relation}$", "right", [
-                ("forgot-chain-in-t", "$2x + 2y = 0$", "no-chain", "$x$ and $y$ both change with time, so each term picks up its own rate: $(x^2)' = 2x\\frac{dx}{dt}$."),
-                ("constant-not-zero", f"$2x\\frac{{dx}}{{dt}} + 2y\\frac{{dy}}{{dt}} = {2 * Lad}$", "const", f"The ladder's length doesn't change, so ${Lad**2}$ has rate 0."),
+                ("sign-slip", "$2x\\frac{dx}{dt} - 2y\\frac{dy}{dt} = 0$", "minus", "$x^2$ and $y^2$ are added, so their rates add too: no minus sign appears."),
+                other,
             ])
             mean = self._choice("What does the sign of $\\frac{dy}{dt}$ tell you?", f"The top slides down at {dec(-dy)} m/s", "down", [
                 ("sign-ignored", f"The top slides up at {dec(-dy)} m/s", "up", "A negative rate means $y$ is decreasing: the top is moving down the wall."),
@@ -249,13 +254,15 @@ class Applications(Framework):
         else:
             w, h, dw, dh = p["w"], p["h"], sp.Rational(p["dw"]), sp.Rational(p["dh"])
             dA = dw * h + w * dh
+            other = [("product-of-rates", "$\\frac{dA}{dt} = \\frac{dw}{dt}\\cdot\\frac{dh}{dt}$", "product", "The product rule has two terms: each side's rate times the other side."),
+                     ("sum-of-rates", "$\\frac{dA}{dt} = \\frac{dw}{dt} + \\frac{dh}{dt}$", "sum", "Rates of a product don't add. The product rule gives $w'h + wh'$.")][(w + h) % 2]
             d_step = self._choice("Differentiate $A = wh$ with respect to $t$:", "$\\frac{dA}{dt} = \\frac{dw}{dt}h + w\\frac{dh}{dt}$", "right", [
-                ("product-of-rates", "$\\frac{dA}{dt} = \\frac{dw}{dt}\\cdot\\frac{dh}{dt}$", "product", "The product rule has two terms: each side's rate times the other side."),
-                ("sum-of-rates", "$\\frac{dA}{dt} = \\frac{dw}{dt} + \\frac{dh}{dt}$", "sum", "Rates of a product don't add. The product rule gives $w'h + wh'$."),
+                ("sign-slip", "$\\frac{dA}{dt} = \\frac{dw}{dt}h - w\\frac{dh}{dt}$", "minus", "The product rule adds its two terms; the minus sign belongs to the quotient rule."),
+                other,
             ])
             mean = self._choice("What are the units of $\\frac{dA}{dt}$?", "cm² per second", "cm2/s", [
                 ("units-wrong", "cm per second", "cm/s", "Area is in cm², so its rate is cm² per second."),
-                ("units-wrong", "cm²", "cm2", "A rate needs \"per second\": cm² per second."),
+                ("units-wrong", "cm³ per second", "cm3/s", "Area is in cm², so its rate is cm² per second."),
             ])
             steps = [d_step, mean,
                      Step(f"How fast is the area changing when $w = {w}$ cm and $h = {h}$ cm?", "number", float(dA), tolerance=0.01,
@@ -281,9 +288,11 @@ class Applications(Framework):
         over = fppa < 0
         name = {"sqrt": "\\sqrt{x}", "cbrt": "\\sqrt[3]{x}", "recip": "\\frac{1}{x}", "square": "x^2", "ln": "\\ln x"}[p["func"]]
         xv = a + d
+        other = [("forgot-shift", f"$L(x) = {L(fa)} + {L(fpa)}x$".replace("+ -", "- "), "no-shift", f"The slope multiplies the distance from the tangent point, $x - {a}$, not $x$ itself."),
+                 ("forgot-base", f"$L(x) = {L(fpa)}(x - {a})$", "no-base", f"Start from the known value $f({a}) = {L(fa)}$, then add the change.")][int(a) % 2]
         line = self._choice(f"What is the tangent line $L(x)$ at $x = {a}$?", f"$L(x) = {L(fa)} + {L(fpa)}(x - {a})$".replace("+ -", "- "), "right", [
-            ("forgot-shift", f"$L(x) = {L(fa)} + {L(fpa)}x$".replace("+ -", "- "), "no-shift", f"The slope multiplies the distance from the tangent point, $x - {a}$, not $x$ itself."),
-            ("forgot-base", f"$L(x) = {L(fpa)}(x - {a})$", "no-base", f"Start from the known value $f({a}) = {L(fa)}$, then add the change."),
+            ("shift-sign", f"$L(x) = {L(fa)} + {L(fpa)}(x + {a})$".replace("+ -", "- "), "shift-sign", f"Measure from the tangent point: the distance is $x - {a}$, not $x + {a}$."),
+            other,
         ])
         bend = self._choice(f"Is ${dec(est)}$ an overestimate or an underestimate of the true value?",
                             "An overestimate" if over else "An underestimate", "over" if over else "under", [

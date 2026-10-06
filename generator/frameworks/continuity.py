@@ -122,7 +122,7 @@ class Continuity(Framework):
     # Level 1 ----------------------------------------------------------------------------
     def _condition_step(self, a):
         return Step(f"What has to be true for $f$ to be continuous at $x = {a}$?", "choice", "limits", options=[
-            Option(f"The limit as $x \\to {a}$ exists and equals $f({a})$", correct=True, value="limits"),
+            Option([f"The limit equals $f({a})$", f"The limit as $x \\to {a}$ exists and equals $f({a})$"][abs(a) % 2], correct=True, value="limits"),
             Option("The slopes on each side match", misconception="slopes-must-match", value="slopes",
                    feedback="Matching slopes is the extra condition for a derivative. Continuity only needs the graph to meet itself with no gap."),
             Option(f"$f({a})$ just has to be defined", misconception="defined-is-enough", value="defined",

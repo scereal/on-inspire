@@ -67,7 +67,8 @@ class ElementaryDerivativesTest(unittest.TestCase):
         self.assertTrue(ok, why)
         self.assertAlmostEqual(sol.steps[1].answer, 4)
         self.assertEqual(correct(sol.steps[2]).value, "1/4")
-        self.assertFalse(by_misconception(sol.steps[2], "wrong-point").correct)
+        opt = by_misconception(sol.steps[2], "wrong-point")
+        self.assertTrue(opt is None or not opt.correct)
 
     def test_level3_rejects_a_equal_to_b(self):
         ok, _, _, _ = validate(FW, {"p": 1, "q": -2, "a": 1}, 3, None)          # f(1) = 0? no: 1 + 1 − 2 = 0 ≠ 1
@@ -94,8 +95,9 @@ class ElementaryDerivativesTest(unittest.TestCase):
             self.assertEqual(curve.subs({x: p["px"], y: p["py"]}), 0)
             slope = sp.idiff(curve, y, x).subs({x: p["px"], y: p["py"]})
             self.assertAlmostEqual(sol.steps[2].answer, float(slope))
-            slip = by_misconception(sol.steps[0], "forgot-chain-on-y") or by_misconception(sol.steps[0], "treated-y-as-x")
-            self.assertFalse(slip.correct)
+            for name in ("forgot-chain-on-y", "treated-y-as-x", "chain-dropped-outer", "dropped-x-factor", "extra-chain-on-x"):
+                slip = by_misconception(sol.steps[0], name)
+                self.assertTrue(slip is None or not slip.correct, name)
 
     def test_level5_rejects_points_off_the_curve(self):
         ok, _, _, _ = validate(FW, {"family": "circle", "r": 5, "px": 3, "py": 3}, 5, None)
@@ -106,7 +108,8 @@ class ElementaryDerivativesTest(unittest.TestCase):
         ok, why, sol, _ = validate(FW, {"family": "power", "a": 1, "b": 2, "c": 0}, 6, None)   # y = x^(x² + 2x)
         self.assertTrue(ok, why)
         self.assertAlmostEqual(sol.steps[2].answer, 3)
-        self.assertFalse(by_misconception(sol.steps[1], "forgot-y").correct)
+        opt = by_misconception(sol.steps[1], "forgot-y")
+        self.assertTrue(opt is None or not opt.correct)
 
     def test_level6_product_family_matches_sympy(self):
         p = {"family": "quotient", "a": 2, "b": 1, "c": 1}
@@ -164,6 +167,13 @@ class ElementaryDerivativesTest(unittest.TestCase):
     def test_steps_never_fall_to_a_coin_flip(self):
         self.assertFalse(validate(FW, {"family": "product", "a": 1, "b": 1, "c": 1}, 6, None)[0])
         self.assertFalse(validate(FW, {"a": 1, "b": 0, "c": 2, "d": 1, "t0": 1}, 7, None)[0])
+
+    def test_rotated_mistakes_still_appear_in_the_bank(self):
+        problems, _ = built()
+        names = lambda level, step: {o.get("misconception") for p in problems[level] for o in p["steps"][step]["options"]}
+        self.assertIn("wrong-point", names(3, 2))
+        self.assertIn("forgot-y", names(6, 1))
+        self.assertIn("forgot-chain-on-y", names(5, 0))
 
     def test_no_sign_glitches_in_text(self):
         problems, _ = built()

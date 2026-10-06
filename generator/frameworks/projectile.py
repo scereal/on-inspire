@@ -3,6 +3,8 @@
 Level 1: horizontal launch from height h, find vx.     Level 2: ground launch with fixed vy, find vx.
 Level 3: fixed speed, find the lower of two angles.    Level 4: fixed vx, find vy to clear a wall.
 """
+import zlib
+import json as _json
 import math
 
 from generator.core.framework import Framework, Level, NoSolution, Option, Solution, Step
@@ -73,6 +75,11 @@ def derived(p, level, g):
         return {"vy": round1((p["H"] + 0.5 * g * tw**2) / tw)}
     return {}
 
+
+
+def variant(p, n=2):
+    """A stable choice among n phrasings, so the right answer's length doesn't give it away."""
+    return zlib.crc32(_json.dumps(p, sort_keys=True, default=str).encode()) % n
 
 class Projectile(Framework):
     id = "projectile"
@@ -186,11 +193,11 @@ class Projectile(Framework):
             self._slider(f"Set the horizontal speed so {label} lands on the target.", vx, 40 if vx < 35 else 110, "m/s", "vx",
                          f"vₓ = d / t = {num(d)} / {t:.2f} ≈ {vx} m/s."),
             Step(f"A second, heavier object is dropped straight down from the same height at the same moment. Which hits the ground first?",
-                 "choice", "They land at the same time", options=[
-                     Option("They land at the same time", correct=True, value="same"),
-                     Option(f"The dropped one", misconception="speed-changes-fall-time",
+                 "choice", ["Together", "They land at exactly the same moment"][variant(p)], options=[
+                     Option(["Together", "They land at exactly the same moment"][variant(p)], correct=True, value="same"),
+                     Option(f"The dropped one lands first", misconception="speed-changes-fall-time",
                             feedback="Moving sideways doesn't slow the fall: both start with zero vertical speed.", value="dropped"),
-                     Option("The heavier one", misconception="heavier-falls-faster",
+                     Option("The heavier one lands first", misconception="heavier-falls-faster",
                             feedback="Without air resistance, every object falls with the same acceleration g.", value="heavier"),
                  ]),
         ]
@@ -211,11 +218,11 @@ class Projectile(Framework):
             self._slider(f"Set the horizontal speed so {label} lands on the target.", vx, 40, "m/s", "vx",
                          f"vₓ = d / t = {num(d)} / {t:.2f} ≈ {vx} m/s."),
             Step("If you throw with twice the horizontal speed (same upward speed), what happens to the flight time?",
-                 "choice", "It stays the same", options=[
-                     Option("It stays the same", correct=True, value="same"),
-                     Option("It doubles", misconception="speed-changes-fall-time",
+                 "choice", ["Same as before", "It stays exactly the same"][variant(p)], options=[
+                     Option(["Same as before", "It stays exactly the same"][variant(p)], correct=True, value="same"),
+                     Option("It doubles too", misconception="speed-changes-fall-time",
                             feedback="Flight time depends only on the vertical motion. It lands twice as far, in the same time.", value="doubles"),
-                     Option("It halves", misconception="speed-changes-fall-time",
+                     Option("It is cut in half", misconception="speed-changes-fall-time",
                             feedback="Going faster sideways doesn't make it fall sooner.", value="halves"),
                  ]),
         ]

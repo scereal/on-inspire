@@ -171,6 +171,7 @@ class Limits(Framework):
         "blamed-wrong-factor": "Blamed the factor that behaves well; the trouble is the oscillating one.",
         "oscillation-has-limit": "Assumed an oscillating function settles down. sin and cos of something growing never do.",
         "bounds-dont-meet": "Used bounds that are true but approach different values, so they squeeze nothing.",
+        "bounds-too-tight": "Chose bounds that the function actually escapes.",
         "lower-bound-too-high": "Picked a lower bound the function actually dips below.",
         "constant-terms": "Divided the constant terms. Far out, the highest powers dominate.",
         "top-grows-so-infinity": "Saw the top grow and concluded infinity, forgetting the bottom grows too.",
@@ -251,7 +252,8 @@ class Limits(Framework):
                  explain=f"From both sides the values crowd in on ${num(L)}$, so $\\lim_{{x\\to {a}}} f(x) = {num(L)}$."),
             Step(f"At $x = {a}$ itself, $f$ is $\\frac{{0}}{{0}}$: undefined. Does that stop the limit from existing?", "choice",
                  "No", options=[
-                     Option("No: a limit only uses the values near the point, never at it", correct=True, value="no"),
+                     Option(["No: it only uses values near the point", "No: a limit only uses the values near the point, never at it"][(p["k"] + p["a"]) % 2],
+                            correct=True, value="no"),
                      Option("Yes: with no value at the point, there's no limit", misconception="limit-needs-value", value="yes",
                             feedback="A limit asks where $f(x)$ is heading as $x$ gets close, not what happens at the point. The table shows a clear destination."),
                      Option("The limit is 0, because the top is 0 there", misconception="top-is-zero", value="zero",
@@ -302,11 +304,12 @@ class Limits(Framework):
             exist.append(Option(f"No: the graph has a hole at $x = {a}$", misconception="hole-means-no-limit", value="dne",
                                 feedback="A hole doesn't matter: both one-sided limits exist and agree."))
         else:
-            exist = [Option("No: the one-sided limits disagree", correct=True, value="dne")]
+            exist = [Option(["No: the sides disagree", "No: the left-hand and right-hand limits disagree"][(p["m1"] + p["b1"] + a) % 2],
+                            correct=True, value="dne")]
             if fa is not None:
-                exist.append(Option(f"Yes, it's ${num(fa)}$", misconception="limit-is-value", value=f"yes:{fa}",
+                exist.append(Option(f"Yes, it's ${num(fa)}$, the value at $x = {a}$", misconception="limit-is-value", value=f"yes:{fa}",
                                     feedback=f"$f({a}) = {num(fa)}$ is a value, not a limit. The two sides head to different heights."))
-            exist.append(Option(f"Yes, it's ${num(sp.Rational(left + right, 2))}$", misconception="average-of-sides",
+            exist.append(Option(f"Yes, it's ${num(sp.Rational(left + right, 2))}$, halfway", misconception="average-of-sides",
                                 value=f"yes:{sp.Rational(left + right, 2)}",
                                 feedback="Averaging doesn't help: the two-sided limit exists only when both sides agree."))
         steps = [
@@ -410,9 +413,23 @@ class Limits(Framework):
         cs = "" if c == 0 else f"{c} "
         lo = f"{c} - {size}" if c else f"-{size}"
         hi = f"{c} + {size}" if c else size
+        if p["family"] == "zero":
+            n1 = p["n"] + 1
+            tight = f"|x|^{{{n1}}}" if n1 % 2 else f"x^{{{n1}}}"
+        else:
+            tight = "\\frac{1}{x^2}"
+        bound_wrongs = [
+            Option(f"${c - 1} \\le f(x) \\le {c + 1}$", misconception="bounds-dont-meet", value="loose",
+                   feedback=f"True near ${where}$, but the bounds stay 2 apart. A squeeze needs bounds that approach the same value."),
+            Option(f"${c} \\le f(x) \\le {hi}$", misconception="lower-bound-too-high", value="high",
+                   feedback=f"${wild}$ goes negative too, so $f(x)$ dips below ${c}$. The lower bound has to mirror the upper one."),
+        ][(k + c) % 2]
+        too_tight = Option((f"${c} - {tight} \\le f(x) \\le {c} + {tight}$" if c else f"$-{tight} \\le f(x) \\le {tight}$"),
+                           misconception="bounds-too-tight", value="tight2",
+                           feedback=f"Those bounds are too tight: ${wild}$ reaches $\\pm 1$, so $f(x)$ strays up to ${size}$ from ${c}$, beyond ${tight}$.")
         steps = [
             Step(f"Why can't you just take the limit of each piece and combine them?", "choice", "osc", options=[
-                Option(f"${wild}$ has no limit: it keeps oscillating", correct=True, value="osc"),
+                Option([f"${wild}$ never settles", f"${wild}$ has no limit: it keeps oscillating forever"][(k + c) % 2], correct=True, value="osc"),
                 Option(f"${tame}$ has no limit as $x \\to {where}$", misconception="blamed-wrong-factor", value="tame",
                        feedback=f"${tame}$ behaves perfectly: it goes to 0. The problem is the other piece."),
                 Option(f"Nothing stops you: ${wild}$ settles to 0", misconception="oscillation-has-limit", value="settles",
@@ -420,10 +437,7 @@ class Limits(Framework):
             ]),
             Step("Which pair of bounds squeezes $f(x)$ to a limit?", "choice", "tight", options=[
                 Option(f"${lo} \\le f(x) \\le {hi}$", correct=True, value="tight"),
-                Option(f"${c - 1} \\le f(x) \\le {c + 1}$", misconception="bounds-dont-meet", value="loose",
-                       feedback=f"True near ${where}$, but the bounds stay 2 apart. A squeeze needs bounds that approach the same value."),
-                Option(f"${c} \\le f(x) \\le {hi}$", misconception="lower-bound-too-high", value="high",
-                       feedback=f"${wild}$ goes negative too, so $f(x)$ dips below ${c}$. The lower bound has to mirror the upper one."),
+                too_tight, bound_wrongs,
             ]),
             Step("Both bounds approach the same value. What is the limit?", "number", float(c), tolerance=0.01,
                  explain=f"Squeezed between ${lo}$ and ${hi}$, both heading to ${c}$, $f(x) \\to {c}$."),

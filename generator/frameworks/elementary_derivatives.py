@@ -44,6 +44,11 @@ def same(a, b):
     return sp.simplify(sp.expand_log(a - b, force=True)) == 0
 
 
+def rotate_list(items, k):
+    k %= len(items)
+    return items[k:] + items[:k]
+
+
 def pick(right, candidates, n=2):
     """Keep up to n (misconception, expression) candidates that differ from the answer and from each other."""
     kept = []
@@ -130,6 +135,11 @@ FEEDBACK = {
     "arcsin-no-chain": "The chain rule multiplies by the derivative of the inside, $mx$, and the inside is squared under the root.",
     "forgot-chain-on-y": "$y$ depends on $x$, so the chain rule applies: $(y^2)' = 2y\\,y'$, not $2y$.",
     "chain-dropped-outer": "The chain rule keeps the outer derivative too: $(y^2)' = 2y\\cdot y'$, not just $2y'$.",
+    "inverse-slope-sign": "f is increasing, so its inverse is increasing too: the reciprocal slope stays positive.",
+    "extra-chain-on-x": "x is the variable you're differentiating by: $(x^2)' = 2x$, with no $y'$ attached.",
+    "x-prime-as-y-prime": "In $(xy)' = x'y + xy'$, the derivative of $x$ itself is 1, so the first term is just $y$: $(xy)' = y + x\\,y'$.",
+    "dropped-x-factor": "In $(xy)' = y + x\\,y'$, the $x$ stays as a factor of $y'$.",
+    "log-diff-sign-slip": "Check each term's sign: differentiate the log of y term by term, keeping the signs it has.",
     "treated-y-as-x": "$y$ changes with $x$, so its derivative is $y'$, not 1: $(xy)' = y + x\\,y'$, and every $y$-term picks up a factor $y'$.",
     "forgot-product-rule": "$xy$ is a product of two things that change with $x$: $(xy)' = y + x\\,y'$.",
     "implicit-sign-slip": "Moving the $x$-terms to the other side flips their sign.",
@@ -309,8 +319,10 @@ class ElementaryDerivatives(Framework):
             Step(f"What is $f'({a})$?", "number", float(fa), tolerance=0.01, explain=f"$f'(x) = 3x^2 + {pp}$, so $f'({a}) = {fa}$."),
             Step(f"What is $(f^{{-1}})'({b})$?", "choice", tex(1 / fa), options=[
                 Option(tex(sp.Rational(1, 1) / fa), correct=True, value=num(1 / fa)),
-                Option(tex(fa), misconception="forgot-to-flip", value=num(fa), feedback=FEEDBACK["forgot-to-flip"]),
-                Option(tex(sp.Rational(1, 1) / fb), misconception="wrong-point", value=num(1 / fb), feedback=FEEDBACK["wrong-point"]),
+                *[[Option(tex(fa), misconception="forgot-to-flip", value=num(fa), feedback=FEEDBACK["forgot-to-flip"]),
+                   Option(tex(sp.Rational(1, 1) / fb), misconception="wrong-point", value=num(1 / fb), feedback=FEEDBACK["wrong-point"]),
+                   Option(tex(sp.Rational(-1, 1) / fa), misconception="inverse-slope-sign", value=num(-1 / fa), feedback=FEEDBACK["inverse-slope-sign"])][i]
+                  for i in [(0, 1), (1, 2), (0, 2)][(a + pp) % 3]],   # rotate, so the answer isn't always the middle value
             ]),
         ]
         story = f"$f(x) = {L(f)}$ is always increasing, so it has an inverse $f^{{-1}}$."
@@ -355,16 +367,16 @@ class ElementaryDerivatives(Framework):
         slope = slope_expr.subs(point)
         if p["family"] == "circle":
             show = x**2 + y**2
-            cands = [("forgot-chain-on-y", 2 * x + 2 * y), ("chain-dropped-outer", 2 * x + 2 * yp)]
+            cands = [("extra-chain-on-x", 2 * x * yp + 2 * y * yp)] + rotate_list([("forgot-chain-on-y", 2 * x + 2 * y), ("chain-dropped-outer", 2 * x + 2 * yp)], px + py)   # one longer, one shorter
             rhs = sp.Integer(p["r"] ** 2)
         elif p["family"] == "hyperbola":
             show = x * y
-            cands = [("forgot-product-rule", x * yp), ("treated-y-as-x", y + x)]
+            cands = [("x-prime-as-y-prime", x * yp + y * yp)] + rotate_list([("dropped-x-factor", y + yp), ("forgot-product-rule", x * yp), ("treated-y-as-x", y + x)], px + py)
             rhs = sp.Integer(p["c"])
         else:
             show = x**2 + x * y + y**2
-            cands = [("forgot-product-rule", 2 * x + x * yp + 2 * y * yp), ("treated-y-as-x", 2 * x + y + x + 2 * y),
-                     ("chain-dropped-outer", 2 * x + y + x * yp + 2 * yp)]
+            cands = [("extra-chain-on-x", 2 * x * yp + y + x * yp + 2 * y * yp)] + rotate_list(
+                [("chain-dropped-outer", 2 * x + y + x * yp + 2 * yp), ("forgot-product-rule", 2 * x + x * yp + 2 * y * yp), ("treated-y-as-x", 2 * x + y + x + 2 * y)], px + py)
             rhs = show.subs(point)
         lw = pick(left, cands)
         d_step = Step("Differentiate both sides with respect to $x$. The left side becomes:", "choice", tex(left),
@@ -394,7 +406,8 @@ class ElementaryDerivatives(Framework):
             ln_y = q * sp.log(x)
             ln_cands = [("exponent-not-down", sp.log(x) ** q), ("log-of-exponent", sp.log(q) * sp.log(x))]
             ratio = sp.diff(ln_y, x)
-            d_cands = [("forgot-y", ratio), ("power-rule-on-variable-exponent", q * x ** (q - 1))]
+            slip = f * (sp.diff(q, x) * sp.log(x) - q / x)
+            d_cands = [("log-diff-sign-slip", slip)] + rotate_list([("forgot-y", ratio), ("power-rule-on-variable-exponent", q * x ** (q - 1))], a + b + c)
         else:
             sign = 1 if fam == "product" else -1
             ln_y = a * sp.log(x) + b * sp.log(x + 1) + sign * c * sp.log(x + 3)
@@ -402,7 +415,8 @@ class ElementaryDerivatives(Framework):
                         ("exponent-not-down", sp.log(x) ** a + sp.log(x + 1) ** b + sign * sp.log(x + 3) ** c)]
             ratio = sp.diff(ln_y, x)
             each = a * x ** (a - 1) * b * (x + 1) ** (b - 1) * (c * (x + 3) ** (c - 1)) ** sign
-            d_cands = [("forgot-y", ratio), ("differentiated-each-factor", each)]
+            slip = f * (sp.Integer(a) / x + sp.Integer(b) / (x + 1) - sign * sp.Integer(c) / (x + 3))
+            d_cands = [("log-diff-sign-slip", slip)] + rotate_list([("forgot-y", ratio), ("differentiated-each-factor", each)], a + b + c)
         right = f * ratio
         value = sp.nsimplify(right.subs(x, 1))
         if same(ratio.subs(x, 1), value) and fam != "power":
