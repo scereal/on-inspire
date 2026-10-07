@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borrowed Teaching Moves · on inspire</title>
+<meta name="description" content="Ten famous teaching moves from schools and maths creators, rebuilt as working demos, plus an analogy workbench.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of "exhibits"; on wide screens each exhibit splits into a live demo (left) and the teaching notes (right). */
+:root {
+  --paper: #eef1f6;      /* page ground: cool, faintly blue paper */
+  --card: #ffffff;       /* the demo stage */
+  --ink: #14213d;        /* text */
+  --muted: #55607a;      /* secondary text */
+  --rule: #cfd6e3;       /* hairlines and grid */
+  --marigold: #c98a0c;   /* accent: the "move" */
+  --teal: #12807f;       /* interactive things */
+  --rose: #c2415d;       /* the wrong idea / negatives */
+  --shade: rgba(18,128,127,0.12);
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Verdana", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f1729; --card: #16203a; --ink: #e6ebf3; --muted: #9aa6bf; --rule: #2a3656;
+  --marigold: #f2b33d; --teal: #4fc1b9; --rose: #ff7a93; --shade: rgba(79,193,185,0.16); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #0f1729; --card: #16203a; --ink: #e6ebf3; --muted: #9aa6bf; --rule: #2a3656;
+  --marigold: #f2b33d; --teal: #4fc1b9; --rose: #ff7a93; --shade: rgba(79,193,185,0.16); color-scheme: dark; }
+
+body { background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--body); padding-inline: max(16px, 4vw); padding-block: 2rem 4rem; }
+.wrap { max-width: 72rem; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.12; margin: 0; }
+h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; }
+[hidden] { display: none !important; }
+a { color: var(--teal); text-underline-offset: 0.18em; }
+.lede { max-width: 42rem; font-size: 1.15rem; color: var(--muted); margin-top: 1rem; }
+.lede strong { color: var(--ink); }
+button, input, select { font: inherit; color: inherit; }
+button { background: transparent; border: 1.5px solid var(--teal); color: var(--teal); border-radius: 999px; padding: 0.4rem 0.95rem; cursor: pointer; font-weight: 700; font-size: 0.92rem; }
+button:hover { background: var(--shade); }
+button.solid { background: var(--teal); color: var(--card); }
+button:disabled { opacity: 0.45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, .knob:focus-visible { outline: 3px solid var(--marigold); outline-offset: 2px; }
+input[type=range] { accent-color: var(--teal); width: 100%; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* index of exhibits */
+.index { display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem; margin: 2rem 0 0; padding: 0; list-style: none; }
+.index a { display: inline-block; text-decoration: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.9rem; background: var(--card); }
+.index a:hover { border-color: var(--marigold); }
+.index b { color: var(--marigold); font-family: var(--mono); font-weight: 500; margin-right: 0.35rem; }
+
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem 2rem; margin: 2.5rem 0 0; padding: 1.2rem 0; border-block: 1px solid var(--rule); }
+.how p { color: var(--muted); font-size: 0.97rem; }
+.how strong { color: var(--ink); display: block; font-family: var(--display); font-size: 1.02rem; margin-bottom: 0.2rem; }
+
+/* an exhibit */
+.exhibit { margin-top: 4rem; scroll-margin-top: 1rem; }
+.exhibit header { display: grid; gap: 0.35rem; margin-bottom: 1.2rem; }
+.move { color: var(--marigold); font-family: var(--display); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.move .n { font-family: var(--mono); font-weight: 500; margin-right: 0.5rem; }
+.source { color: var(--muted); font-size: 0.95rem; }
+.body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.5rem 2.5rem; align-items: start; }
+@media (max-width: 860px) { .body { grid-template-columns: minmax(0, 1fr); } }
+.stage { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 1rem; display: grid; gap: 0.8rem; min-width: 0; }
+.stage canvas, .stage svg { width: 100%; height: auto; display: block; touch-action: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; }
+.controls label { display: grid; gap: 0.15rem; flex: 1 1 12rem; font-size: 0.88rem; color: var(--muted); }
+.readout { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.9rem; color: var(--ink); min-height: 1.4em; }
+.notes { display: grid; gap: 1.1rem; min-width: 0; }
+.notes h3 { margin-bottom: 0.25rem; }
+.notes p, .notes li { font-size: 0.98rem; }
+.notes ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.35rem; }
+.analogy { display: grid; gap: 0.5rem; }
+.analogy div { border-left: 3px solid var(--teal); padding-left: 0.75rem; }
+.analogy em.breaks { color: var(--rose); font-style: normal; font-weight: 700; }
+.remix li::marker { color: var(--marigold); }
+
+/* demo-specific bits */
+.doors { display: grid; gap: 4px; }
+.door { aspect-ratio: 3 / 4; border-radius: 4px; border: 1.5px solid var(--rule); background: var(--paper); display: grid; place-items: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); padding: 0; min-width: 0; }
+.door.picked { border-color: var(--teal); background: var(--shade); color: var(--teal); }
+.door.open { background: transparent; border-style: dashed; opacity: 0.4; }
+.door.car { border-color: var(--marigold); color: var(--marigold); opacity: 1; }
+.bars { display: grid; gap: 0.35rem; }
+.bar { display: grid; grid-template-columns: 4.5rem 1fr 3.5rem; gap: 0.5rem; align-items: center; font-size: 0.88rem; }
+.bar .track { height: 0.7rem; background: var(--paper); border-radius: 999px; overflow: hidden; }
+.bar .fill { height: 100%; width: 0; background: var(--teal); transition: width 0.4s; }
+.bar.stay .fill { background: var(--rose); }
+.choices { display: grid; gap: 0.5rem; }
+.choices button { text-align: left; border-radius: 10px; font-weight: 400; color: var(--ink); border-color: var(--rule); }
+.choices button.on { border-color: var(--teal); background: var(--shade); }
+.verdict { padding: 0.7rem 0.9rem; border-radius: 10px; background: var(--paper); font-size: 0.97rem; }
+.verdict.good { border-left: 4px solid var(--teal); }
+.verdict.bad { border-left: 4px solid var(--rose); }
+.ladder { display: grid; gap: 0.7rem; }
+.rung { display: grid; gap: 0.35rem; padding: 0.7rem 0.8rem; border-radius: 10px; background: var(--paper); }
+.rung form { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.rung input { width: 6.5rem; padding: 0.35rem 0.6rem; border: 1.5px solid var(--rule); border-radius: 8px; background: var(--card); }
+.rung .ok { color: var(--teal); font-weight: 700; }
+.reactive { font-size: 1.15rem; line-height: 1.9; }
+.knob { color: var(--teal); font-family: var(--mono); font-weight: 500; border-bottom: 2px dashed var(--teal); cursor: ew-resize; user-select: none; padding: 0 0.1em; touch-action: none; }
+.result { color: var(--marigold); font-family: var(--mono); font-weight: 500; }
+
+/* analogy workbench */
+.bench { margin-top: 5rem; }
+.bench > p { max-width: 44rem; color: var(--muted); margin-top: 0.6rem; }
+.filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0; }
+.filters button { font-weight: 400; color: var(--ink); border-color: var(--rule); }
+.filters button[aria-pressed=true] { border-color: var(--marigold); color: var(--marigold); font-weight: 700; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1rem; }
+.acard { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 1rem 1.1rem; display: grid; gap: 0.6rem; align-content: start; }
+.acard h3 { font-size: 1.15rem; }
+.acard .tag { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.acard dl { margin: 0; display: grid; gap: 0.55rem; }
+.acard dt { font-weight: 700; font-size: 0.95rem; }
+.acard dd { margin: 0.1rem 0 0; font-size: 0.93rem; color: var(--muted); }
+.acard dd .breaks { color: var(--rose); font-weight: 700; }
+.acard .line { font-style: italic; border-top: 1px solid var(--rule); padding-top: 0.55rem; font-size: 0.95rem; }
+
+.craft { margin-top: 5rem; display: grid; gap: 1.2rem; }
+.craft ol { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.8rem; max-width: 46rem; }
+.craft li::marker { color: var(--marigold); font-family: var(--mono); }
+.craft li strong { font-family: var(--display); }
+footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.9rem; display: grid; gap: 0.5rem; }
+footer ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.25rem; }
+@media (prefers-reduced-motion: reduce) { .bar .fill { transition: none; } }
+.crumbs { font: 500 0.9rem var(--body); margin-bottom: 1.4rem; color: var(--muted); }
+.crumbs a { color: var(--muted); }
+.crumbs span { margin: 0 0.4rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">on inspire</a><span>›</span><a href="../">Cool math problems</a></nav>
+  <header>
+    <h1>Borrowed teaching moves</h1>
+    <p class="lede">Ten ideas from teachers, schools and creators who are famous for making hard maths feel obvious. Each one is rebuilt here as a small working demo, so you can feel <strong>the move</strong> behind it, then remix it into something of your own. Below them: a workbench of analogies, with the place each one breaks.</p>
+    <ul class="index" id="index"></ul>
+    <div class="how">
+      <p><strong>Steal the move, not the artwork</strong>Each exhibit names the transferable technique. The demos are fresh builds of the idea, credited and linked, so you study why it works rather than copy how it looks.</p>
+      <p><strong>Try it before reading</strong>Play with each demo first. Notice the moment it clicks for you. That moment is what the notes try to name.</p>
+      <p><strong>Then remix</strong>Every exhibit ends with prompts: the same move pointed at a different concept. Those are your raw material.</p>
+    </div>
+  </header>
+
+  <!-- 1. 3Blue1Brown: unroll the circle -->
+  <section class="exhibit" id="peel">
+    <header>
+      <p class="move"><span class="n">01</span>Turn the shape into one you already know</p>
+      <h2>Peel a circle into a triangle</h2>
+      <p class="source">After Grant Sanderson, <a href="https://www.3blue1brown.com/lessons/essence-of-calculus/" target="_blank" rel="noopener">3Blue1Brown, “The essence of calculus”</a></p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <canvas id="peel-canvas" width="720" height="330" aria-label="Rings of a circle unrolled into thin strips that stack into a triangle"></canvas>
+        <div class="controls"><label for="peel-n">Rings: <span id="peel-n-out" class="mono"></span><input id="peel-n" type="range" min="3" max="80" value="8"></label></div>
+        <p class="readout" id="peel-read"></p>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Nobody needs to be told the area formula. Slice the circle into rings, unroll each ring into a thin strip of length 2πr, and stack the strips by size. The strips make a staircase that becomes a triangle with base R and height 2πR, so the area is ½ · R · 2πR = πR². The derivative sneaks in for free: each new ring adds 2πr of area per unit of radius, so (πr²)′ = 2πr.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>Peeling an onion and laying the layers flat on a cutting board. <em class="breaks">Breaks:</em> onion layers have thickness that doesn't shrink to zero.</div>
+          <div>A roll of tape: the area of the roll is the area of the tape unwound. <em class="breaks">Breaks:</em> fine for area, but tape has a cardboard hole in the middle.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Which other formula hides a “layers” story? The sphere's volume, built from shells of area 4πr², is the 3D sequel.</li>
+          <li>Could a learner predict the triangle's height before seeing it?</li>
+          <li>What does the staircase's overshoot look like, and when is it a lesson about error?</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 3Blue1Brown: matrix as grid transformation -->
+  <section class="exhibit" id="grid">
+    <header>
+      <p class="move"><span class="n">02</span>Follow two arrows and everything else follows</p>
+      <h2>A matrix is where the grid goes</h2>
+      <p class="source">After Grant Sanderson, <a href="https://www.3blue1brown.com/topics/linear-algebra" target="_blank" rel="noopener">3Blue1Brown, “Essence of linear algebra”</a></p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <svg id="grid-svg" viewBox="-5 -5 10 10" aria-label="Drag the two arrow tips to transform the grid"></svg>
+        <p class="readout" id="grid-read"></p>
+        <div class="controls"><button type="button" id="grid-reset">Reset</button><button type="button" id="grid-shear">Shear</button><button type="button" id="grid-flip">Flip</button><button type="button" id="grid-squash">Squash to a line</button></div>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Drag the teal and gold arrow tips. Their landing spots are the two columns of the matrix, and the whole grid follows because gridlines stay parallel and evenly spaced. The determinant stops being a formula to memorise: it's how much the shaded unit square's area grew. It goes negative when the square gets flipped over, and hits zero when space is squashed flat.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>A matrix is a recipe that only says where two ingredients go; linearity cooks the rest. <em class="breaks">Breaks:</em> only for linear maps; a translation isn't in the recipe.</div>
+          <div>Stretching a printed grid on a sheet of rubber, pinned at the origin. <em class="breaks">Breaks:</em> rubber can bend lines; a linear map can't.</div>
+          <div>The determinant as an exchange rate for area: every square metre becomes |det| square metres.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Which vectors only get stretched, never turned? Let learners hunt for eigenvectors by dragging.</li>
+          <li>Show two transformations in a row. Why does order matter?</li>
+          <li>Turn “det = 0 means no inverse” into a puzzle: can you unsquash a line?</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Numberphile: Monty Hall with 100 doors -->
+  <section class="exhibit" id="doors">
+    <header>
+      <p class="move"><span class="n">03</span>Exaggerate the numbers until intuition wakes up</p>
+      <h2>Monty Hall, with a hundred doors</h2>
+      <p class="source">After Lisa Goldberg (UC Berkeley) on <a href="https://mathslinks.net/links/monty-hall-problem-numberphile" target="_blank" rel="noopener">Numberphile</a>, building on <a href="https://en.wikipedia.org/wiki/Monty_Hall_problem" target="_blank" rel="noopener">the classic puzzle</a></p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <div class="controls"><label for="doors-n">Doors <select id="doors-n"><option value="3">3 doors</option><option value="100" selected>100 doors</option></select></label></div>
+        <div class="doors" id="doors-grid"></div>
+        <p class="readout" id="doors-read"></p>
+        <div class="controls"><button type="button" id="doors-stay" disabled>Stay</button><button type="button" id="doors-switch" disabled>Switch</button><button type="button" id="doors-again">New game</button><button type="button" class="solid" id="doors-sim">Play 1,000 games of each</button></div>
+        <div class="bars" id="doors-bars" hidden>
+          <div class="bar stay"><span>Stay</span><div class="track"><div class="fill"></div></div><span class="mono"></span></div>
+          <div class="bar switch"><span>Switch</span><div class="track"><div class="fill"></div></div><span class="mono"></span></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>With 3 doors, “two doors left, so it's 50–50” feels airtight. With 100, it collapses: you picked one door at 1%, the host, who knows where the car is, opens 98 goats, and one door is conspicuously left shut. Your door is still 1%. The other door carries the remaining 99%. Same logic, but the exaggeration makes the asymmetry impossible to miss.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>The host is a filter, not a coin: he hands you the best of 99 doors. <em class="breaks">Breaks:</em> if the host opens doors at random and happens to reveal goats, switching no longer helps. Knowledge is the whole point.</div>
+          <div>Your first pick versus “everything else, tidied up for you”.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Where else does pushing a parameter to an extreme reveal the answer? Try the birthday problem with 365 people, or the limit of a sum.</li>
+          <li>Let learners vote before the 1,000-game run, then compare their vote with the bars.</li>
+          <li>Build the “random host” version and ask why the answer changes.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Veritasium research: misconception first -->
+  <section class="exhibit" id="rope">
+    <header>
+      <p class="move"><span class="n">04</span>Let the wrong idea speak first, then break it</p>
+      <h2>A rope around the Earth</h2>
+      <p class="source">The move comes from Derek Muller's PhD research behind <a href="https://www.veritasium.com/publications" target="_blank" rel="noopener">Veritasium</a>: clear explanations left misconceptions intact, while videos that confronted them produced bigger gains. The puzzle itself is a classic.</p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <p>A rope is pulled tight around the equator (40,075 km). Add <b>1 metre</b> to its length and lift it evenly all the way round. How high off the ground does it float?</p>
+        <div class="controls"><label for="rope-guess">Your guess: <span id="rope-guess-out" class="mono"></span><input id="rope-guess" type="range" min="0" max="100" value="18"></label></div>
+        <div class="controls"><button type="button" class="solid" id="rope-reveal">Lock in my guess</button><button type="button" id="rope-ball" hidden>Now try a basketball</button><button type="button" id="rope-sun" hidden>Now try the Sun</button></div>
+        <canvas id="rope-canvas" width="720" height="220" aria-label="The gap between the ground and the lifted rope"></canvas>
+        <div class="verdict" id="rope-verdict" hidden></div>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Most people guess something microscopic: 1 metre spread over 40,000 km. The answer, 1/(2π) m ≈ 15.9 cm, is shocking, and the shock is the lesson. Circumference is 2πr, so adding 1 to the circumference adds 1/(2π) to the radius, whatever the planet. Muller found that a learner who first commits to the wrong idea and then sees it fail learns more than one handed a tidy explanation, even though the confrontation feels more confusing in the moment.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>Running a lap on the outside lane of a track: the extra distance depends only on how far out you are, not on how big the track is. <em class="breaks">Breaks:</em> tracks have straights; the rope is a pure circle.</div>
+          <div>Circumference and radius are on a fixed exchange rate of 2π, so no bank is too big for the rate.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Which concepts have a confident wrong intuition you could surface first? Heavier things fall faster; 0.999… is less than 1; multiplying always makes bigger.</li>
+          <li>Ask for confidence as well as a guess. A confident wrong answer is the most valuable one to break.</li>
+          <li>Follow the surprise with a second case (the basketball) so the rule, not the number, is what sticks.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Mazur: ConcepTest, vote/argue/revote -->
+  <section class="exhibit" id="vote">
+    <header>
+      <p class="move"><span class="n">05</span>Vote, argue, vote again</p>
+      <h2>Is 0.999… equal to 1?</h2>
+      <p class="source">After Eric Mazur's <a href="https://en.wikipedia.org/wiki/Peer_instruction" target="_blank" rel="noopener">Peer Instruction</a> and ConcepTests at Harvard</p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <p><b>Vote first.</b> Is 0.999… (nines forever) equal to 1?</p>
+        <div class="choices" id="vote-first">
+          <button type="button" data-v="less">No, it's a tiny bit less than 1</button>
+          <button type="button" data-v="equal">Yes, they're the same number</button>
+          <button type="button" data-v="limit">It gets closer and closer but never arrives</button>
+        </div>
+        <div id="vote-argue" hidden>
+          <p><b>Two classmates disagree.</b> Which argument convinces you more?</p>
+          <div class="choices" id="vote-args">
+            <button type="button" data-a="sam"><b>Sam:</b> “1/3 = 0.333…, and three of those make 0.999… But three thirds make 1. So they're equal.”</button>
+            <button type="button" data-a="alex"><b>Alex:</b> “However many nines you write, there's always a gap of 0.000…1 left. So it's always less.”</button>
+          </div>
+        </div>
+        <div id="vote-again" hidden>
+          <p><b>Vote again.</b></p>
+          <div class="choices" id="vote-second">
+            <button type="button" data-v="less">No, it's a tiny bit less than 1</button>
+            <button type="button" data-v="equal">Yes, they're the same number</button>
+            <button type="button" data-v="limit">It gets closer and closer but never arrives</button>
+          </div>
+        </div>
+        <div class="verdict" id="vote-verdict" hidden></div>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>A ConcepTest is a conceptual question with tempting wrong answers. Learners commit, then argue with a neighbour before anyone gives the answer. Explaining your reasoning out loud exposes its weak joint. At Harvard, Mazur found this kind of interactive teaching roughly tripled gains on conceptual tests, and the learning lasted longer. Online, the “neighbour” can be a pair of written arguments, one sound and one subtly broken.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>“Infinitely many nines” isn't a process still running; it's a finished address on the number line. <em class="breaks">Breaks:</em> learners often hear “forever” as “not done yet”, which is exactly the misconception.</div>
+          <div>If two numbers differ, you can fit a third between them. Try to name a number between 0.999… and 1.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Write the broken argument first: it should be the one a smart learner would actually make.</li>
+          <li>Show the vote split before and after the argument, as a class would see it.</li>
+          <li>Other good ConcepTests: Is a square a rectangle? Can a function be continuous everywhere and smooth nowhere?</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Seeing Theory (Brown) -->
+  <section class="exhibit" id="flips">
+    <header>
+      <p class="move"><span class="n">06</span>Let learners make the data themselves</p>
+      <h2>Flip until the noise settles</h2>
+      <p class="source">After Daniel Kunin's <a href="https://seeing-theory.brown.edu" target="_blank" rel="noopener">Seeing Theory</a> (Brown University)</p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <canvas id="flip-canvas" width="720" height="260" aria-label="Running share of heads as coins are flipped"></canvas>
+        <div class="controls"><label for="flip-p">Chance of heads: <span id="flip-p-out" class="mono"></span><input id="flip-p" type="range" min="5" max="95" value="50"></label></div>
+        <div class="controls"><button type="button" id="flip-1">Flip 1</button><button type="button" id="flip-10">Flip 10</button><button type="button" class="solid" id="flip-100">Flip 100</button><button type="button" id="flip-1000">Flip 1,000</button><button type="button" id="flip-reset">Start over</button></div>
+        <p class="readout" id="flip-read"></p>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Seeing Theory was built on the idea that the real barrier in statistics isn't the maths but the missing mental image. Here, every flip is yours, so “probability” stops being a number on a page. Early on the line swings wildly. After hundreds of flips it calms down around the true chance: the law of large numbers, felt before it's stated.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>One person's opinion is noisy; a crowd's average is calm. <em class="breaks">Breaks:</em> only if the people are independent. A crowd that copies each other doesn't average out.</div>
+          <div>Footprints of a wobbly walker on a long beach: zoomed in they zigzag, zoomed out they make a straight line.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Ask for a prediction first: after 10 flips, how far from 50% could you be?</li>
+          <li>Hide the bias and let learners estimate it from their own flips, as a first taste of inference.</li>
+          <li>Show the gambler's fallacy: after 5 heads, does tails become “due”?</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. MIT Mathlets -->
+  <section class="exhibit" id="spring">
+    <header>
+      <p class="move"><span class="n">07</span>One slider, every representation linked</p>
+      <h2>One spring, three views</h2>
+      <p class="source">After Haynes Miller's <a href="https://oeit.mit.edu/gallery/projects/mathlets/index.html" target="_blank" rel="noopener">MIT Mathlets</a>, used in MIT's differential equations course (18.03) since 2002</p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <canvas id="spring-canvas" width="720" height="300" aria-label="A mass on a spring, its position over time, and the roots of its characteristic equation"></canvas>
+        <div class="controls"><label for="spring-b">Damping b: <span id="spring-b-out" class="mono"></span><input id="spring-b" type="range" min="0" max="60" value="8"></label></div>
+        <p class="readout" id="spring-read"></p>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>The equation x″ + b·x′ + 4x = 0 lives in three places at once: the bouncing mass, the graph of position over time, and the two roots of r² + br + 4 = 0 in the complex plane. The Mathlets link each representation to the same controls, so moving one slider teaches the connections. Complex roots mean oscillation; the roots colliding at b = 4 is exactly the moment the bouncing stops.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>A car's shock absorbers: too little damping and the car bounces down the road, too much and it sinks back slowly, critical damping settles it at once. <em class="breaks">Breaks:</em> real shocks are nonlinear; the model is a first approximation.</div>
+          <div>A door closer that is too loose slams and swings; too stiff, it takes forever.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>What other idea has three faces you could link: a sequence, its graph and its table?</li>
+          <li>Hide one view and ask learners to predict it from the other two.</li>
+          <li>For engineers: add a driving force and let resonance surprise them.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Proof without words -->
+  <section class="exhibit" id="odds">
+    <header>
+      <p class="move"><span class="n">08</span>A picture that is the proof</p>
+      <h2>Odd numbers build squares</h2>
+      <p class="source">A classic proof without words (collected in Roger Nelsen's <i>Proofs Without Words</i>, MAA), in the spirit of the visual proofs on <a href="https://www.youtube.com/@Mathologer" target="_blank" rel="noopener">Mathologer</a></p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <svg id="odds-svg" viewBox="0 0 100 100" aria-label="Square built from L-shaped layers of 1, 3, 5, 7 tiles"></svg>
+        <div class="controls"><label for="odds-n">Layers: <span id="odds-n-out" class="mono"></span><input id="odds-n" type="range" min="1" max="12" value="5"></label></div>
+        <p class="readout" id="odds-read"></p>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>1 + 3 + 5 + … + (2n − 1) = n² can be proved by induction, but this picture makes it obvious. Each odd number is an L-shaped frame that wraps the square beneath it into the next bigger square: going from n² to (n + 1)² adds 2n + 1 tiles. The algebra becomes a description of something you can see.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>Each odd number is a new corner bracket, like the next layer of tree rings, but square. <em class="breaks">Breaks:</em> rings are round; the corner shape is the whole point.</div>
+          <div>Induction is building the square layer by layer: if every layer fits, the tower stands.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Which other sums are secretly shapes? Triangle numbers and staircases, or the sum of cubes as a square.</li>
+          <li>Show the picture without the formula and ask learners to write the formula.</li>
+          <li>Where would a picture lie? Build a “proof” that looks right but isn't, like the missing-square puzzle.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Exeter problem ladder -->
+  <section class="exhibit" id="ladder">
+    <header>
+      <p class="move"><span class="n">09</span>No lecture: a ladder of problems that discovers the rule</p>
+      <h2>How many handshakes?</h2>
+      <p class="source">After the problem-based curriculum of <a href="https://exeter.edu/academics/departments/mathematics/" target="_blank" rel="noopener">Phillips Exeter Academy</a>: no textbook, just sequences of problems that work from cases to general rules around the Harkness table</p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <div class="ladder" id="ladder-box"></div>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Exeter's maths classes have no chapters. Students meet carefully ordered problems and re-discover the rules themselves, so each rung is easy given the one before. Nobody states n(n − 1)/2. By the last rung the learner has invented it, and remembers it because it's theirs.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>Each new arrival shakes hands with everyone already in the room, like a guest walking down a receiving line. <em class="breaks">Breaks:</em> nothing, which is why it's a good one: it maps to 0 + 1 + 2 + … + (n − 1).</div>
+          <div>Count every handshake twice (once from each hand), then halve: n(n − 1) ÷ 2.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Write a five-rung ladder for any formula you'd normally state. What is the smallest first step?</li>
+          <li>Plant a rung where the obvious pattern breaks, like points on a circle and regions: 1, 2, 4, 8, 16, then 31.</li>
+          <li>Let two learners' different methods meet, as at the Harkness table.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Explorable explanation -->
+  <section class="exhibit" id="reactive">
+    <header>
+      <p class="move"><span class="n">10</span>Put the knobs inside the sentence</p>
+      <h2>A sentence you can drag</h2>
+      <p class="source">After Bret Victor's <a href="https://en.wikipedia.org/wiki/Parable_of_the_Polygons" target="_blank" rel="noopener">explorable explanations</a> and Nicky Case and Vi Hart's <a href="https://ncase.me/polygons/" target="_blank" rel="noopener">Parable of the Polygons</a></p>
+    </header>
+    <div class="body">
+      <div class="stage">
+        <p class="reactive" id="reactive-text">If you save <span class="knob" tabindex="0" role="slider" id="k-save"></span> a month at <span class="knob" tabindex="0" role="slider" id="k-rate"></span> a year for <span class="knob" tabindex="0" role="slider" id="k-years"></span>, you'll have <span class="result" id="r-total"></span>. Only <span class="result" id="r-paid"></span> of that is money you put in; <span class="result" id="r-interest"></span> is interest earning interest.</p>
+        <p class="readout">Drag a dashed number sideways, or focus it and use the arrow keys.</p>
+        <canvas id="reactive-canvas" width="720" height="180" aria-label="Money saved versus interest over time"></canvas>
+      </div>
+      <div class="notes">
+        <div><h3>Why it works</h3><p>Victor's reactive documents put the parameters inside the prose, so reading and experimenting are the same act. Drag the years from 10 to 40 and watch the interest go from a sliver to most of the total. Exponential growth is felt as “it runs away from me”, which no formula conveys.</p></div>
+        <div class="analogy"><h3>Analogies to try</h3>
+          <div>A snowball rolling downhill picks up snow in proportion to its size. <em class="breaks">Breaks:</em> real snowballs hit trees; compounding at a fixed rate never stops.</div>
+          <div>Doubling time: at 7% a year your money doubles about every 10 years (the rule of 72), so 40 years is four doublings, not four times.</div>
+        </div>
+        <div><h3>Remix prompts</h3><ul class="remix">
+          <li>Which formula would come alive as a draggable sentence? Try the speed of a falling object, or the half-life of medicine in the blood.</li>
+          <li>Pair the sentence with a picture that responds to the same knobs.</li>
+          <li>Let learners find the knob setting that makes a claim true, like “interest is half the total”.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analogy workbench -->
+  <section class="bench" id="bench">
+    <h2>Analogy workbench</h2>
+    <p>Two or three analogies per idea, each with the place it breaks, plus a line you might write. An analogy you know the limits of is a tool; one you don't is a misconception waiting to happen. Filter by course.</p>
+    <div class="filters" id="bench-filters" role="group" aria-label="Filter by course"></div>
+    <div class="cards" id="bench-cards"></div>
+  </section>
+
+  <section class="craft">
+    <h2>The craft, in seven rules</h2>
+    <ol>
+      <li><strong>Concrete before abstract.</strong> Start with a thing a learner can picture (a rope, a door, a ring) and let the symbol arrive as a name for what they already see.</li>
+      <li><strong>Say which part maps to which.</strong> “The host is the filter; the 98 goats are what it removes.” An analogy with unstated mappings invites learners to map the wrong parts.</li>
+      <li><strong>Name where it breaks, out loud.</strong> Saying “the onion analogy fails because onion layers have thickness” turns a weakness into a lesson about limits.</li>
+      <li><strong>Prediction before explanation.</strong> Ask for a guess, ideally with confidence, before showing anything. The surprise does the teaching.</li>
+      <li><strong>Exaggerate the parameter.</strong> A hundred doors, a planet-sized rope, a million flips. Extremes make the structure impossible to miss.</li>
+      <li><strong>Mix analogies only when each carries a different part.</strong> The rubber sheet shows the grid moving; the exchange rate shows the area. Two analogies doing the same job just compete.</li>
+      <li><strong>Wordplay has to carry meaning.</strong> “The derivative is the slope you'd see if you zoomed in until the curve gave up” is memorable because the joke is the definition.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>Sources and originals (go and see them; they're better than any rebuild):</p>
+    <ul>
+      <li><a href="https://www.3blue1brown.com/lessons/essence-of-calculus/" target="_blank" rel="noopener">3Blue1Brown: The essence of calculus</a> and <a href="https://www.3blue1brown.com/topics/linear-algebra" target="_blank" rel="noopener">Essence of linear algebra</a></li>
+      <li><a href="https://mathslinks.net/links/monty-hall-problem-numberphile" target="_blank" rel="noopener">Numberphile: Monty Hall problem (Lisa Goldberg)</a></li>
+      <li><a href="https://www.veritasium.com/publications" target="_blank" rel="noopener">Veritasium publications</a>, including Derek Muller's thesis <i>Designing Effective Multimedia for Physics Education</i></li>
+      <li><a href="https://en.wikipedia.org/wiki/Peer_instruction" target="_blank" rel="noopener">Peer Instruction (Eric Mazur)</a></li>
+      <li><a href="https://seeing-theory.brown.edu" target="_blank" rel="noopener">Seeing Theory (Daniel Kunin, Brown University)</a></li>
+      <li><a href="https://oeit.mit.edu/gallery/projects/mathlets/index.html" target="_blank" rel="noopener">MIT Mathlets (Haynes Miller)</a></li>
+      <li><a href="https://exeter.edu/academics/departments/mathematics/" target="_blank" rel="noopener">Phillips Exeter Academy mathematics</a></li>
+      <li><a href="https://ncase.me/polygons/" target="_blank" rel="noopener">Parable of the Polygons (Nicky Case and Vi Hart)</a></li>
+    </ul>
+    <p>All demos here are original builds of the ideas, made for study.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const $ = (id) => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const svgEl = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.append(e); return e; };
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const redrawers = [];
+  const onTheme = (fn) => { redrawers.push(fn); };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => redrawers.forEach((f) => f()));
+  new MutationObserver(() => redrawers.forEach((f) => f())).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // index
+  const idx = $("index");
+  document.querySelectorAll(".exhibit").forEach((s, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="#${s.id}"><b>${String(i + 1).padStart(2, "0")}</b>${s.querySelector("h2").textContent}</a>`;
+    idx.append(li);
+  });
+  const lb = document.createElement("li"); lb.innerHTML = `<a href="#bench"><b>→</b>Analogy workbench</a>`; idx.append(lb);
+
+  // 1. Peel the circle ---------------------------------------------------------
+  (function () {
+    const c = $("peel-canvas"), g = c.getContext("2d"), s = $("peel-n");
+    const draw = () => {
+      const n = +s.value, W = c.width, H = c.height, R = 120;
+      g.clearRect(0, 0, W, H);
+      const cx = 150, cy = H / 2, dr = R / n;
+      for (let i = n - 1; i >= 0; i--) {
+        g.beginPath(); g.arc(cx, cy, (i + 1) * dr, 0, 2 * Math.PI);
+        g.fillStyle = i % 2 ? css("--shade") : css("--card"); g.fill();
+        g.strokeStyle = css("--teal"); g.lineWidth = 1; g.stroke();
+      }
+      // unrolled strips: x = radius position, height = circumference (scaled)
+      const x0 = 330, base = H - 30, scale = (H - 60) / (2 * Math.PI * R), wpx = 340 / R;
+      g.strokeStyle = css("--rule"); g.beginPath(); g.moveTo(x0, base); g.lineTo(x0 + R * wpx + 10, base); g.stroke();
+      for (let i = 0; i < n; i++) {
+        const r = (i + 1) * dr, h = 2 * Math.PI * r * scale;
+        g.fillStyle = i % 2 ? css("--shade") : css("--card");
+        g.fillRect(x0 + i * dr * wpx, base - h, dr * wpx, h);
+        g.strokeStyle = css("--teal"); g.strokeRect(x0 + i * dr * wpx, base - h, dr * wpx, h);
+      }
+      g.setLineDash([5, 5]); g.strokeStyle = css("--marigold"); g.lineWidth = 2;
+      g.beginPath(); g.moveTo(x0, base); g.lineTo(x0 + R * wpx, base - 2 * Math.PI * R * scale); g.lineTo(x0 + R * wpx, base); g.stroke(); g.setLineDash([]);
+      g.fillStyle = css("--muted"); g.font = `15px ${css("--body")}`;
+      g.fillText("base R", x0 + R * wpx / 2 - 20, base + 20);
+      g.save(); g.translate(x0 + R * wpx + 22, base - 80); g.rotate(-Math.PI / 2); g.fillText("height 2πR", 0, 0); g.restore();
+      const sum = Array.from({ length: n }, (_, i) => 2 * Math.PI * ((i + 1) * dr) * dr).reduce((a, b) => a + b, 0);
+      $("peel-n-out").textContent = n;
+      $("peel-read").textContent = `strips add up to ${(sum / (R * R)).toFixed(4)} R²   ·   triangle: ½ · R · 2πR = ${Math.PI.toFixed(4)} R²`;
+    };
+    s.addEventListener("input", draw); draw(); onTheme(draw);
+  })();
+
+  // 2. Matrix grid ----------------------------------------------------------------
+  (function () {
+    const svg = $("grid-svg");
+    let A = { i: [1, 0], j: [0, 1] };
+    const flipY = (p) => [p[0], -p[1]];
+    let drag = null;
+    const draw = () => {
+      svg.innerHTML = "";
+      const [a, c] = A.i, [b, d] = A.j;
+      const T = (x, y) => flipY([a * x + b * y, c * x + d * y]);
+      const g = svgEl("g", {}, svg);
+      for (let k = -6; k <= 6; k++) {
+        svgEl("line", { x1: -5, y1: -k, x2: 5, y2: -k, stroke: css("--rule"), "stroke-width": 0.02 }, g);
+        svgEl("line", { x1: k, y1: -5, x2: k, y2: 5, stroke: css("--rule"), "stroke-width": 0.02 }, g);
+      }
+      for (let k = -8; k <= 8; k++) {
+        const p1 = T(-8, k), p2 = T(8, k), q1 = T(k, -8), q2 = T(k, 8);
+        svgEl("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: css("--teal"), "stroke-width": k === 0 ? 0.05 : 0.025, opacity: 0.6 }, g);
+        svgEl("line", { x1: q1[0], y1: q1[1], x2: q2[0], y2: q2[1], stroke: css("--teal"), "stroke-width": k === 0 ? 0.05 : 0.025, opacity: 0.6 }, g);
+      }
+      const det = a * d - b * c;
+      const sq = [T(0, 0), T(1, 0), T(1, 1), T(0, 1)].map((p) => p.join(",")).join(" ");
+      svgEl("polygon", { points: sq, fill: det < 0 ? css("--rose") : css("--marigold"), opacity: 0.32 }, g);
+      const arrow = (v, color, key) => {
+        const e = flipY(v);
+        svgEl("line", { x1: 0, y1: 0, x2: e[0], y2: e[1], stroke: color, "stroke-width": 0.09, "stroke-linecap": "round" }, g);
+        const h = svgEl("circle", { cx: e[0], cy: e[1], r: 0.28, fill: color, stroke: css("--card"), "stroke-width": 0.06, style: "cursor:grab" }, g);
+        h.addEventListener("pointerdown", (ev) => { drag = key; svg.setPointerCapture(ev.pointerId); });
+      };
+      arrow(A.i, css("--teal"), "i"); arrow(A.j, css("--marigold"), "j");
+      $("grid-read").textContent = `matrix [[${a.toFixed(1)}, ${b.toFixed(1)}], [${c.toFixed(1)}, ${d.toFixed(1)}]]   ·   det = ${det.toFixed(2)}` +
+        (Math.abs(det) < 0.05 ? "  (space squashed flat: no way back)" : det < 0 ? "  (flipped over)" : `  (areas ×${det.toFixed(2)})`);
+    };
+    svg.addEventListener("pointermove", (ev) => {
+      if (!drag) return;
+      const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const snap = (v) => Math.round(v * 2) / 2;
+      A[drag] = [Math.max(-4.5, Math.min(4.5, snap(p.x))), Math.max(-4.5, Math.min(4.5, snap(-p.y)))];
+      draw();
+    });
+    svg.addEventListener("pointerup", () => { drag = null; });
+    const set = (i, j) => { A = { i, j }; draw(); };
+    $("grid-reset").onclick = () => set([1, 0], [0, 1]);
+    $("grid-shear").onclick = () => set([1, 0], [1, 1]);
+    $("grid-flip").onclick = () => set([0, 1], [1, 0]);
+    $("grid-squash").onclick = () => set([1, 0.5], [2, 1]);
+    draw(); onTheme(draw);
+  })();
+
+  // 3. Monty Hall -------------------------------------------------------------
+  (function () {
+    const grid = $("doors-grid"), sel = $("doors-n"), read = $("doors-read");
+    let N, car, pick, left, state;
+    const render = () => {
+      grid.style.gridTemplateColumns = `repeat(${N === 3 ? 3 : 10}, minmax(0, 1fr))`;
+      grid.innerHTML = "";
+      for (let k = 0; k < N; k++) {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "door"; b.textContent = N === 3 ? `Door ${k + 1}` : k + 1;
+        if (k === pick) b.classList.add("picked");
+        if (state !== "pick" && k !== pick && k !== left) b.classList.add("open");
+        if (state === "done" && k === car) { b.classList.add("car"); b.textContent = "car"; }
+        b.disabled = state !== "pick";
+        b.onclick = () => choose(k);
+        grid.append(b);
+      }
+      $("doors-stay").disabled = $("doors-switch").disabled = state !== "decide";
+    };
+    const reset = () => { N = +sel.value; car = Math.floor(Math.random() * N); pick = -1; left = -1; state = "pick"; read.textContent = `Pick a door. One of the ${N} hides a car.`; render(); };
+    const choose = (k) => {
+      pick = k;
+      left = k === car ? (k + 1 + Math.floor(Math.random() * (N - 1))) % N : car;
+      state = "decide";
+      read.textContent = N === 3 ? `The host opens a goat door. Door ${pick + 1} (yours) or door ${left + 1}?` : `The host, who knows where the car is, opens ${N - 2} goat doors. Your door ${pick + 1}, or door ${left + 1}?`;
+      render();
+    };
+    const finish = (sw) => { const final = sw ? left : pick; state = "done"; read.textContent = final === car ? `You ${sw ? "switched" : "stayed"} and won the car.` : `You ${sw ? "switched" : "stayed"} and got a goat. The car was behind door ${car + 1}.`; render(); };
+    $("doors-stay").onclick = () => finish(false);
+    $("doors-switch").onclick = () => finish(true);
+    $("doors-again").onclick = reset;
+    sel.onchange = reset;
+    $("doors-sim").onclick = () => {
+      const n = +sel.value; let stay = 0, sw = 0;
+      for (let t = 0; t < 1000; t++) { const c = Math.floor(Math.random() * n), p = Math.floor(Math.random() * n); if (p === c) stay++; else sw++; }
+      const bars = $("doors-bars"); bars.hidden = false;
+      const [bs, bw] = bars.querySelectorAll(".bar");
+      bs.querySelector(".fill").style.width = `${stay / 10}%`; bs.querySelector(".mono").textContent = `${stay}`;
+      bw.querySelector(".fill").style.width = `${sw / 10}%`; bw.querySelector(".mono").textContent = `${sw}`;
+    };
+    reset();
+  })();
+
+  // 4. Rope around the Earth ---------------------------------------------------
+  (function () {
+    const s = $("rope-guess"), c = $("rope-canvas"), g = c.getContext("2d");
+    const metres = (v) => 0.0001 * Math.pow(10, v / 100 * 9);   // 0.1 mm .. 100 km on a log scale
+    const fmt = (m) => m < 0.001 ? `${(m * 1000).toFixed(2)} mm` : m < 1 ? `${(m * 100).toFixed(m < 0.01 ? 2 : 1)} cm` : m < 1000 ? `${m.toFixed(1)} m` : `${(m / 1000).toFixed(1)} km`;
+    let revealed = false, body = "Earth";
+    const gap = 1 / (2 * Math.PI);
+    const draw = () => {
+      const W = c.width, H = c.height, ground = H - 40;
+      g.clearRect(0, 0, W, H);
+      g.fillStyle = css("--shade"); g.fillRect(0, ground, W, 40);
+      g.strokeStyle = css("--teal"); g.lineWidth = 2; g.beginPath(); g.moveTo(0, ground); g.lineTo(W, ground); g.stroke();
+      const pxPerM = 150 / 0.4;   // 0.4 m spans 150 px
+      const yOf = (m) => ground - Math.min(m * pxPerM, ground - 12);
+      g.fillStyle = css("--muted"); g.font = `14px ${css("--body")}`;
+      g.fillText(`ground (${body})`, 12, ground + 26);
+      const guess = metres(+s.value);
+      g.setLineDash([6, 6]); g.strokeStyle = css("--rose"); g.lineWidth = 2;
+      g.beginPath(); g.moveTo(0, yOf(guess)); g.lineTo(W, yOf(guess)); g.stroke(); g.setLineDash([]);
+      g.fillStyle = css("--rose"); g.fillText(`your guess: ${fmt(guess)}${guess * pxPerM > ground - 12 ? " (off the chart)" : ""}`, W - 250, yOf(guess) - 8);
+      if (revealed) {
+        g.strokeStyle = css("--marigold"); g.lineWidth = 3; g.beginPath(); g.moveTo(0, yOf(gap)); g.lineTo(W, yOf(gap)); g.stroke();
+        g.fillStyle = css("--marigold"); g.fillText(`the rope: 1/(2π) m ≈ 15.9 cm`, 12, yOf(gap) - 8);
+        // a cat for scale
+        g.fillStyle = css("--ink"); g.font = `28px ${css("--body")}`; g.fillText("🐈", W / 2, ground - 4);
+      }
+    };
+    s.addEventListener("input", () => { $("rope-guess-out").textContent = fmt(metres(+s.value)); draw(); });
+    $("rope-guess-out").textContent = fmt(metres(+s.value));
+    $("rope-reveal").onclick = () => {
+      revealed = true; draw();
+      const v = $("rope-verdict"); v.hidden = false;
+      const guess = metres(+s.value), ratio = gap / guess;
+      v.className = "verdict " + (ratio > 0.5 && ratio < 2 ? "good" : "bad");
+      v.innerHTML = ratio > 0.5 && ratio < 2 ? `Close! Most people guess far smaller. A cat can walk under it.` :
+        `About <b>15.9 cm</b>, roughly ${ratio > 1 ? `${ratio >= 100 ? Math.round(ratio).toLocaleString() : ratio.toFixed(1)}× bigger` : `${(1 / ratio).toFixed(1)}× smaller`} than your guess. A cat could walk under it. Circumference = 2π × radius, so 1 extra metre of rope means 1/(2π) m of extra radius.`;
+      $("rope-ball").hidden = false;
+    };
+    $("rope-ball").onclick = () => { body = "basketball"; draw(); $("rope-verdict").innerHTML = "A rope tight round a basketball, plus 1 metre: the gap is <b>still 15.9 cm</b>. The size of the ball never enters the calculation."; $("rope-sun").hidden = false; };
+    $("rope-sun").onclick = () => { body = "the Sun"; draw(); $("rope-verdict").innerHTML = "Round the Sun (4.4 million km), plus 1 metre: <b>still 15.9 cm</b>. Extra radius = extra length ÷ 2π, whatever the size."; };
+    draw(); onTheme(draw);
+  })();
+
+  // 5. ConcepTest --------------------------------------------------------------
+  (function () {
+    let first = null;
+    const pick = (box, attr, fn) => box.querySelectorAll("button").forEach((b) => b.onclick = () => { box.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); fn(b.dataset[attr]); });
+    pick($("vote-first"), "v", (v) => { first = v; $("vote-argue").hidden = false; });
+    pick($("vote-args"), "a", () => { $("vote-again").hidden = false; });
+    pick($("vote-second"), "v", (v) => {
+      const verdict = $("vote-verdict"); verdict.hidden = false;
+      const right = v === "equal";
+      verdict.className = "verdict " + (right ? "good" : "bad");
+      verdict.innerHTML = (right ? "<b>Yes: they're the same number.</b> " : "<b>They're actually equal.</b> ") +
+        "Sam's argument is sound. Alex's breaks at “0.000…1”: there's no last digit to put a 1 after, so that number doesn't exist. Two different numbers always have a third between them, and nothing fits between 0.999… and 1." +
+        (first && first !== v ? ` You changed your vote (${first === "equal" ? "away from" : "from “" + ({ less: "a bit less", limit: "never arrives" })[first] + "” to"} the right answer). That change is the peer-instruction effect.` : "");
+    });
+  })();
+
+  // 6. Coin flips ---------------------------------------------------------------
+  (function () {
+    const c = $("flip-canvas"), g = c.getContext("2d"), ps = $("flip-p");
+    let flips = [], heads = 0;
+    const draw = () => {
+      const W = c.width, H = c.height, L = 46, R = W - 12, T = 12, B = H - 30;
+      const p = +ps.value / 100;
+      g.clearRect(0, 0, W, H);
+      g.strokeStyle = css("--rule"); g.lineWidth = 1;
+      [0, 0.25, 0.5, 0.75, 1].forEach((y) => { const yy = B - y * (B - T); g.beginPath(); g.moveTo(L, yy); g.lineTo(R, yy); g.stroke(); g.fillStyle = css("--muted"); g.font = `12px ${css("--mono")}`; g.fillText(`${y * 100}%`, 6, yy + 4); });
+      g.setLineDash([6, 5]); g.strokeStyle = css("--marigold"); g.lineWidth = 2; const py = B - p * (B - T); g.beginPath(); g.moveTo(L, py); g.lineTo(R, py); g.stroke(); g.setLineDash([]);
+      if (flips.length) {
+        const n = flips.length;
+        g.strokeStyle = css("--teal"); g.lineWidth = 2; g.beginPath();
+        let h = 0;
+        for (let k = 0; k < n; k++) { h += flips[k]; const x = L + (Math.log(k + 1) / Math.log(Math.max(n, 2))) * (R - L); const y = B - (h / (k + 1)) * (B - T); k ? g.lineTo(x, y) : g.moveTo(x, y); }
+        g.stroke();
+      }
+      g.fillStyle = css("--muted"); g.font = `12px ${css("--body")}`; g.fillText("flips (log scale) →", L, H - 10);
+      $("flip-p-out").textContent = `${ps.value}%`;
+      $("flip-read").textContent = flips.length ? `${flips.length.toLocaleString()} flips · ${heads.toLocaleString()} heads · ${(100 * heads / flips.length).toFixed(1)}% (true chance ${ps.value}%)` : "No flips yet. Start small.";
+    };
+    const flip = (k) => { const p = +ps.value / 100; for (let i = 0; i < k; i++) { const f = Math.random() < p ? 1 : 0; flips.push(f); heads += f; } draw(); };
+    [1, 10, 100, 1000].forEach((k) => $(`flip-${k}`).onclick = () => flip(k));
+    $("flip-reset").onclick = () => { flips = []; heads = 0; draw(); };
+    ps.addEventListener("input", () => { flips = []; heads = 0; draw(); });
+    draw(); onTheme(draw);
+  })();
+
+  // 7. Spring, three views ------------------------------------------------------
+  (function () {
+    const c = $("spring-canvas"), g = c.getContext("2d"), bs = $("spring-b");
+    const k = 4, x0 = 1;
+    let t0 = performance.now();
+    const solve = (b) => {
+      const disc = b * b - 4 * k;
+      if (disc < -1e-9) { const a = -b / 2, w = Math.sqrt(-disc) / 2; return { roots: [[a, w], [a, -w]], x: (t) => Math.exp(a * t) * (x0 * Math.cos(w * t) + (-a * x0 / w) * Math.sin(w * t)), kind: "underdamped: it oscillates" }; }
+      if (Math.abs(disc) <= 1e-9) { const r = -b / 2; return { roots: [[r, 0], [r, 0]], x: (t) => (x0 - r * x0 * t) * Math.exp(r * t), kind: "critically damped: fastest settle, no bounce" }; }
+      const r1 = (-b + Math.sqrt(disc)) / 2, r2 = (-b - Math.sqrt(disc)) / 2;
+      const c2 = (r1 * x0) / (r1 - r2), c1 = x0 - c2;
+      return { roots: [[r1, 0], [r2, 0]], x: (t) => c1 * Math.exp(r1 * t) + c2 * Math.exp(r2 * t), kind: "overdamped: it creeps back slowly" };
+    };
+    const frame = (now) => {
+      const b = +bs.value / 10, sol = solve(b), W = c.width, H = c.height;
+      g.clearRect(0, 0, W, H);
+      const t = ((now - t0) / 1000) % 8;
+      // view 1: mass on spring
+      const wallY = 30, mx = 70, restY = 150, amp = 70, y = restY + amp * sol.x(t);
+      g.strokeStyle = css("--muted"); g.lineWidth = 2; g.beginPath(); g.moveTo(30, wallY); g.lineTo(110, wallY); g.stroke();
+      g.strokeStyle = css("--teal"); g.beginPath(); g.moveTo(mx, wallY);
+      for (let i = 1; i <= 12; i++) g.lineTo(mx + (i % 2 ? 14 : -14), wallY + (y - 20 - wallY) * i / 12);
+      g.lineTo(mx, y - 20); g.stroke();
+      g.fillStyle = css("--marigold"); g.fillRect(mx - 22, y - 20, 44, 40);
+      // view 2: x(t)
+      const L = 160, R = 470, mid = 150, sc = 90;
+      g.strokeStyle = css("--rule"); g.lineWidth = 1; g.beginPath(); g.moveTo(L, mid); g.lineTo(R, mid); g.stroke();
+      g.strokeStyle = css("--teal"); g.lineWidth = 2; g.beginPath();
+      for (let i = 0; i <= 300; i++) { const tt = i / 300 * 8, xx = L + i / 300 * (R - L), yy = mid + sc * sol.x(tt); i ? g.lineTo(xx, yy) : g.moveTo(xx, yy); }
+      g.stroke();
+      g.fillStyle = css("--marigold"); g.beginPath(); g.arc(L + t / 8 * (R - L), mid + sc * sol.x(t), 5, 0, 2 * Math.PI); g.fill();
+      // view 3: roots in the complex plane
+      const cx = 600, cy = 150, s = 24;
+      g.strokeStyle = css("--rule"); g.beginPath(); g.moveTo(500, cy); g.lineTo(705, cy); g.moveTo(cx, 40); g.lineTo(cx, 260); g.stroke();
+      sol.roots.forEach(([re, im]) => { g.fillStyle = css("--rose"); g.beginPath(); g.arc(cx + Math.max(-4.2, re) * s, cy - im * s, 6, 0, 2 * Math.PI); g.fill(); });
+      g.fillStyle = css("--muted"); g.font = `13px ${css("--body")}`;
+      g.fillText("the mass", 40, 285); g.fillText("position over time", L, 285); g.fillText("roots of r² + br + 4", 520, 285);
+      $("spring-b-out").textContent = b.toFixed(1);
+      $("spring-read").textContent = `b = ${b.toFixed(1)} · ${sol.kind}` + (Math.abs(b - 4) < 0.05 ? " (the two roots have just collided)" : "");
+      if (!reduce) requestAnimationFrame(frame);
+    };
+    bs.addEventListener("input", () => { t0 = performance.now(); if (reduce) frame(performance.now()); });
+    requestAnimationFrame(frame);
+  })();
+
+  // 8. Odd numbers make squares --------------------------------------------------
+  (function () {
+    const svg = $("odds-svg"), s = $("odds-n");
+    const draw = () => {
+      const n = +s.value, cell = 96 / n;
+      svg.innerHTML = "";
+      for (let layer = 0; layer < n; layer++) {
+        const col = layer % 2 ? css("--marigold") : css("--teal");
+        for (let i = 0; i <= layer; i++) {
+          const cells = i === layer ? Array.from({ length: layer + 1 }, (_, j) => [layer, j]).concat(Array.from({ length: layer }, (_, j) => [j, layer])) : [];
+          cells.forEach(([x, y]) => svgEl("rect", { x: 2 + x * cell + 0.4, y: 98 - (y + 1) * cell + 0.4, width: cell - 0.8, height: cell - 0.8, rx: Math.min(1.5, cell / 6), fill: col, opacity: 0.35 + 0.5 * ((layer + 1) / n) }, svg));
+        }
+      }
+      const terms = Array.from({ length: n }, (_, i) => 2 * i + 1);
+      $("odds-n-out").textContent = n;
+      $("odds-read").textContent = `${terms.length > 6 ? terms.slice(0, 3).join(" + ") + " + … + " + terms[terms.length - 1] : terms.join(" + ")} = ${n * n} = ${n}²`;
+    };
+    s.addEventListener("input", draw); draw(); onTheme(draw);
+  })();
+
+  // 9. Exeter ladder -----------------------------------------------------------------
+  (function () {
+    const box = $("ladder-box");
+    const rungs = [
+      { q: "Three people meet and everyone shakes hands with everyone else once. How many handshakes?", a: 3, hint: "Name them A, B, C: AB, AC, BC." },
+      { q: "A fourth person walks in and shakes hands with everyone already there. How many handshakes now?", a: 6, hint: "The newcomer adds 3." },
+      { q: "And with 5 people?", a: 10, hint: "The fifth person adds 4 to the 6." },
+      { q: "With 10 people, how many handshakes? (Each person shakes 9 hands.)", a: 45, hint: "10 × 9 counts every handshake twice, once from each hand." },
+      { q: "With n people? Type the number for n = 100.", a: 4950, hint: "n(n − 1) ÷ 2. You've just invented the formula." },
+    ];
+    let at = 0;
+    const render = () => {
+      box.innerHTML = "";
+      rungs.slice(0, at + 1).forEach((r, i) => {
+        const div = document.createElement("div"); div.className = "rung";
+        div.innerHTML = `<p><b>${i + 1}.</b> ${r.q}</p>`;
+        if (i < at) { div.innerHTML += `<p class="ok">${r.a} ✓ ${r.hint}</p>`; }
+        else {
+          const f = document.createElement("form");
+          f.innerHTML = `<label class="mono" for="rung-${i}" style="position:absolute;left:-9999px">Answer</label><input id="rung-${i}" inputmode="numeric" autocomplete="off"><button type="submit">Check</button><span class="msg"></span>`;
+          f.onsubmit = (e) => { e.preventDefault(); const v = +f.querySelector("input").value; if (v === r.a) { at = Math.min(at + 1, rungs.length - 1); if (i === rungs.length - 1) { div.innerHTML += `<p class="ok">✓ ${r.hint}</p>`; f.remove(); } else render(); } else f.querySelector(".msg").textContent = `Not quite. ${r.hint}`; };
+          div.append(f);
+        }
+        box.append(div);
+      });
+    };
+    render();
+  })();
+
+  // 10. Reactive sentence ------------------------------------------------------------
+  (function () {
+    const knobs = { save: { v: 200, min: 25, max: 2000, step: 25, fmt: (v) => `$${v.toLocaleString()}` }, rate: { v: 6, min: 0, max: 12, step: 0.5, fmt: (v) => `${v}%` }, years: { v: 30, min: 1, max: 50, step: 1, fmt: (v) => `${v} years` } };
+    const c = $("reactive-canvas"), g = c.getContext("2d");
+    const compute = () => {
+      const m = knobs.save.v, r = knobs.rate.v / 100 / 12, n = knobs.years.v * 12;
+      let bal = 0, series = [];
+      for (let i = 1; i <= n; i++) { bal = bal * (1 + r) + m; if (i % 12 === 0) series.push([i / 12, bal, m * i]); }
+      return { bal, paid: m * n, series };
+    };
+    const money = (v) => `$${Math.round(v).toLocaleString()}`;
+    const render = () => {
+      for (const k in knobs) $(`k-${k}`).textContent = knobs[k].fmt(knobs[k].v);
+      for (const k in knobs) { const e = $(`k-${k}`); e.setAttribute("aria-valuenow", knobs[k].v); e.setAttribute("aria-valuemin", knobs[k].min); e.setAttribute("aria-valuemax", knobs[k].max); e.setAttribute("aria-label", k); }
+      const { bal, paid, series } = compute();
+      $("r-total").textContent = money(bal); $("r-paid").textContent = money(paid); $("r-interest").textContent = money(bal - paid);
+      const W = c.width, H = c.height, L = 10, R = W - 10, T = 10, B = H - 20, max = Math.max(bal, 1);
+      g.clearRect(0, 0, W, H);
+      const bw = (R - L) / series.length;
+      series.forEach(([yr, total, put], i) => {
+        const x = L + i * bw, hp = put / max * (B - T), ht = total / max * (B - T);
+        g.fillStyle = css("--marigold"); g.fillRect(x + 1, B - ht, Math.max(1, bw - 2), ht - hp);
+        g.fillStyle = css("--teal"); g.fillRect(x + 1, B - hp, Math.max(1, bw - 2), hp);
+      });
+      g.fillStyle = css("--muted"); g.font = `12px ${css("--body")}`; g.fillText("teal: money you put in · gold: interest", L, H - 4);
+    };
+    for (const k in knobs) {
+      const el = $(`k-${k}`), kn = knobs[k];
+      let startX = null, startV = null;
+      el.addEventListener("pointerdown", (e) => { startX = e.clientX; startV = kn.v; el.setPointerCapture(e.pointerId); });
+      el.addEventListener("pointermove", (e) => { if (startX === null) return; const steps = Math.round((e.clientX - startX) / 6); kn.v = Math.min(kn.max, Math.max(kn.min, +(startV + steps * kn.step).toFixed(2))); render(); });
+      el.addEventListener("pointerup", () => { startX = null; });
+      el.addEventListener("keydown", (e) => { const d = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0; if (d) { e.preventDefault(); kn.v = Math.min(kn.max, Math.max(kn.min, +(kn.v + d * kn.step).toFixed(2))); render(); } });
+    }
+    render(); onTheme(render);
+  })();
+
+  // Analogy workbench ------------------------------------------------------------------
+  const A = [
+    { c: "Calculus", t: "Limit", a: [["GPS arrival estimates", "The ETA keeps updating as you near the door; the limit is the time it's honing in on, even if you never stand still at the doorstep.", "an ETA can jump around; a limit has to settle."], ["A zoom lens on a hole", "Zoom in on the point where the formula breaks: the curve around it still points at one height.", "zooming suggests you eventually land on the point, but a limit never needs the value there."]], line: "A limit is where the road is heading, even if the bridge is out." },
+    { c: "Calculus", t: "Derivative", a: [["A speedometer", "It reads how fast you're going right now, not your average for the trip.", "the speedometer measures a physical rate; most derivatives don't have a dial."], ["Zoom until it's straight", "Zoom in on a smooth curve far enough and it looks like a line; the derivative is that line's slope.", "corners never straighten out, and that's exactly when the derivative fails to exist."]], line: "Zoom in until the curve gives up and admits it's a line." },
+    { c: "Calculus", t: "Integral", a: [["A water meter", "It adds up a flow rate over time into a total volume.", "it hides that the 'flow' can be negative, which subtracts."], ["Peeling and stacking", "Cut the shape into thin strips, then add up the strips.", "the strips must get thinner without limit; a fixed slicing gives only an estimate."]], line: "Integration is patience: add up infinitely many nearly-nothings." },
+    { c: "Calculus", t: "Chain rule", a: [["Gears in a train", "If gear B turns 3 times per turn of A, and C turns 2 per turn of B, then C turns 6 per turn of A: rates multiply.", "gears have fixed ratios; for a function the ratio changes from point to point."], ["Currency conversion", "Euros to dollars to yen: multiply the exchange rates.", "exchange rates don't depend on how much money you have; derivatives depend on where you are."]], line: "Rates of rates multiply, like gears in a gearbox." },
+    { c: "Calculus", t: "ε–δ", a: [["A game with a sceptic", "The sceptic names a tolerance; you answer with a window. If you can always answer, the limit holds.", "the game language can hide that δ may depend on ε."], ["Manufacturing tolerances", "A machinist promises parts within ε of spec if the input stays within δ.", "a factory has a fixed tolerance; the definition demands every tolerance, however tiny."]], line: "Name any tolerance; I'll name a window. That's all a limit promises." },
+    { c: "Functions", t: "Exponential growth", a: [["A rumour", "Each person who hears it tells two more, so the number who know doubles each round.", "rumours run out of people; pure exponentials never do."], ["Compound interest", "Interest earns interest.", "rates in real life change; the model assumes a fixed rate."]], line: "Linear adds; exponential multiplies, and multiplication runs away from you." },
+    { c: "Functions", t: "Logarithm", a: [["Counting zeros", "log₁₀ of a number is roughly how many digits it has, minus one: log of 1,000 is 3.", "it only counts exact powers neatly; log of 500 is about 2.7."], ["How many doublings?", "log₂ 1,000,000 ≈ 20: twenty doublings take 1 to a million.", "doublings are steps; the log fills in the in-between."]], line: "A logarithm asks how many times you had to multiply to get here." },
+    { c: "Fourier", t: "Fourier series", a: [["A chord of pure tones", "Any repeating sound is a mix of pure notes at whole-number multiples of a base pitch.", "real instruments aren't perfectly periodic, and the corners of a square wave ring forever (Gibbs)."], ["Mixing paint to match a colour", "Find how much of each pure ingredient you need.", "paint mixes subtractively; Fourier mixes add."]], line: "Every repeating wiggle is a choir of sines singing together." },
+    { c: "Linear algebra", t: "Eigenvector", a: [["A stretch that doesn't turn", "Push a door along its hinge line and it doesn't swing: that direction just gets scaled.", "some maps, like rotations, have no such real direction at all."], ["The grain of wood", "Directions where the material only stretches without shearing.", "wood grain has one direction; a matrix can have several or none."]], line: "An eigenvector is the arrow the transformation can't knock off course." },
+    { c: "Linear algebra", t: "Determinant", a: [["An exchange rate for area", "Every square metre becomes |det| square metres.", "it says nothing about shape: a square and a long sliver can have the same area."], ["Flipping a page", "A negative determinant means the plane got turned over, like reading a mirror image.", "in 3D, 'turning over' is subtler: it's handedness."]], line: "The determinant is the transformation's area tax, negative if it flips you over." },
+    { c: "Probability", t: "Expected value", a: [["The balancing point", "Put each outcome on a seesaw at its value, weighted by its probability: the expected value is where it balances.", "you may never actually get the expected value, like 3.5 on a die."], ["Long-run average pay", "What a game pays per play over thousands of plays.", "one-off decisions don't get the long run."]], line: "Expected value is where the seesaw of outcomes balances, even if no outcome sits there." },
+    { c: "Probability", t: "Bayes' theorem", a: [["A smoke alarm that cries wolf", "If alarms are sensitive but fires are rare, most alarms are false.", "it hides the arithmetic: you still need the base rate to compute."], ["Updating a weather forecast", "Start with yesterday's odds, then adjust with today's clouds.", "real forecasts combine many clues, not one."]], line: "A positive test means less than you think when the thing is rare." },
+    { c: "Proof", t: "Induction", a: [["Dominoes", "If the first falls and each knocks over the next, they all fall.", "dominoes are finite; induction covers infinitely many."], ["A ladder", "If you can reach the first rung, and from any rung reach the next, you can climb as high as you like.", "the ladder hides that the step must work from every rung, not just the ones you tried."]], line: "Prove the first step and the next step, and you've proved every step." },
+    { c: "Functions", t: "Complex numbers", a: [["Rotation", "Multiplying by i turns a point a quarter-turn about the origin; i² = −1 is two quarter-turns, which points backwards.", "rotation explains multiplication well and addition less vividly."], ["A second number line", "Real numbers live on one line; complex numbers add a perpendicular one.", "it suggests complex numbers are just pairs, missing the rotation magic."]], line: "i isn't imaginary; it's a quarter-turn." },
+  ];
+  const courses = ["All", ...new Set(A.map((x) => x.c))];
+  const fbox = $("bench-filters"), cards = $("bench-cards");
+  let current = "All";
+  const renderBench = () => {
+    fbox.innerHTML = "";
+    courses.forEach((c) => { const b = document.createElement("button"); b.type = "button"; b.textContent = c; b.setAttribute("aria-pressed", c === current); b.onclick = () => { current = c; renderBench(); }; fbox.append(b); });
+    cards.innerHTML = "";
+    A.filter((x) => current === "All" || x.c === current).forEach((x) => {
+      const d = document.createElement("article"); d.className = "acard";
+      d.innerHTML = `<span class="tag">${x.c}</span><h3>${x.t}</h3><dl>${x.a.map(([name, how, br]) => `<div><dt>${name}</dt><dd>${how} <span class="breaks">Breaks:</span> ${br}</dd></div>`).join("")}</dl><p class="line">“${x.line}”</p>`;
+      cards.append(d);
+    });
+  };
+  renderBench();
+})();
+</script>
+</body>
+</html>
