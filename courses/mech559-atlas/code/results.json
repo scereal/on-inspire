@@ -1,0 +1,261 @@
+{
+ "key": "fc7f2ea83d6a2323",
+ "results": {
+  "lib-minimize": {
+   "output": "True Optimization terminated successfully\nx* = [0.5 1. ]  f* = 1.25  g(x*) = -0.0"
+  },
+  "lib-constraints": {
+   "output": "SLSQP        [0.5 1. ]\ntrust-constr [0.5 1. ]\ntrust-constr [0.5 1. ]"
+  },
+  "lib-result": {
+   "output": "success: True | nit: 28 | nfev: 54\nx* = [1.5 0.5]  g(x*) = -0.0\nmultiplier mu = [1.]"
+  },
+  "lib-minimize-scalar": {
+   "output": "alpha* = 0.10831  (exact formula gives 146/1348 = 0.10831 )"
+  },
+  "lib-linprog": {
+   "output": "x* = [ 80. 160.]   max profit = 8000.0\nshadow prices (labour, land): [-10. -20.]"
+  },
+  "lib-roots": {
+   "output": "brentq: 1.4142135623731364\nroot: True [-0.71429 -0.14286]  (expected -5/7, -1/7)"
+  },
+  "lib-global": {
+   "output": "local  from 1.5: [0.96] 0.2941\nglobal (DE)    : [-1.036] -0.3054"
+  },
+  "lib-check-grad": {
+   "output": "check_grad: 1.3486991347635734e-07\nfinite differences: [ -2.1 -15.9]  analytic: [ -2.1 -15.9]"
+  },
+  "lib-qmc-lhs": {
+   "output": "[[4.3500e-01 1.2491e+01]\n [2.3400e-01 1.6797e+01]\n [2.0000e-03 1.4336e+01]\n [8.6700e-01 1.9030e+01]\n [7.6200e-01 1.1807e+01]]\none point per fifth in column 0: [0, 1, 2, 3, 4]"
+  },
+  "lib-linalg": {
+   "output": "eigenvalues: [0.7574 9.2426] -> positive definite\nnormal equations: [1.1667 0.5   ]  lstsq: [1.1667 0.5   ]\ncond(Z^T Z) = 8.55"
+  },
+  "lib-rbf": {
+   "output": "lam=    0.1  prediction= 1.2475   truth= 1.2475\nlam=   10.0  prediction= 1.2509   truth= 1.2475\nlam= 1000.0  prediction= 1.0039   truth= 1.2475"
+  },
+  "lib-sklearn-linear": {
+   "output": "normal equations: [4.9956 1.0176 1.9924]  sklearn: [4.9956 1.0176 1.9924]\nridge formula: [4.5743 1.4839 2.0184]  sklearn Ridge (fit_intercept=False): [4.5743 1.4839 2.0184]"
+  },
+  "lib-kfold": {
+   "output": "lambda=1e-06  CV RMSE=0.1210\nlambda=0.001  CV RMSE=0.1377\nlambda=0.1  CV RMSE=0.3425\nlambda=10  CV RMSE=0.5633"
+  },
+  "lib-mlp": {
+   "output": "converged in 120 iterations; training R^2 = 0.9581"
+  },
+  "lib-gpr": {
+   "output": "at a training point: mean 96.86, std 0.0000\nfar from the data:   mean 88.01, std 9.4223"
+  },
+  "e-ineq-sign": {
+   "symptom": null,
+   "bad_show": "x = [1. 2.],  g(x) = 2.5000,  success = True",
+   "good_show": "x = [0.5 1. ],  g(x) = -0.0000,  success = True"
+  },
+  "e-args-tuple": {
+   "symptom": "TypeError: <lambda>() takes 2 positional arguments but 3 were given",
+   "bad_show": null,
+   "good_show": "x = [1.]"
+  },
+  "e-objective-vector": {
+   "symptom": "ValueError: The user-provided objective function must return a scalar value.",
+   "bad_show": null,
+   "good_show": "x = [0.5]"
+  },
+  "e-bounds-format": {
+   "symptom": "TypeError: 'int' object is not iterable",
+   "bad_show": null,
+   "good_show": "x = [1. 1.]"
+  },
+  "e-method-ignores": {
+   "symptom": "RuntimeWarning: Method BFGS cannot handle bounds.",
+   "bad_show": "x = [-3.]",
+   "good_show": "x = [0.]"
+  },
+  "e-constraint-dict-typo": {
+   "symptom": "ValueError: Unknown constraint type 'inequality'.",
+   "bad_show": null,
+   "good_show": "x = [1.]"
+  },
+  "e-lambda-late-binding": {
+   "symptom": null,
+   "bad_show": "x = [-0. -0.  3.]",
+   "good_show": "x = [1. 2. 3.]"
+  },
+  "e-int-array": {
+   "symptom": null,
+   "bad_show": "x = [1 2]  dtype = int64",
+   "good_show": "x = [1.0001 2.    ]  dtype = float64"
+  },
+  "e-view-copy": {
+   "symptom": null,
+   "bad_show": "base = [0.1001 0.2   ]",
+   "good_show": "base = [0.1 0.2]"
+  },
+  "e-ignore-success": {
+   "symptom": null,
+   "bad_show": "success = False, message = 'Positive directional derivative for linesearch', x = [0.]",
+   "good_show": "success = False, message = 'Positive directional derivative for linesearch', x = [0.]"
+  },
+  "e-nan-domain": {
+   "symptom": null,
+   "bad_show": "x = [-1033.34], f = nan, success = False",
+   "good_show": "x = [0.], f = 0.09003162217660166, success = True"
+  },
+  "e-bad-scaling": {
+   "symptom": null,
+   "bad_show": "x = [1.99999258e-03 1.00000000e+08]",
+   "good_show": "x = [1.99999999e-03 2.99999999e+08]"
+  },
+  "e-wrong-jac": {
+   "symptom": null,
+   "bad_show": "x = [1.     1.8333], success = True",
+   "good_show": "x = [-0.  2.], success = True"
+  },
+  "e-linprog-max": {
+   "symptom": null,
+   "bad_show": "x = [0. 0.], fun = 0.0",
+   "good_show": "x = [ 80. 160.], fun = -8000.0"
+  },
+  "e-linprog-ge": {
+   "symptom": null,
+   "bad_show": "x = [0. 0.], x1+x2 = 0.0",
+   "good_show": "x = [2. 0.], x1+x2 = 2.0"
+  },
+  "e-linprog-bounds": {
+   "symptom": null,
+   "bad_show": "x = [0.]",
+   "good_show": "x = [-5.]"
+  },
+  "e-brentq-sign": {
+   "symptom": "ValueError: f(a) and f(b) must have different signs",
+   "bad_show": null,
+   "good_show": "root = 2.0"
+  },
+  "e-fsolve-silent": {
+   "symptom": "RuntimeWarning: The iteration is not making good progress, as measured by the improvement from the last ten iterations.",
+   "bad_show": "x = [-2.18114415e-12]",
+   "good_show": "x = None"
+  },
+  "e-solve-singular": {
+   "symptom": "LinAlgError: Singular matrix",
+   "bad_show": null,
+   "good_show": "x = [0.2 0.4]"
+  },
+  "e-inv-vs-solve": {
+   "symptom": null,
+   "bad_show": "max error = 12.6",
+   "good_show": "max error = 0.22"
+  },
+  "e-object-dtype": {
+   "symptom": "UFuncTypeError: Cannot cast ufunc 'solve1' input 0 from dtype('O') to dtype('float64') with casting rule 'same_kind'",
+   "bad_show": null,
+   "good_show": "A.dtype = float64"
+  },
+  "e-broadcast-residual": {
+   "symptom": null,
+   "bad_show": "rmse = 2.0",
+   "good_show": "rmse = 0.0"
+  },
+  "e-star-vs-at": {
+   "symptom": null,
+   "bad_show": "yhat = [[1.0, 0.0], [1.0, 0.5], [1.0, 1.0]]",
+   "good_show": "yhat = [1.0, 1.5, 2.0]"
+  },
+  "e-pandas-align": {
+   "symptom": null,
+   "bad_show": "err = [nan, nan, nan, nan, nan, nan]",
+   "good_show": "err = [0.0, 0.0, 0.0]"
+  },
+  "e-sk-1d": {
+   "symptom": "ValueError: Expected 2D array, got 1D array instead: array=[1. 2. 3.]. Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.",
+   "bad_show": null,
+   "good_show": "slope = 2.000"
+  },
+  "e-scale-leak": {
+   "symptom": null,
+   "bad_show": "scaled training data = [0.  0.5]",
+   "good_show": "scaled training data = [0. 1.]"
+  },
+  "e-ridge-intercept": {
+   "symptom": null,
+   "bad_show": "sklearn w = [0.     0.6923 1.4935],  formula = [4.5763 1.4721 2.0243]",
+   "good_show": "sklearn w = [4.5763 1.4721 2.0243],  formula = [4.5763 1.4721 2.0243]"
+  },
+  "e-mlp-convergence": {
+   "symptom": "ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.",
+   "bad_show": "iterations = 200, R^2 = -0.0393",
+   "good_show": "iterations = 13, R^2 = 1.0000"
+  },
+  "e-gpr-normalize": {
+   "symptom": null,
+   "bad_show": "prediction far from the data = 18.7  (data mean = 98.1)",
+   "good_show": "prediction far from the data = 99.5  (data mean = 98.1)"
+  },
+  "e-kfold-shuffle": {
+   "symptom": null,
+   "bad_show": "first validation fold = [0.0, 1.0]",
+   "good_show": "first validation fold = [2.0, 7.0]"
+  },
+  "e-rbf-epsilon": {
+   "symptom": null,
+   "bad_show": "same predictions for both epsilons: True",
+   "good_show": "same predictions for both epsilons: False"
+  },
+  "e-meshgrid-index": {
+   "symptom": null,
+   "bad_show": "reported optimum = (1.0, 0.5)",
+   "good_show": "reported optimum = (2.0, 0.25)"
+  },
+  "e-np-all-axis": {
+   "symptom": null,
+   "bad_show": "feasible = False",
+   "good_show": "feasible = [ True False  True]"
+  },
+  "w-constrained-design": {
+   "outputs": [
+    "7 parameters",
+    "mass at b=2 cm, h=10 cm: 5.40 kg",
+    "g at b=2 cm, h=10 cm: [-0.6    0.143  0.   ]",
+    "without g3: b = 0.005 (its lower bound)",
+    "True Optimization terminated successfully\nb* = 2.07 cm, h* = 10.34 cm, mass* = 5.773 kg",
+    "stress     -0.63812  inactive\ndeflection +0.00000  active\naspect     -0.00000  active",
+    "brentq: b = 2.07 cm, h = 10.34 cm  (matches SLSQP)",
+    "delta_max =    2 mm  mass* = 9.128 kg  active: ['deflection', 'aspect']\ndelta_max =    5 mm  mass* = 5.773 kg  active: ['deflection', 'aspect']\ndelta_max =   20 mm  mass* = 2.932 kg  active: ['stress', 'aspect']\ndelta_max =   50 mm  mass* = 2.932 kg  active: ['stress', 'aspect']"
+   ]
+  },
+  "w-surrogate-cv": {
+   "outputs": [
+    "(40, 2) (200, 2)",
+    "(40, 28)  cond(Z^T Z), raw inputs: 2.5e+38",
+    "cond(Z^T Z), scaled inputs: 1.3e+10",
+    "{0: 0.5952, 1e-08: 0.1821, 1e-06: 0.0703, 0.0001: 0.0612, 0.01: 0.1201, 1: 0.2817} -> best lambda 0.0001",
+    "{0.01: 0.6845, 0.1: 7.7843, 1: 2.0449, 10: 0.2236, 100: 0.3133, 1000: 0.3853} -> best spread 10",
+    "fitted kernel: 2.6**2 * RBF(length_scale=[0.441, 0.669]) + WhiteKernel(noise_level=0.0125)\nstd at the test point nearest the data 0.050, farthest 0.095",
+    "degree-6 poly + ridge  lambda=0.0001              test RMSE 0.0588   native UQ: no\nGaussian RBF           spread=10                  test RMSE 0.1983   native UQ: no\nKriging / GP           theta by max. likelihood   test RMSE 0.0318   native UQ: yes (std)"
+   ]
+  },
+  "w-linprog": {
+   "outputs": [
+    "[-40. -30.] (2, 2)",
+    "0 Optimization terminated successfully. (HiGHS Status 7: Optimal)\nacres: [ 80. 160.]  profit: 8000.0",
+    "slack (unused): [0. 0.]\nshadow prices : [10. 20.] (profit per extra labour hour, per extra acre)",
+    "profit gain from one more acre: 20.0"
+   ]
+  },
+  "w-unconstrained": {
+   "outputs": [
+    "f(3, 0.5) = 0.0",
+    "check_grad: 4.76837158203125e-07  |grad| = 27.75",
+    "Nelder-Mead          success=True  nit=  56 nfev= 107 x=[3.00002 0.50001]\nBFGS (finite diff.)  success=True  nit=  15 nfev=  51 x=[3.  0.5]\nBFGS (analytic jac)  success=True  nit=  15 nfev=  17 x=[3.  0.5]"
+   ]
+  },
+  "_versions": {
+   "python": "3.9.6",
+   "numpy": "2.0.2",
+   "scipy": "1.13.1",
+   "scikit-learn": "1.6.1",
+   "pandas": "2.3.3"
+  }
+ },
+ "failures": []
+}
