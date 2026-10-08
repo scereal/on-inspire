@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hymn Intros · on inspire</title>
+<meta name="description" content="Type a hymn's opening notes as scale degrees (1 to 8) and see the melody line, the hymnal.net hymns that share the tune, and who composed it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Franklin:wght@400;500;600&display=swap">
+<style>
+/* Layout: a hymnal page. The melody is drawn on an eight-line staff (one line per scale degree);
+   results run down the left, the composer's note sits beside the staff like a margin annotation. */
+:root {
+  --paper: #f3f1ee;      /* hymnal page */
+  --card: #fbfaf8;
+  --ink: #1f1a17;
+  --muted: #6b625b;
+  --rule: #d9d3cc;
+  --oxblood: #8a2a1e;    /* cloth binding: the melody line */
+  --gilt: #9c7a1e;       /* gilt edge: highlights */
+  --ok: #2f6b45;
+  --serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+  --sans: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #16120f; --card: #1e1915; --ink: #eee8e1; --muted: #a99e93; --rule: #3a322b; --oxblood: #e0735f; --gilt: #d9b45a; --ok: #6fbf8a; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --paper: #16120f; --card: #1e1915; --ink: #eee8e1; --muted: #a99e93; --rule: #3a322b; --oxblood: #e0735f; --gilt: #d9b45a; --ok: #6fbf8a; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.1rem/1.6 var(--serif); }
+.wrap { max-width: 68rem; margin: 0 auto; padding-inline: max(16px, 3vw); padding-block: 1.6rem 3rem; }
+a { color: var(--oxblood); text-underline-offset: 0.18em; }
+.crumbs { font: 500 0.88rem var(--sans); color: var(--muted); display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.crumbs a { color: var(--muted); }
+h1 { font: 700 clamp(2.2rem, 5.5vw, 3.4rem)/1.05 var(--serif); margin: 0.9rem 0 0.4rem; letter-spacing: -0.01em; }
+.lede { color: var(--muted); max-width: 40rem; margin: 0 0 1.4rem; }
+:focus-visible { outline: 3px solid var(--gilt); outline-offset: 2px; border-radius: 4px; }
+.entry { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: end; }
+.entry label { display: grid; gap: 0.25rem; font: 500 0.9rem var(--sans); color: var(--muted); flex: 1 1 18rem; }
+.entry input { font: 600 1.6rem/1.2 var(--sans); letter-spacing: 0.18em; padding: 0.45rem 0.7rem; border: 2px solid var(--ink); border-radius: 6px; background: var(--card); color: var(--ink); width: 100%; font-variant-numeric: tabular-nums; }
+.btn { font: 600 0.9rem var(--sans); border: 1.5px solid var(--ink); background: transparent; color: var(--ink); border-radius: 6px; padding: 0.5rem 0.9rem; cursor: pointer; }
+.btn:hover { background: color-mix(in srgb, var(--gilt) 14%, transparent); }
+.tries { font: 400 0.88rem var(--sans); color: var(--muted); margin: 0.7rem 0 0; display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.tries button { font: 500 0.84rem var(--sans); border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 99px; padding: 0.2rem 0.65rem; cursor: pointer; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 1.2rem 1.6rem; margin-top: 1.4rem; align-items: start; }
+@media (max-width: 860px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.staff { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 0.6rem 0.6rem 0.2rem; }
+.staff svg { display: block; width: 100%; height: auto; touch-action: manipulation; cursor: crosshair; }
+.staff .note-hint { font: 400 0.82rem var(--sans); color: var(--muted); margin: 0.2rem 0.3rem 0.4rem; }
+.bubble { position: relative; background: var(--card); border: 1.5px solid var(--ink); border-radius: 14px; padding: 0.9rem 1rem 1rem; }
+.bubble::before { content: ""; position: absolute; left: -11px; top: 48px; width: 18px; height: 18px; background: var(--card); border-left: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(45deg); }
+@media (max-width: 860px) { .bubble::before { left: 48px; top: -11px; transform: rotate(135deg); } }
+.bubble .who { font: 600 0.76rem var(--sans); color: var(--muted); letter-spacing: 0.04em; margin: 0; }
+.bubble h2 { font: 700 1.45rem/1.15 var(--serif); margin: 0.15rem 0 0.1rem; }
+.bubble .dates { font: italic 400 1rem var(--serif); color: var(--muted); margin: 0 0 0.5rem; }
+.bubble p { margin: 0 0 0.6rem; font-size: 1.02rem; }
+.bubble .more { font: 600 0.9rem var(--sans); }
+.bubble.empty h2 { font-size: 1.15rem; }
+.results { margin-top: 1.6rem; }
+.results h2 { font: 700 1.5rem var(--serif); margin: 0 0 0.3rem; }
+.results .tune { font: 500 0.92rem var(--sans); color: var(--muted); margin: 0 0 0.8rem; }
+.hymns { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.35rem; max-width: 46rem; }
+.hymns a { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto; gap: 0.7rem; align-items: baseline; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 0.5rem 0.75rem; }
+.hymns a:hover { border-color: var(--oxblood); }
+.hymns .num { font: 600 0.85rem var(--sans); color: var(--oxblood); font-variant-numeric: tabular-nums; }
+.hymns .title { overflow-wrap: anywhere; }
+.tag { font: 600 0.72rem var(--sans); padding: 0.12rem 0.5rem; border-radius: 4px; white-space: nowrap; }
+.tag.original { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.tag.alternate { background: color-mix(in srgb, var(--gilt) 18%, transparent); color: var(--gilt); }
+.tag.new { background: color-mix(in srgb, var(--oxblood) 14%, transparent); color: var(--oxblood); }
+@media (max-width: 560px) { .hymns a { grid-template-columns: 3.4rem minmax(0, 1fr); } .hymns .tag { grid-column: 2; justify-self: start; } }
+.search-out { font: 400 0.95rem var(--sans); background: var(--card); border: 1px dashed var(--rule); border-radius: 8px; padding: 0.7rem 0.9rem; max-width: 46rem; }
+.search-out code { font: 600 1rem var(--sans); letter-spacing: 0.12em; }
+.foot { margin-top: 2.6rem; border-top: 1px solid var(--rule); padding-top: 1rem; font: 400 0.86rem var(--sans); color: var(--muted); max-width: 46rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../../../">on inspire</a><span>›</span><a href="../../../#hymnology">Hymnology</a><span>›</span><a href="../../../#hymnology-0">Tunes</a><span>›</span><span>Intros</span></nav>
+  <h1>Hymn intros</h1>
+  <p class="lede">Hum the opening of a hymn and write it as scale degrees: 1 is <i>do</i>, 2 is <i>re</i>, up to 8 for the high <i>do</i>. The line below draws your melody, and the page finds the hymnal.net hymns that share the tune and tells you who wrote it. You can also tap the staff to add notes.</p>
+  <form class="entry" id="entry" autocomplete="off">
+    <label for="notes">Opening notes (1–8)<input id="notes" inputmode="numeric" placeholder="e.g. 11765123" value="11765123" aria-describedby="code-line"></label>
+    <button class="btn" type="button" id="play">Play</button>
+    <button class="btn" type="button" id="undo">Remove last</button>
+    <button class="btn" type="button" id="clear">Clear</button>
+  </form>
+  <p class="tries">Try: <span id="tries"></span></p>
+  <div class="stage">
+    <div class="staff">
+      <svg id="staff" viewBox="0 0 720 300" role="img" aria-label="Melody line"></svg>
+      <p class="note-hint" id="code-line"></p>
+    </div>
+    <aside class="bubble" id="bubble" aria-live="polite"></aside>
+  </div>
+  <section class="results" id="results" aria-live="polite"></section>
+  <p class="foot">Hymn codes, numbers and titles are from <a href="https://www.hymnal.net" target="_blank" rel="noopener">hymnal.net</a>, whose hymn pages list each tune as a code of scale degrees (octave ignored, so a typed 8 counts as 1). The tunes listed here were checked one by one against hymnal.net's own hymn-code search; for any other opening, the search link sends you to hymnal.net's full results. "Original tune" means the tune the hymn carries on hymnal.net; "Alternate tune" and "New tune" are hymnal.net's own additional settings. Composer notes are written from public sources, with a link to read more.</p>
+</div>
+<script>
+const TUNES = {
+ "OLD HUNDREDTH": {
+  "tune": "Old Hundredth",
+  "firstline": "“All people that on earth do dwell”",
+  "meter": "8.8.8.8 (Long Metre)",
+  "role": null,
+  "composer": {
+   "name": "Louis Bourgeois",
+   "short": "Louis Bourgeois",
+   "dates": "c. 1510 – c. 1560",
+   "link": "https://en.wikipedia.org/wiki/Louis_Bourgeois_(composer)",
+   "blurb": "A French composer who worked in Calvin's Geneva from about 1545, editing and writing melodies for the Genevan Psalter. This tune first appeared there in 1551 for Psalm 134. English Protestants sang it to Psalm 100, which is how it became the “Old Hundredth”. Bourgeois was briefly jailed in 1551 for changing familiar psalm tunes without permission."
+  },
+  "code": "1176512333321432",
+  "items": [
+   {
+    "num": "E8005",
+    "title": "Praise Father, whence all blessings spring",
+    "href": "https://www.hymnal.net/en/hymn/h/8005",
+    "label": "Original tune"
+   },
+   {
+    "num": "E8",
+    "title": "Praise God, from whom all blessings flow",
+    "href": "https://www.hymnal.net/en/hymn/h/8",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "NICAEA": {
+  "tune": "Nicaea",
+  "firstline": "“Holy, Holy, Holy! Lord God Almighty”",
+  "meter": "11.12.12.10",
+  "role": null,
+  "composer": {
+   "name": "John Bacchus Dykes",
+   "short": "John Bacchus Dykes",
+   "dates": "1823 – 1876",
+   "link": "https://en.wikipedia.org/wiki/John_Bacchus_Dykes",
+   "blurb": "An English clergyman and precentor of Durham Cathedral who wrote around 300 hymn tunes. He composed this one for the 1861 Hymns Ancient and Modern, setting Reginald Heber's hymn to the Trinity, and named it after the Council of Nicaea, which defined that doctrine in 325."
+  },
+  "code": "11335566",
+  "items": [
+   {
+    "num": "E6",
+    "title": "Holy, Holy, Holy, Lord God Almighty",
+    "href": "https://www.hymnal.net/en/hymn/h/6",
+    "label": "Original tune"
+   },
+   {
+    "num": "E6213",
+    "title": "Wholly, wholly, wholly back to the beginning",
+    "href": "https://www.hymnal.net/en/hymn/h/6213",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "NEW BRITAIN": {
+  "tune": "New Britain",
+  "firstline": "“Amazing grace! how sweet the sound”",
+  "meter": "8.6.8.6 (Common Metre)",
+  "role": "Composer unknown · first set to these words by",
+  "composer": {
+   "name": "William Walker",
+   "short": "William Walker",
+   "dates": "1809 – 1875",
+   "link": "https://en.wikipedia.org/wiki/William_Walker_(composer)",
+   "blurb": "The melody is an anonymous American folk tune, first printed in 1829. William Walker, a Baptist singing-school teacher from South Carolina, joined it to John Newton's “Amazing Grace” in his shape-note tunebook The Southern Harmony (1835), and that pairing is the one sung everywhere today."
+  },
+  "code": "51313216",
+  "items": [
+   {
+    "num": "E313",
+    "title": "Amazing Grace",
+    "href": "https://www.hymnal.net/en/hymn/h/313",
+    "label": "Original tune"
+   },
+   {
+    "num": "E8623",
+    "title": "As now we breathe the heav'nly air",
+    "href": "https://www.hymnal.net/en/hymn/h/8623",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1143",
+    "title": "The tree of life, how sweet the fruit",
+    "href": "https://www.hymnal.net/en/hymn/h/1143",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "EIN FESTE BURG": {
+  "tune": "Ein feste Burg",
+  "firstline": "“A mighty Fortress is our God”",
+  "meter": "8.7.8.7.6.6.6.6.7",
+  "role": null,
+  "composer": {
+   "name": "Martin Luther",
+   "short": "Martin Luther",
+   "dates": "1483 – 1546",
+   "link": "https://en.wikipedia.org/wiki/Martin_Luther",
+   "blurb": "The German reformer wrote both the words and the melody around 1529, paraphrasing Psalm 46. Luther wanted congregations to sing in their own language, and his hymns carried the Reformation as far as his writings did. Bach later built a cantata (BWV 80) on this tune."
+  },
+  "code": "11156717",
+  "items": [
+   {
+    "num": "E886",
+    "title": "A mighty Fortress is our God",
+    "href": "https://www.hymnal.net/en/hymn/h/886",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1198",
+    "title": "A mighty flowing-out is God",
+    "href": "https://www.hymnal.net/en/hymn/h/1198",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1288",
+    "title": "In Eden's garden, Satan thought",
+    "href": "https://www.hymnal.net/en/hymn/h/1288",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "ST ANNE": {
+  "tune": "St. Anne",
+  "firstline": "“O God, our help in ages past”",
+  "meter": "8.6.8.6 (Common Metre)",
+  "role": null,
+  "composer": {
+   "name": "William Croft",
+   "short": "William Croft",
+   "dates": "1678 – 1727",
+   "link": "https://en.wikipedia.org/wiki/William_Croft",
+   "blurb": "An English organist and composer: organist of St Anne's Church, Soho (hence the tune's name), and later of Westminster Abbey. The tune appeared without a name attached in 1708 and has long been credited to him. Isaac Watts's paraphrase of Psalm 90 made it one of the best-known tunes in English."
+  },
+  "code": "536511715",
+  "items": [
+   {
+    "num": "E607",
+    "title": "O God, our help in ages past",
+    "href": "https://www.hymnal.net/en/hymn/h/607",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "AUSTRIA": {
+  "tune": "Austria",
+  "firstline": "“Glorious things of thee are spoken”",
+  "meter": "8.7.8.7 D",
+  "role": null,
+  "composer": {
+   "name": "Joseph Haydn",
+   "short": "Joseph Haydn",
+   "dates": "1732 – 1809",
+   "link": "https://en.wikipedia.org/wiki/Joseph_Haydn",
+   "blurb": "The Austrian composer often called the father of the symphony and the string quartet. He wrote this melody in 1797 as “Gott erhalte Franz den Kaiser”, an anthem for Emperor Francis II, and then wrote variations on it in his “Emperor” Quartet, Op. 76 No. 3. Today it is also the melody of Germany's national anthem."
+  },
+  "code": "123243271",
+  "items": [
+   {
+    "num": "E43",
+    "title": "Abba, Father, we approach Thee",
+    "href": "https://www.hymnal.net/en/hymn/h/43",
+    "label": "Original tune"
+   },
+   {
+    "num": "E977",
+    "title": "Glorious things of thee are spoken",
+    "href": "https://www.hymnal.net/en/hymn/h/977",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1275",
+    "title": "Glorious things to thee are spoken",
+    "href": "https://www.hymnal.net/en/hymn/h/1275",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1203",
+    "title": "God is righteous in His doings",
+    "href": "https://www.hymnal.net/en/hymn/h/1203",
+    "label": "Original tune"
+   },
+   {
+    "num": "E20",
+    "title": "God our Father, we adore Thee",
+    "href": "https://www.hymnal.net/en/hymn/h/20",
+    "label": "Original tune"
+   },
+   {
+    "num": "E6510",
+    "title": "In this age of Revelation",
+    "href": "https://www.hymnal.net/en/hymn/h/6510",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1183",
+    "title": "On the Lord's day, John, in spirit",
+    "href": "https://www.hymnal.net/en/hymn/h/1183",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1263",
+    "title": "There's a church in New York City*",
+    "href": "https://www.hymnal.net/en/hymn/h/1263",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "CONVERSE": {
+  "tune": "Converse",
+  "firstline": "“What a Friend we have in Jesus”",
+  "meter": "8.7.8.7 D",
+  "role": null,
+  "composer": {
+   "name": "Charles Crozat Converse",
+   "short": "Charles Converse",
+   "dates": "1832 – 1918",
+   "link": "https://en.wikipedia.org/wiki/Charles_Crozat_Converse",
+   "blurb": "An American lawyer and composer who studied music in Leipzig in the 1850s. He set Joseph Scriven's poem “What a Friend We Have in Jesus” in 1868, and the hymn spread widely through the gospel songbooks of Ira Sankey."
+  },
+  "code": "556531165",
+  "items": [
+   {
+    "num": "E1332",
+    "title": "Do you know that you were chosen",
+    "href": "https://www.hymnal.net/en/hymn/h/1332",
+    "label": "Original tune"
+   },
+   {
+    "num": "E1185",
+    "title": "In the multitude he lay there",
+    "href": "https://www.hymnal.net/en/hymn/h/1185",
+    "label": "Original tune"
+   },
+   {
+    "num": "E784",
+    "title": "Pray to fellowship with Jesus",
+    "href": "https://www.hymnal.net/en/hymn/h/784",
+    "label": "Original tune"
+   },
+   {
+    "num": "E628",
+    "title": "Via Bethlehem we journey",
+    "href": "https://www.hymnal.net/en/hymn/h/628",
+    "label": "Original tune"
+   },
+   {
+    "num": "E789",
+    "title": "What a Friend we have in Jesus",
+    "href": "https://www.hymnal.net/en/hymn/h/789",
+    "label": "Original tune"
+   }
+  ]
+ },
+ "EVENTIDE": {
+  "tune": "Eventide",
+  "firstline": "“Abide with me! fast falls the eventide”",
+  "meter": "10.10.10.10",
+  "role": null,
+  "composer": {
+   "name": "William Henry Monk",
+   "short": "William Henry Monk",
+   "dates": "1823 – 1889",
+   "link": "https://en.wikipedia.org/wiki/William_Henry_Monk",
+   "blurb": "An English organist and choirmaster, and the music editor of the first Hymns Ancient and Modern (1861). He wrote this tune for Henry Francis Lyte's “Abide with Me” for that book; a popular story says it took him ten minutes. Crowds still sing it before the FA Cup Final."
+  },
+  "code": "33215655",
+  "items": [
+   {
+    "num": "E370",
+    "title": "Abide with me! fast falls the eventide",
+    "href": "https://www.hymnal.net/en/hymn/h/370",
+    "label": "Original tune"
+   },
+   {
+    "num": "E927b",
+    "title": "O God of burning altar fire (Alternate Tune)",
+    "href": "https://www.hymnal.net/en/hymn/h/927b",
+    "label": "Alternate tune"
+   }
+  ]
+ }
+};
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const input = $("notes"), svg = $("staff");
+const SOLFA = ["", "do", "re", "mi", "fa", "sol", "la", "ti", "do"];
+const ns = "http://www.w3.org/2000/svg";
+const el = (n, a = {}, parent) => { const e = document.createElementNS(ns, n); for (const k in a) e.setAttribute(k, a[k]); if (parent) parent.append(e); return e; };
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const notes = () => (input.value.match(/[1-8]/g) || []).map(Number);
+const codeOf = (ns2) => ns2.map((d) => (d === 8 ? 1 : d)).join("");
+
+function drawStaff(ds, matchLen) {
+  svg.replaceChildren();
+  const narrow = (svg.clientWidth || 720) < 520;
+  const W = narrow ? 400 : 720, H = narrow ? 240 : 300, left = 46, right = 12, top = 18, bottom = 18;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const Y = (d) => top + (8 - d) * ((H - top - bottom) / 7);
+  for (let d = 1; d <= 8; d++) {
+    el("line", { x1: left, x2: W - right, y1: Y(d), y2: Y(d), stroke: css("--rule"), "stroke-width": d === 1 || d === 8 ? 1.6 : 1 }, svg);
+    const t = el("text", { x: left - 8, y: Y(d) + 4, "text-anchor": "end", fill: css("--muted"), "font-family": css("--sans"), "font-size": 12 }, svg);
+    t.textContent = `${d} ${SOLFA[d]}`;
+  }
+  const n = Math.max(ds.length, 8), step = (W - left - right - 20) / Math.max(n - 1, 1), X = (i) => left + 10 + i * step;
+  if (ds.length) {
+    const pts = ds.map((d, i) => `${X(i)},${Y(d)}`).join(" ");
+    el("polyline", { points: pts, fill: "none", stroke: css("--oxblood"), "stroke-width": 3, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+    ds.forEach((d, i) => {
+      el("circle", { cx: X(i), cy: Y(d), r: 6.5, fill: i < matchLen ? css("--gilt") : css("--oxblood"), stroke: css("--card"), "stroke-width": 2 }, svg);
+      const t = el("text", { x: X(i), y: Y(d) - 11, "text-anchor": "middle", fill: css("--ink"), "font-family": css("--sans"), "font-size": 12, "font-weight": 600 }, svg);
+      t.textContent = d;
+    });
+  }
+  // invisible rows to tap a degree
+  for (let d = 1; d <= 8; d++) {
+    const r = el("rect", { x: left, y: Y(d) - 16, width: W - left - right, height: 32, fill: "transparent" }, svg);
+    r.addEventListener("click", () => { input.value = notes().join("") + d; update(); });
+  }
+}
+
+function findTunes(code) {
+  if (code.length < 4) return [];
+  return Object.entries(TUNES).map(([name, t]) => {
+    let k = 0; while (k < code.length && k < t.code.length && code[k] === t.code[k]) k++;
+    const full = k === Math.min(code.length, t.code.length);
+    return { name, t, k, full };
+  }).filter((m) => m.full && m.k >= 4).sort((a, b) => b.k - a.k);
+}
+
+function update() {
+  const ds = notes();
+  input.value = ds.join("");
+  const code = codeOf(ds);
+  const found = findTunes(code), best = found[0];
+  drawStaff(ds, best ? best.k : 0);
+  $("code-line").textContent = ds.length ? `hymnal.net hymn code: ${code}${ds.includes(8) ? " (8 counts as 1)" : ""}` : "Type numbers or tap the staff to start.";
+  const search = code.length ? `https://www.hymnal.net/en/search/all/hymncode/${code}` : null;
+  const b = $("bubble"), r = $("results");
+  if (best) {
+    const c = best.t.composer;
+    b.classList.remove("empty");
+    b.innerHTML = `<p class="who">${best.t.role || "Composer of " + best.t.tune}</p><h2>${c.name}</h2><p class="dates">${c.dates}</p><p>${c.blurb}</p><a class="more" href="${c.link}" target="_blank" rel="noopener">Read more about ${c.short}</a>`;
+    const others = found.slice(1).map((m) => m.t.tune);
+    r.innerHTML = `<h2>${best.t.tune}</h2><p class="tune">${best.t.firstline} · ${best.t.meter}${others.length ? ` · also starts like: ${others.join(", ")}` : ""}</p>
+      <ul class="hymns">${best.t.items.map((h) => `<li><a href="${h.href}" target="_blank" rel="noopener"><span class="num">${h.num}</span><span class="title">${esc(h.title)}</span><span class="tag ${h.label.split(" ")[0].toLowerCase()}">${h.label}</span></a></li>`).join("")}</ul>
+      <p class="search-out">These are the English hymnal.net hymns whose code contains <code>${best.t.code}</code>. <a href="${search}" target="_blank" rel="noopener">See every match for your notes on hymnal.net</a> (it also covers the other languages).</p>`;
+  } else {
+    b.classList.add("empty");
+    b.innerHTML = `<p class="who">Composer</p><h2>${code.length < 4 ? "Keep going" : "Not one of the tunes collected here yet"}</h2><p>${code.length < 4 ? "Four or more notes usually identify a tune." : "hymnal.net's own search can still find it from your notes."}</p>${search && code.length >= 4 ? `<a class="more" href="${search}" target="_blank" rel="noopener">Search hymnal.net for ${code}</a>` : ""}`;
+    r.innerHTML = search ? `<p class="search-out">No match among the ${Object.keys(TUNES).length} tunes collected here. <a href="${search}" target="_blank" rel="noopener">Search hymnal.net for the code ${code}</a>: it lists every hymn whose melody contains those notes.</p>` : "";
+  }
+}
+
+// a few tunes to try
+$("tries").innerHTML = Object.values(TUNES).slice(0, 5).map((t) => `<button type="button" data-code="${t.code.slice(0, 8)}">${t.tune}</button>`).join("");
+$("tries").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { input.value = b.dataset.code; update(); } });
+input.addEventListener("input", update);
+$("entry").addEventListener("submit", (e) => { e.preventDefault(); update(); });
+$("undo").addEventListener("click", () => { input.value = notes().slice(0, -1).join(""); update(); });
+$("clear").addEventListener("click", () => { input.value = ""; update(); input.focus(); });
+
+// play the line in C major, one note per beat
+let actx = null;
+$("play").addEventListener("click", () => {
+  const ds = notes(); if (!ds.length) return;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  const semis = [0, 0, 2, 4, 5, 7, 9, 11, 12], t0 = actx.currentTime + 0.05;
+  ds.forEach((d, i) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = "triangle"; o.frequency.value = 261.63 * Math.pow(2, semis[d] / 12);
+    g.gain.setValueAtTime(0, t0 + i * 0.42); g.gain.linearRampToValueAtTime(0.25, t0 + i * 0.42 + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t0 + i * 0.42 + 0.4);
+    o.connect(g).connect(actx.destination); o.start(t0 + i * 0.42); o.stop(t0 + i * 0.42 + 0.42);
+  });
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", update);
+let lastW = 0;
+addEventListener("resize", () => { const w = svg.clientWidth; if (Math.abs(w - lastW) > 40) { lastW = w; update(); } });
+update();
+</script>
+</body>
+</html>
