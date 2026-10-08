@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Borrowed Teaching Moves · on inspire</title>
+<title>Reproduced Nuggets · on inspire</title>
 <meta name="description" content="Ten famous teaching moves from schools and maths creators, rebuilt as working demos, plus an analogy workbench.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,6 +57,10 @@ input[type=range] { accent-color: var(--teal); width: 100%; }
 .index a:hover { border-color: var(--marigold); }
 .index b { color: var(--marigold); font-family: var(--mono); font-weight: 500; margin-right: 0.35rem; }
 
+.thanks { max-width: 42rem; margin: 1.8rem 0 0; padding: 1rem 1.2rem; background: var(--card); border-left: 4px solid var(--marigold); border-radius: 0 10px 10px 0; }
+.thanks h2 { font-family: var(--display); font-size: 1.15rem; margin: 0 0 0.4rem; }
+.thanks p { margin: 0 0 0.6rem; }
+.thanks p:last-child { margin-bottom: 0; }
 .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem 2rem; margin: 2.5rem 0 0; padding: 1.2rem 0; border-block: 1px solid var(--rule); }
 .how p { color: var(--muted); font-size: 0.97rem; }
 .how strong { color: var(--ink); display: block; font-family: var(--display); font-size: 1.02rem; margin-bottom: 0.2rem; }
@@ -141,8 +145,13 @@ footer ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.25rem; }
 <div class="wrap">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">on inspire</a><span>›</span><a href="../">Cool math problems</a></nav>
   <header>
-    <h1>Borrowed teaching moves</h1>
+    <h1>Reproduced nuggets</h1>
     <p class="lede">Ten ideas from teachers, schools and creators who are famous for making hard maths feel obvious. Each one is rebuilt here as a small working demo, so you can feel <strong>the move</strong> behind it, then remix it into something of your own. Below them: a workbench of analogies, with the place each one breaks.</p>
+    <aside class="thanks" aria-labelledby="thanks-h">
+      <h2 id="thanks-h">A thank-you, first</h2>
+      <p>Every demo on this page stands on someone else's patience. Somewhere a teacher redrew the same diagram for the fifth time until a tired room finally saw it. A school kept trusting its students to argue their way to an answer instead of handing it over. A creator spent weeks on one animation so that a single idea could land in a few seconds.</p>
+      <p>When hard maths feels obvious, it's because someone did the hard part for you, quietly and usually without thanks. These pages are my attempt to understand how they did it, not to take credit for it. The originals are linked on every exhibit and at the bottom. Go and watch them, and if one of them ever made something click for you, tell the person who made it.</p>
+    </aside>
     <ul class="index" id="index"></ul>
     <div class="how">
       <p><strong>Steal the move, not the artwork</strong>Each exhibit names the transferable technique. The demos are fresh builds of the idea, credited and linked, so you study why it works rather than copy how it looks.</p>
